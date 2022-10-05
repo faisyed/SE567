@@ -13,7 +13,6 @@ CREATE TABLE objects (
    loc_room text,
    loc_description text,
    img_url text,
-   img_thumburl text,
    price double DEFAULT NULL
  );
 
@@ -137,7 +136,6 @@ create table sold_objects (
    obj_attribution text,
    obj_class text,
    img_url text,
-   img_thumburl text,
    shop_id bigint
 );
 
@@ -177,7 +175,7 @@ CREATE TRIGGER objects_trigger AFTER DELETE ON objects FOR EACH ROW
 BEGIN
 	declare v_shop_id bigint;
     select shop_id into v_shop_id from shop_transactions where obj_id = OLD.obj_id;
-    INSERT INTO sold_objects(obj_id, obj_title, obj_beginyear, obj_endyear, obj_medium, obj_dimensions, obj_inscription, obj_attribution, obj_class, img_url, img_thumburl, shop_id) VALUES(OLD.obj_id, OLD.obj_title, OLD.obj_beginyear, OLD.obj_endyear, OLD.obj_medium, OLD.obj_dimensions, OLD.obj_inscription, OLD.obj_attribution, OLD.obj_class, OLD.img_url, OLD.img_thumburl, v_shop_id);
+    INSERT INTO sold_objects(obj_id, obj_title, obj_beginyear, obj_endyear, obj_medium, obj_dimensions, obj_inscription, obj_attribution, obj_class, img_url, shop_id) VALUES(OLD.obj_id, OLD.obj_title, OLD.obj_beginyear, OLD.obj_endyear, OLD.obj_medium, OLD.obj_dimensions, OLD.obj_inscription, OLD.obj_attribution, OLD.obj_class, OLD.img_url, v_shop_id);
 END$$
 DELIMITER ;
 
