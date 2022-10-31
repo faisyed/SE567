@@ -10986,7 +10986,7 @@ Animations
   
   
   /* Add Animation */
-  .modal-content, {  
+  .modal-content {  
     -webkit-animation-name: zoom;
     -webkit-animation-duration: 0.6s;
     animation-name: zoom;
