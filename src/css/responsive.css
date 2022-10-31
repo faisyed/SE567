@@ -456,7 +456,7 @@
     width: 50px;
     height: 60px; }
   .scSidebar:before {
-    height: calc(100% + 180px);
+    height: calc(100% + 30px);
     border-width: 0 0 0 1px;
     right: initial;
     left: -15px; }
