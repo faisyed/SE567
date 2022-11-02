@@ -5,12 +5,24 @@
   "main": "./src/home-classic.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./server.js --watch"
+    "start": "nodemon -e html --delay 2.5 --watch src ./server.js",
+    "start-server": "node ./src/index.js --watch"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.1",
-    "mysql": "^2.18.1"
-  }
+    "bcrypt": "^5.1.0",
+    "express": "^4.18.2",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.3.3",
+    "nodemon": "^2.0.20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faisyed/SE567.git"
+  },
+  "bugs": {
+    "url": "https://github.com/faisyed/SE567/issues"
+  },
+  "homepage": "https://github.com/faisyed/SE567#readme"
 }

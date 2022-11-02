@@ -1,6 +1,8 @@
 const express = require("express");
 const mysql = require("mysql");
+const path = require('path');
 const bodyParser = require('body-parser');
+const bcrypt = require("bcrypt");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -23,12 +25,87 @@ app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`);
 });
 
-/*
-Sample home page api req-response
-*/
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+pool.getConnection( (err, connection)=> {
+  if (err) throw (err)
+  console.log ("DB connected successful: " + connection.threadId)
+})
+
+app.use(express.static(path.join(__dirname, './src')));
+app.use(express.json());
+
+app.get('/', (req, res) => {        
+  res.sendFile('./src/home.html', {root: __dirname});
 });
+
+
+//CREATE USER
+app.post("/createUser", async (req,res) => {
+  res.sendFile('./src/my-account.html', {root: __dirname});
+  console.log(req.body)
+  const user = req.body.name;
+  const pass = req.body.password;
+  pool.getConnection( async (err, connection) => {
+      if (err) throw (err)
+      const sqlSearch = "SELECT * FROM users WHERE username = ?"
+      const search_query = mysql.format(sqlSearch,[user])
+      const sqlInsert = "INSERT INTO users VALUES (0,?,?)"
+      const insert_query = mysql.format(sqlInsert,[user, pass])
+      await connection.query (search_query, async (err, result) => {
+          if (err) throw (err)
+          console.log("------> Search Results")
+          console.log(result.length)
+          if (result.length != 0) {
+              connection.release()
+              console.log("------> User already exists")
+              res.sendStatus(409) 
+          } 
+          else {
+              await connection.query (insert_query, (err, result)=> {
+                  connection.release()
+                  if (err) throw (err)
+                  console.log ("--------> Created new User")
+                  console.log(result.insertId)
+                  res.sendStatus(201)
+              })
+          }
+      }) 
+  }) 
+}) 
+
+
+//LOGIN (AUTHENTICATE USER)
+app.post("/login", (req, res)=> {
+  res.sendFile('./src/my-account.html', {root: __dirname});
+  const user = req.body.name
+  const password = req.body.password
+  pool.getConnection ( async (err, connection)=> {
+      if (err) throw (err)
+      const sqlSearch = "Select * from users where username = ?"
+      const search_query = mysql.format(sqlSearch,[user])
+      await connection.query (search_query, async (err, result) => {
+      connection.release()
+
+      if (err) throw (err)
+      if (result.length == 0) {
+          console.log("--------> User does not exist")
+          res.sendStatus(404)
+      } 
+      else {
+          const pass = result[0].password
+          console.log(password, pass)
+      
+          if (password == pass) {
+              console.log("---------> Login Successful")
+              res.send(`${user} is logged in!`)
+          } 
+          else {
+              console.log("---------> Password Incorrect")
+              res.send("Password incorrect!")
+          }
+      }
+      }) 
+  }) 
+})
 
 /*
 API to get all art collections from database to display on UI
