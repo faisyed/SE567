@@ -1,16 +1,26 @@
 {
   "name": "museum_mgmt",
   "version": "1.0.0",
-  "description": "",
+  "description": "Musuem Management",
   "main": "./src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./src/index.js --watch"
+    "start": "nodemon -e html --delay 2.5 --watch src ./src/index.js",
+    "start-server": "node ./src/index.js --watch"
   },
-  "author": "",
+  "author": "SE - 567 group 4",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.1",
-    "mysql2": "^2.3.3"
-  }
+    "express": "^4.18.2",
+    "mysql2": "^2.3.3",
+    "nodemon": "^2.0.20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faisyed/SE567.git"
+  },
+  "bugs": {
+    "url": "https://github.com/faisyed/SE567/issues"
+  },
+  "homepage": "https://github.com/faisyed/SE567#readme"
 }
