@@ -91,3 +91,151 @@ app.post("/getArtsCol/",(req,res) => {
   });
 
 });
+
+
+/*Get past shows*/
+app.get("/getPastShows/",(req,res) => {
+  pool.query("SELECT * FROM `events` where ev_type=? and ev_date<CURDATE()",["show"], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+});
+
+//get current and upcoming shows
+app.get("/getUpcomingShows/",(req,res) => {
+  pool.query("SELECT * FROM `events` where ev_type=? and ev_date>=CURDATE()",["show"], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+});
+
+//get past exhibitions
+app.get("/getPastExhibitions/",(req,res) => {
+  pool.query("SELECT * FROM `events` where ev_type=? and ev_date<CURDATE()",["exhibition"], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+});
+
+//get current and upcoming exhibitions
+app.get("/getUpcomingExhibitions/",(req,res) => {
+  pool.query("SELECT * FROM `events` where ev_type=? and ev_date>=CURDATE()",["exhibition"], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+});
+
+//get past auctions
+app.get("/getPastAuctions/",(req,res) => {
+  pool.query("SELECT * FROM `events` where ev_type=? and ev_date<CURDATE()",["auction"], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
+
+//get current and upcoming auctions
+app.get("/getUpcomingAuctions/",(req,res) => {
+  pool.query("SELECT * FROM `events` where ev_type=? and ev_date>=CURDATE()",["auction"], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
+
+//get show with id
+app.get("/getShow/:id",(req,res) => {
+  pool.query("SELECT * FROM `events` where ev_id=? and ev_type=?", [req.params.id,"show"], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
+
+//get exhibition with id
+app.get("/getExhibition/:id",(req,res) => {
+  pool.query("SELECT * FROM `events` where ev_id=? and ev_type=?", [req.params.id,"exhibition"], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
+
+//get auction with id
+app.get("/getAuction/:id",(req,res) => {
+  pool.query("SELECT * FROM `events` where ev_id=? and ev_type=?", [req.params.id,"auction"], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
+
+//create a new show
+app.post("/createShow/",(req,res) => {
+  console.log(req.body);
+  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_type, ev_description, ev_site,ev_room_no) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, "show", req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
+
+//create a new exhibition
+app.post("/createExhibition/",(req,res) => {
+  console.log(req.body);
+  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_type, ev_description, ev_site,ev_room_no) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, "exhibition", req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
+
+//create a new auction
+app.post("/createAuction/",(req,res) => {
+  console.log(req.body);
+  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_type, ev_description, ev_site,ev_room_no) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, "auction", req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
