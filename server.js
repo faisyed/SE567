@@ -137,7 +137,7 @@ GET REQUEST
 */
 app.get("/getArt/:id",(req,res) => {
 
-  pool.query("SELECT * FROM `objects` where `obj_id` < ?", [req.params.id], (err, data) => {
+  pool.query("SELECT * FROM `objects` where `obj_id` == ?", [req.params.id], (err, data) => {
     if (err){ 
         console.log(err);
         throw(err);
@@ -156,9 +156,9 @@ request body = {
   "type": "painting"
 }
 */
-app.post("/getArtsCol/",(req,res) => {
-  
-  pool.query("SELECT * FROM `objects` where `obj_class` = ?", [req.body.type], (err, data) => {
+app.get("/getArtsCol/",(req,res) => {
+  console.log(req.query,req.params)
+  pool.query("SELECT * FROM `objects` where `obj_class` = ?", [req.query.type], (err, data) => {
     if (err){ 
         console.log(err);
         throw(err);
@@ -168,6 +168,46 @@ app.post("/getArtsCol/",(req,res) => {
   });
 
 });
+
+/*Api for Search by name for fetching collections 
+Example: localhost:3000/searchName/
+POST REQUEST
+request body = {
+  "name": "fpl"
+}
+*/
+app.get("/searchName/",(req,res) => {
+  pool.query("select * from `objects` where `obj_title` like ?", [`%${req.query.name}%`], (err, data) => {
+    if (err){ 
+        console.log(err);
+        throw(err);
+    };
+
+    res.send(data);
+  });
+
+});
+
+/*Api for Search by keyword for fetching collections 
+Example: localhost:3000/searchName/
+POST REQUEST
+request body = {
+  "key": "fpl"
+}
+*/
+app.get("/searchKey/",(req,res) => {
+  pool.query("select * from objects where obj_title like ? or obj_medium like ? or obj_inscription like ?", [`%${req.query.key}%`,`%${req.query.key}%`,`%${req.query.key}%`], (err, data) => {
+    if (err){ 
+        console.log(err);
+        throw(err);
+    };
+
+    res.send(data);
+  });
+
+});
+
+
 
 
 /*Get past shows*/
