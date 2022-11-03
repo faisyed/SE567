@@ -316,3 +316,43 @@ app.post("/createAuction/",(req,res) => {
   });
 
 } );
+
+//get all members
+app.get("/getAllMem/",(req,res) => {
+  pool.query("SELECT * FROM `members`", (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
+
+//get member with id
+app.get("/getMem/:id",(req,res) => {
+  pool.query("SELECT * FROM `members` where mem_id=?", [req.params.id,"show"], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
+
+
+//insert new member
+app.post("/register/",(req,res) => {
+  console.log(req.body);
+  pool.query("INSERT INTO `members` (first_name, last_name, phone_no, email, address1,address2,city,state,zipcode) VALUES (?,?,?,?,?,?,?,?,?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2,req.body[0].city ,req.body[0].state ,req.body[0].zipcode], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
+
+
