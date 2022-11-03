@@ -331,7 +331,7 @@ app.get("/getAllMem/",(req,res) => {
 
 //get member with id
 app.get("/getMem/:id",(req,res) => {
-  pool.query("SELECT * FROM `members` where mem_id=?", [req.params.id,"show"], (err, data) => {
+  pool.query("SELECT * FROM `members` where mem_id=?", [req.params.id], (err, data) => {
     if (err){
         console.log(err);
         throw(err);
@@ -355,4 +355,15 @@ app.post("/register/",(req,res) => {
 
 } );
 
+//insert new member
+app.put("/updateMem/:id",(req,res) => {
+  console.log(req.body);
+  pool.query("UPDATE `members` SET first_name=?, last_name=?, phone_no=?, email=?, address1=?,address2=?,city=?,state=?,zipcode=? WHERE mem_id=? ", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2,req.body[0].city ,req.body[0].state ,req.body[0].zipcode,req.params.id], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
 
+} );
