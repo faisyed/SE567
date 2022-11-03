@@ -227,7 +227,18 @@ app.get("/searchPrice/",(req,res) => {
 
 });
 
+//add a new art
+app.post("/addArt/",(req,res) => {
+  console.log(req.body);
+  pool.query("insert into `objects` (`obj_title`, `obj_beginyear`, `obj_endyear`, `obj_medium`, `obj_dimensions`, `obj_inscription`, `obj_attribution`, `obj_class`, `loc_site`, `loc_room`, `loc_description`, `img_url`, `price`) values (?,?,?,?,?,?,?,?,?,?,?,?,?)", [req.body[0].obj_title, req.body[0].obj_beginyear, req.body[0].obj_endyear, req.body[0].obj_medium, req.body[0].obj_dimensions,req.body[0].obj_inscription,req.body[0].obj_attribution,req.body[0].obj_class,req.body[0].loc_site,req.body[0].loc_room,req.body[0].loc_description,req.body[0].img_url,req.body[0].price], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
 
+} );
 
 
 
@@ -377,3 +388,5 @@ app.post("/createAuction/",(req,res) => {
   });
 
 } );
+
+
