@@ -189,7 +189,7 @@ app.get("/searchName/",(req,res) => {
 });
 
 /*Api for Search by keyword for fetching collections 
-Example: localhost:3000/searchName/
+Example: localhost:3000/searchKey/
 POST REQUEST
 request body = {
   "key": "fpl"
@@ -206,6 +206,27 @@ app.get("/searchKey/",(req,res) => {
   });
 
 });
+
+/*Api for Search by price for fetching collections 
+Example: localhost:3000/searchPrice/
+POST REQUEST
+request body = {
+  "from":2000
+  "to":3000
+}
+*/
+app.get("/searchPrice/",(req,res) => {
+  pool.query("select * from `objects` where `price` between ? and ?", [parseInt(req.query.from),parseInt(req.query.to)], (err, data) => {
+    if (err){ 
+        console.log(err);
+        throw(err);
+    };
+
+    res.send(data);
+  });
+
+});
+
 
 
 
