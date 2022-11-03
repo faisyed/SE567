@@ -316,3 +316,47 @@ app.post("/createAuction/",(req,res) => {
   });
 
 } );
+
+//create new employees
+app.post("/newEmployee/",(req,res) => {
+    console.log(req.body);
+        // validate params in request body
+        // let missed = [];
+
+        // if (req.body[0].emp_id == null || req.body[0].emp_id == undefined || req.body[0].emp_id == "") {
+        //     missed.push("emp_id is required");
+        // }
+        // if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == "") {
+        //     missed.push("first_name is required");
+        // }
+        // if (req.body[0].last_name == null || req.body[0].last_name == undefined || req.body[0].last_name == "") {
+        //     missed.push("last_name is required");
+        // }
+        // if (req.body[0].phone_no == null || req.body[0].phone_no == undefined || req.body[0].phone_no == "") {
+        //     missed.push("phone_no is required");
+        // }
+    
+        // if (missed.length > 0) {
+        //     res.status(400).send(missed);
+        //     return;
+        // }
+    pool.query("INSERT INTO `employees`(`first_name`,`last_name`,`phone_no`,`email_id`,`address1`,`address2`,`city`,`state`,`zipcode`)VALUES(?,?,?,?,?,?,?,?,?);", [req.body[0].emp_id, req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email_id, req.body[0].address1, req.body[0].address2, req.body[0].city, req.body[0].state, req.body[0].zipcode], (err, data) => {
+      if (err){
+          console.log(err);
+          throw(err);
+      }
+      res.send(data);
+    });
+  });
+
+//get employee details using id
+  app.get("/getEmp/",(req,res) => {
+    pool.query("SELECT * FROM `employees` where `emp_id`=?", [parseInt(req.query.id)], (err, data) => {
+      if (err){
+          console.log(err);
+          throw(err);
+      }
+      res.send(data);
+    });
+  
+  } );
