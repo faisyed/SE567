@@ -390,3 +390,60 @@ app.post("/createAuction/",(req,res) => {
 } );
 
 
+// make a donation
+app.post("/makeDonation/",(req,res) => {
+  let missed_fields = [];
+  // check if first name is empty, undefined or null
+  if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == ""){
+    missed_fields.push("Enter first name");
+  }
+  // check if last name is empty, undefined or null
+  if (req.body[0].last_name == null || req.body[0].last_name == undefined || req.body[0].last_name == ""){
+    missed_fields.push("Enter last name");
+  }
+  // check if email is empty, undefined or null
+  if (req.body[0].email == null || req.body[0].email == undefined || req.body[0].email == ""){
+    missed_fields.push("Enter email");
+  }
+  // check if phone is empty, undefined or null
+  if (req.body[0].phone == null || req.body[0].phone == undefined || req.body[0].phone == ""){
+    missed_fields.push("Enter phone");
+  }
+  // check if amount is empty, undefined or null
+  if (req.body[0].amount == null || req.body[0].amount == undefined || req.body[0].amount == ""){
+    missed_fields.push("Enter amount");
+  }
+  if (missed_fields.length > 0){
+    return res.status(404).json({message: missed_fields});
+  }
+  // check if user exists as a member
+  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [req.body[0].first_name, req.body[0].last_name, "Y"], (err, data) => {
+    // if user is a member, insert donation into donations table
+    if (data.length > 0){
+      pool.query("INSERT INTO `donations` (user_id, user_type, amount) VALUES (?,?,?)", [data[0].mem_id, "M", req.body[0].amount], (err, data) => {
+        if (err){
+            return res.status(400).json({"message": "Donation failed"});
+        }
+        return res.status(200).json({"message":"Donation successful"});
+      });
+    }
+    // if user is not a member, insert donation into donations table
+    else{
+      // create entry in visitors table
+      var visitor_id = 0;
+      pool.query("INSERT INTO `visitors` (first_name, last_name, email, phone_no) VALUES (?,?,?,?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].email, req.body[0].phone], (err, data) => {
+        if (err){
+            return res.status(400).json({"message":"Donation failed"});
+        }
+        visitor_id = data.insertId;
+        pool.query("INSERT INTO `donations` (user_id, user_type, amount) VALUES (?,?,?)", [visitor_id, "V", req.body[0].amount], (err, data) => {
+          if (err){
+              return res.status(400).json({"message":"Donation failed"});
+          }
+          return res.status(200).json({"message":"Donation successful"});
+        });
+      });
+    }
+  });
+} );
+
