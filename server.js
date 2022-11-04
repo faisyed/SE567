@@ -3,6 +3,7 @@ const mysql = require("mysql");
 const path = require('path');
 const bodyParser = require('body-parser');
 const bcrypt = require("bcrypt");
+const { response } = require("express");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -447,3 +448,12 @@ app.post("/makeDonation/",(req,res) => {
   });
 } );
 
+// get total donations for a member
+app.get("/getDonations/:id",(req,res) => {
+  pool.query("SELECT sum(amount) as total_donations FROM `master_transactions` where tran_type=? and user_id=?", ["donation",req.params.id], (err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Error in getting donations"});
+    }
+    return res.status(200).json({"message":"Donations fetched successfully", "data": data});
+  });
+});
