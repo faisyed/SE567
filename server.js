@@ -110,7 +110,7 @@ app.post("/login", (req, res)=> {
 /*
 API to get all art collections from database to display on UI
 */
-app.get("/getAllArts/",(req,res) => {
+app.get("/getArts/",(req,res) => {
   pool.query("SELECT * FROM `objects`", (err, data) => {
     if (err){ 
         console.log(err);
@@ -121,7 +121,11 @@ app.get("/getAllArts/",(req,res) => {
       var row = data[key];
       
       result.push({
-        'obj_title': row.obj_title
+        'title': row.obj_title,
+        'url': row.img_url,
+        'price': row.price,
+        'author': row.obj_attribution,
+        'id': row.obj_id
       });
     });
 
@@ -136,8 +140,19 @@ Example: localhost:3000/getArt?id=10
 GET REQUEST
 */
 app.get("/getArt/:id",(req,res) => {
+  //validation
+  let missed = [];
 
-  pool.query("SELECT * FROM `objects` where `obj_id` < ?", [req.params.id], (err, data) => {
+  if (req.params.id == null || req.params.id == undefined || req.params.id == "" || !Number.isInteger(parseInt(req.params.id))) {
+    missed.push("Invalid id");
+  }
+
+  if (missed.length > 0) {
+      res.status(400).send(missed);
+      return;
+  }
+
+  pool.query("SELECT * FROM `objects` where `obj_id` = ?", [parseInt(req.params.id)], (err, data) => {
     if (err){ 
         console.log(err);
         throw(err);
@@ -157,17 +172,270 @@ request body = {
 }
 */
 app.post("/getArtsCol/",(req,res) => {
-  
+  //validation
+  let missed = [];
+
+  if (req.body.type == null || req.body.type == undefined || req.body.type == "") {
+    missed.push("Type of art(type) is not valid");
+  }
+
+  if (missed.length > 0) {
+      res.status(400).send(missed);
+      return;
+  }
+
   pool.query("SELECT * FROM `objects` where `obj_class` = ?", [req.body.type], (err, data) => {
     if (err){ 
         console.log(err);
         throw(err);
     };
+      var result = [];
+      Object.keys(data).forEach(function(key) {
+        var row = data[key];
 
-    res.send(data);
+        result.push({
+          'title': row.obj_title,
+          'url': row.img_url,
+          'price': row.price,
+          'author': row.obj_attribution,
+          'id': row.obj_id
+        });
+      });
+
+      res.send(result);
   });
 
 });
+
+/*Api for Search by keyword for fetching collections
+Example: localhost:3000/searchKey/
+POST REQUEST
+request body = {
+  "key": "fpl"
+}
+*/
+app.get("/searchKey/",(req,res) => {
+  //validation
+  let missed = [];
+
+  if (req.query.key == null || req.query.key == undefined || req.query.key == "") {
+    missed.push("Keyword(key) is missing");
+  }
+
+  if (missed.length > 0) {
+      res.status(400).send(missed);
+      return;
+  }
+  pool.query("select * from objects where obj_title like ? or obj_medium like ? or obj_inscription like ?", [`%${req.query.key}%`,`%${req.query.key}%`,`%${req.query.key}%`], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    };
+    var result = [];
+      Object.keys(data).forEach(function(key) {
+        var row = data[key];
+
+        result.push({
+          'title': row.obj_title,
+          'url': row.img_url,
+          'price': row.price,
+          'author': row.obj_attribution,
+          'id': row.obj_id
+        });
+      });
+
+      res.send(result);
+  });
+
+});
+
+/*Api for Search by keyword for fetching collections
+Example: localhost:3000/searchName/
+POST REQUEST
+request body = {
+  "name": "fpl"
+}
+*/
+app.get("/searchName/",(req,res) => {
+  //validation
+  let missed = [];
+
+  if (req.query.name == null || req.query.name == undefined || req.query.name == "") {
+    missed.push("Name(name) is missing");
+  }
+
+  if (missed.length > 0) {
+      res.status(400).send(missed);
+      return;
+  }
+  pool.query("select * from objects where obj_attribution = ?", [req.query.name], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    };
+    var result = [];
+      Object.keys(data).forEach(function(key) {
+        var row = data[key];
+
+        result.push({
+          'title': row.obj_title,
+          'url': row.img_url,
+          'price': row.price,
+          'author': row.obj_attribution,
+          'id': row.obj_id
+        });
+      });
+
+      res.send(result);
+  });
+
+});
+
+/*Api for Search by price for fetching collections
+Example: localhost:3000/searchPrice/
+POST REQUEST
+request body = {
+  "from":2000
+  "to":3000
+}
+*/
+app.get("/searchPrice/",(req,res) => {
+  //validation
+  let missed = [];
+
+  if (req.query.from == null || req.query.from == undefined || req.query.from == "" || !Number.isInteger(parseInt(req.query.from))) {
+    missed.push("Price range from/low value is missing");
+  }
+
+  if (req.query.to == null || req.query.to == undefined || req.query.to == "" || !Number.isInteger(parseInt(req.query.to))) {
+    missed.push("Price range to/high value is missing");
+  }
+
+  if (missed.length > 0) {
+      res.status(400).send(missed);
+      return;
+  }
+
+
+  pool.query("select * from `objects` where `price` between ? and ?", [parseInt(req.query.from),parseInt(req.query.to)], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    };
+
+    var result = [];
+      Object.keys(data).forEach(function(key) {
+        var row = data[key];
+
+        result.push({
+          'title': row.obj_title,
+          'url': row.img_url,
+          'price': row.price,
+          'author': row.obj_attribution,
+          'id': row.obj_id
+        });
+      });
+
+      res.send(result);
+
+  });
+
+});
+
+//add a new art
+app.post("/addArt/",(req,res) => {
+  console.log(req.body);
+
+  //validation
+  let missed = [];
+
+  if (req.body.obj_title == null || req.body.obj_title == undefined || req.body.obj_title == "") {
+      missed.push("Title(obj_title) is required");
+  }
+  if (req.body.obj_beginyear == null || req.body.obj_beginyear == undefined || req.body.obj_beginyear == "") {
+    missed.push("obj_beginyear is required");
+  }
+  if (req.body.obj_endyear == null || req.body.obj_endyear == undefined || req.body.obj_endyear == "") {
+    missed.push("obj_endyear is required");
+  }
+  if (req.body.obj_dimensions == null || req.body.obj_dimensions == undefined || req.body.obj_dimensions == "") {
+    missed.push("Art dimensions(obj_dimensions) are required");
+  }
+  if (req.body.obj_class == null || req.body.obj_class == undefined || req.body.obj_class == "") {
+    missed.push("Art type/class (obj_class) is required");
+  }
+  if (req.body.loc_site == null || req.body.loc_site == undefined || req.body.loc_site == "") {
+    missed.push("Location site (loc_site) is required");
+  }
+  if (req.body.img_url == null || req.body.img_url == undefined || req.body.img_url == "") {
+    missed.push("Image url(img_url) is required");
+  }
+  if (req.body.price == null || req.body.price == undefined || req.body.price == "" || !Number.isFinite(parseFloat(req.body.price))) {
+    missed.push("Price is missing or should be a valid integer");
+  }
+
+  if (missed.length > 0) {
+      res.status(400).send(missed);
+      return;
+  }
+
+  pool.query("insert into `objects` (`obj_title`, `obj_beginyear`, `obj_endyear`, `obj_medium`, `obj_dimensions`, `obj_inscription`, `obj_attribution`, `obj_class`, `loc_site`, `loc_room`, `loc_description`, `img_url`, `price`) values (?,?,?,?,?,?,?,?,?,?,?,?,?)", [req.body.obj_title, req.body.obj_beginyear, req.body.obj_endyear, req.body.obj_medium, req.body.obj_dimensions,req.body.obj_inscription,req.body.obj_attribution,req.body.obj_class,req.body.loc_site,req.body.loc_room,req.body.loc_description,req.body.img_url,parseFloat(req.body.price)], (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.status(200).send(data);
+  });
+
+} );
+
+//add a new art
+app.post("/buyArt/", async (req,res) => {
+  //validation
+  let missed = [];
+
+  if (req.query.id == null || req.query.id == undefined || req.query.id == "") {
+      missed.push("id is required");
+  }
+
+  if (req.body.user_id == null || req.body.user_id == undefined || req.body.user_id == "") {
+    missed.push("user_id is required");
+  }
+
+  if (req.body.user_type == null || req.body.user_type == undefined || req.body.user_type == "") {
+    missed.push("user_type is required");
+  }
+
+  if (missed.length > 0) {
+      res.status(400).send(missed);
+      return;
+  }
+
+  pool.query("SELECT obj_id, price FROM `objects` where `obj_id` = ?", [parseInt(req.query.id)], (err,data) => {
+    if(err){
+      console.log(err);
+      missed.push("id does not exist in the database");
+      res.status(400).send(missed);
+      throw(err);
+    }
+
+    if(data.length > 0 && data[0].obj_id > 0){
+      pool.query("insert into `shop_transactions` (`obj_oid`, `total_amount`, `user_id`, `user_type`, `purchase_date`) values (?,?,?,?,?)", [data[0].obj_id, data[0].price, req.body.user_id, req.body.user_type, new Date()], (err, data) => {
+        if (err){
+            console.log(err);
+            throw(err);
+        }
+        res.status(200).send(data);
+      });
+    }
+    else{
+      missed.push("id does not exist in the database");
+      res.status(400).send(missed);
+    }
+  });
+
+});
+
 
 
 /*Get past shows*/
