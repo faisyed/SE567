@@ -147,6 +147,15 @@ create table contact_us(
     description text
 );
 
+-- below section of code is used to create table 'login' in database
+create table login(
+	log_id bigint auto_increment primary key,
+    user_id bigint,
+    user_type varchar(2),
+    username text,
+    password text
+);
+
 -- altering objects table to add auto increment to obj_id and primary key
 ALTER TABLE objects MODIFY obj_id bigint AUTO_INCREMENT PRIMARY KEY;
 
