@@ -949,3 +949,35 @@ app.post("/buyExhibitionTicket/",(req,res) => {
     }
   });
 });
+
+// post request to save contact us form data
+app.post('/contactus', (req, res) => {
+  // check if all required fields are present
+  let missed_fields = [];
+  // check if name is empty, undefined or null
+  if (req.body[0].name == null || req.body[0].name == undefined || req.body[0].name == ""){
+    missed_fields.push("Enter name");
+  }
+  // check if email is empty, undefined or null
+  if (req.body[0].email == null || req.body[0].email == undefined || req.body[0].email == ""){
+    missed_fields.push("Enter email");
+  }
+  // check if subject is empty, undefined or null
+  if (req.body[0].subject == null || req.body[0].subject == undefined || req.body[0].subject == ""){
+    missed_fields.push("Enter subject");
+  }
+  // check if description is empty, undefined or null
+  if (req.body[0].description == null || req.body[0].description == undefined || req.body[0].description == ""){
+    missed_fields.push("Enter description");
+  }
+  if (missed_fields.length > 0){
+    return res.status(400).json({message: missed_fields});
+  }
+  // insert contact us form data into contact_us table
+  pool.query("INSERT INTO `contact_us` (name, email, subject, description) VALUES (?,?,?,?)", [req.body[0].name, req.body[0].email, req.body[0].subject, req.body[0].description], (err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Contact us form submission failed"});
+    }
+    return res.status(200).json({"message":"Contact us form submission successful"});
+  });
+});

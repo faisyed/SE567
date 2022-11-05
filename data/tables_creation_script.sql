@@ -139,6 +139,15 @@ create table sold_objects (
    shop_id bigint
 );
 
+-- below section of code is used to create table 'contact_us' in database
+create table contact_us(
+	con_id bigint auto_increment primary key,
+    name text,
+    email text,
+    subject text,
+    description text
+);
+
 -- altering objects table to add auto increment to obj_id and primary key
 ALTER TABLE objects MODIFY obj_id bigint AUTO_INCREMENT PRIMARY KEY;
 
