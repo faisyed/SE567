@@ -2,7 +2,6 @@ const express = require("express");
 const mysql = require("mysql");
 const path = require('path');
 const bodyParser = require('body-parser');
-const bcrypt = require("bcrypt");
 const { response } = require("express");
 
 const app = express();
@@ -40,12 +39,12 @@ app.get('/', (req, res) => {
 
 //LOGIN (AUTHENTICATE USER)
 app.post("/login", (req, res)=> {
-  res.sendFile('./src/my-account.html', {root: __dirname});
-  const user = req.body.name
+  // res.sendFile('./src/my-account.html', {root: __dirname});
+  const user = req.body.username
   const password = req.body.password
   pool.getConnection ( async (err, connection)=> {
       if (err) throw (err)
-      const sqlSearch = "Select * from users where username = ?"
+      const sqlSearch = "Select * from login where username = ?"
       const search_query = mysql.format(sqlSearch,[user])
       await connection.query (search_query, async (err, result) => {
       connection.release()
@@ -70,7 +69,7 @@ app.post("/login", (req, res)=> {
       }
       }) 
   }) 
-});
+})
 
 /*
 API to get all art collections from database to display on UI
