@@ -204,3 +204,15 @@ BEGIN
     DELETE FROM event_employee_map WHERE ev_id = OLD.ev_id;
 END$$
 DELIMITER ;
+
+-- creating scheduled event to cancel any membership that is expired
+DELIMITER $$
+create event membership_cancellation
+	on schedule
+	every 1 day
+	starts '2022-11-06 00:00:00' on completion preserve enable
+	do
+begin 
+	update members set is_active = 'N' where renewed_date+interval 1 year<curdate();
+end$$
+DELIMITER ;
