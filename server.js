@@ -79,7 +79,7 @@ app.post("/createUser", async (req,res) => {
 //LOGIN (AUTHENTICATE USER)
 app.post("/login", (req, res)=> {
   // res.sendFile('./src/my-account.html', {root: __dirname});
-  const user = req.body.name
+  const user = req.body.username
   const password = req.body.password
   pool.getConnection ( async (err, connection)=> {
       if (err) throw (err)
@@ -110,10 +110,30 @@ app.post("/login", (req, res)=> {
   }) 
 })
 
+// DELETE USER
+app.post('/remove', function (req, res, next) {
+  const user = req.body.username
+  pool.getConnection ( async (err, connection)=> {
+    if (err) throw (err)
+    const sqlSearch = "DELETE FROM login WHERE username = ?"
+    const search_query = mysql.format(sqlSearch,[user])
+    await connection.query(search_query, async (err, result) => {
+      if (err) throw (err)
+      if (result.length == 0) {
+          console.log("--------> User does not exist")
+          res.sendStatus(404)
+      } else {
+          res.send(user+' Deleted')
+        }
+      },
+    )
+  })
+})
+
 /*
 API to get all art collections from database to display on UI
 */
-app.get("/getArts/",(req,res) => {
+app.post("/getArts/",(req,res) => {
   pool.query("SELECT * FROM `objects`", (err, data) => {
     if (err){ 
         console.log(err);
