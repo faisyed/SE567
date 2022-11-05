@@ -37,40 +37,6 @@ app.get('/', (req, res) => {
   res.sendFile('./src/home.html', {root: __dirname});
 });
 
-//LOGIN (AUTHENTICATE USER)
-app.post("/login", (req, res)=> {
-  // res.sendFile('./src/my-account.html', {root: __dirname});
-  const user = req.body.username
-  const password = req.body.password
-  pool.getConnection ( async (err, connection)=> {
-      if (err) throw (err)
-      const sqlSearch = "Select * from login where username = ?"
-      const search_query = mysql.format(sqlSearch,[user])
-      await connection.query (search_query, async (err, result) => {
-      connection.release()
-
-      if (err) throw (err)
-      if (result.length == 0) {
-          console.log("--------> User does not exist")
-          res.sendStatus(404)
-      } 
-      else {
-          const pass = result[0].password
-          console.log(password, pass)
-      
-          if (password == pass) {
-              console.log("---------> Login Successful")
-              res.send(`${user} is logged in!`)
-          } 
-          else {
-              console.log("---------> Password Incorrect")
-              res.send("Password incorrect!")
-          }
-      }
-      }) 
-  }) 
-})
-
 /*
 API to get all art collections from database to display on UI
 */
@@ -1306,5 +1272,38 @@ app.get('/getupcomingemployeeevents/:id', (req, res) => {
       return res.status(400).json({"message":"Upcoming events not found"});
     }
     return res.status(200).json(data);
+  });
+});
+
+// check login validation
+app.post('/checklogin', (req, res) => {
+  pool.query("select * from login where username = ? and password = ?",[req.body.username, req.body.password] , (err, data) => {
+    if (err){
+      return res.status(400).json({"message":"Login failed"});
+    }
+    if (data.length == 0){
+      return res.status(400).json({"message":"invalid username or password"});
+    }
+    if (data[0].user_type == "E"){
+      pool.query("select * from employees where emp_id = ? and is_active = ?",[data[0].user_id, "Y"], (err, data) => {
+        if (err){
+          return res.status(400).json({"message":"Login failed"});
+        }
+        if (data.length == 0){
+          return res.status(400).json({"message":"account not active"});
+        }
+        return res.status(200).json(data);
+      });
+    } else if (data[0].user_type == "M"){
+      pool.query("select * from members where mem_id = ? and is_active = ?",[data[0].user_id, "Y"], (err, data) => {
+        if (err){
+          return res.status(400).json({"message":"Login failed"});
+        }
+        if (data.length == 0){
+          return res.status(400).json({"message":"account not active"});
+        }
+        return res.status(200).json(data);
+      });
+    }
   });
 });
