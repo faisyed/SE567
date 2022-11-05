@@ -67,7 +67,6 @@ create table events (
     ev_description text,
     ev_date date,
     ev_type text,
-    ev_entry_price double default 0,
     ev_site text,
     ev_room_no text
 );

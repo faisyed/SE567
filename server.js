@@ -437,155 +437,6 @@ app.post("/buyArt/", async (req,res) => {
 
 });
 
-
-
-/*Get past shows*/
-app.get("/getPastShows/",(req,res) => {
-  pool.query("SELECT * FROM `events` where ev_type=? and ev_date<CURDATE()",["show"], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-});
-
-//get current and upcoming shows
-app.get("/getUpcomingShows/",(req,res) => {
-  pool.query("SELECT * FROM `events` where ev_type=? and ev_date>=CURDATE()",["show"], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-});
-
-//get past exhibitions
-app.get("/getPastExhibitions/",(req,res) => {
-  pool.query("SELECT * FROM `events` where ev_type=? and ev_date<CURDATE()",["exhibition"], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-});
-
-//get current and upcoming exhibitions
-app.get("/getUpcomingExhibitions/",(req,res) => {
-  pool.query("SELECT * FROM `events` where ev_type=? and ev_date>=CURDATE()",["exhibition"], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-});
-
-//get past auctions
-app.get("/getPastAuctions/",(req,res) => {
-  pool.query("SELECT * FROM `events` where ev_type=? and ev_date<CURDATE()",["auction"], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-} );
-
-//get current and upcoming auctions
-app.get("/getUpcomingAuctions/",(req,res) => {
-  pool.query("SELECT * FROM `events` where ev_type=? and ev_date>=CURDATE()",["auction"], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-} );
-
-//get show with id
-app.get("/getShow/:id",(req,res) => {
-  pool.query("SELECT * FROM `events` where ev_id=? and ev_type=?", [req.params.id,"show"], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-} );
-
-//get exhibition with id
-app.get("/getExhibition/:id",(req,res) => {
-  pool.query("SELECT * FROM `events` where ev_id=? and ev_type=?", [req.params.id,"exhibition"], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-} );
-
-//get auction with id
-app.get("/getAuction/:id",(req,res) => {
-  pool.query("SELECT * FROM `events` where ev_id=? and ev_type=?", [req.params.id,"auction"], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-} );
-
-//create a new show
-app.post("/createShow/",(req,res) => {
-  console.log(req.body);
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_type, ev_description, ev_site,ev_room_no) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, "show", req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-} );
-
-//create a new exhibition
-app.post("/createExhibition/",(req,res) => {
-  console.log(req.body);
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_type, ev_description, ev_site,ev_room_no) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, "exhibition", req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-} );
-
-//create a new auction
-app.post("/createAuction/",(req,res) => {
-  console.log(req.body);
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_type, ev_description, ev_site,ev_room_no) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, "auction", req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no], (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
-  });
-
-} );
-
 //get all members
 app.get("/getAllMem/",(req,res) => {
   pool.query("SELECT * FROM `members`", (err, data) => {
@@ -979,5 +830,190 @@ app.post('/contactus', (req, res) => {
         return res.status(400).json({"message":"Contact us form submission failed"});
     }
     return res.status(200).json({"message":"Contact us form submission successful"});
+  });
+});
+
+// get past shows
+app.get('/pastshows', (req, res) => {
+  // get past shows from shows table
+  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["show"],(err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Past shows not found"});
+    }
+    return res.status(200).json(data);
+  });
+});
+
+// get past exhibitions
+app.get('/pastexhibitions', (req, res) => {
+  // get past exhibitions from shows table
+  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["exhibition"],(err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Past exhibitions not found"});
+    }
+    return res.status(200).json(data);
+  });
+});
+
+// get past auctions
+app.get('/pastauctions', (req, res) => {
+  // get past auctions from shows table
+  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["auction"],(err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Past auctions not found"});
+    }
+    return res.status(200).json(data);
+  });
+});
+
+// get current or upcoming shows
+app.get('/currentshows', (req, res) => {
+  // get current or upcoming shows from shows table
+  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["show"],(err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Current or upcoming shows not found"});
+    }
+    return res.status(200).json(data);
+  });
+});
+
+// get current or upcoming exhibitions
+app.get('/currentexhibitions', (req, res) => {
+  // get current or upcoming exhibitions from shows table
+  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["exhibition"],(err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Current or upcoming exhibitions not found"});
+    }
+    return res.status(200).json(data);
+  });
+});
+
+// get current or upcoming auctions
+app.get('/currentauctions', (req, res) => {
+  // get current or upcoming auctions from shows table
+  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["auction"],(err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Current or upcoming auctions not found"});
+    }
+    return res.status(200).json(data);
+  });
+});
+
+// get event details by id
+app.get('/eventdetails/:id', (req, res) => {
+  // get event details from shows table
+  pool.query("select * from `events` where ev_id=?",[req.params.id],(err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Event details not found"});
+    }
+    return res.status(200).json(data);
+  });
+});
+
+// create show
+app.post('/createshow', (req, res) => {
+  // check if all required fields are present
+  let missed_fields = [];
+  // check if ev_name is empty, undefined or null
+  if (req.body[0].ev_name == null || req.body[0].ev_name == undefined || req.body[0].ev_name == ""){
+    missed_fields.push("Enter show name");
+  }
+  // check if ev_date is empty, undefined or null
+  if (req.body[0].ev_date == null || req.body[0].ev_date == undefined || req.body[0].ev_date == ""){
+    missed_fields.push("Enter show date");
+  }
+  // check if ev_description is empty, undefined or null
+  if (req.body[0].ev_description == null || req.body[0].ev_description == undefined || req.body[0].ev_description == ""){
+    missed_fields.push("Enter show description");
+  }
+  // check if ev_site is empty, undefined or null
+  if (req.body[0].ev_site == null || req.body[0].ev_site == undefined || req.body[0].ev_site == ""){
+    missed_fields.push("Enter show site");
+  }
+  // check if ev_room_no is empty, undefined or null
+  if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
+    missed_fields.push("Enter show room number");
+  }
+  if (missed_fields.length > 0){
+    return res.status(400).json({message: missed_fields});
+  }
+  // insert show data into events table
+  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "show"], (err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Show creation failed"});
+    }
+    return res.status(200).json({"message":"Show created successfully"});
+  });
+});
+
+// create exhibition
+app.post('/createexhibition', (req, res) => {
+  // check if all required fields are present
+  let missed_fields = [];
+  // check if ev_name is empty, undefined or null
+  if (req.body[0].ev_name == null || req.body[0].ev_name == undefined || req.body[0].ev_name == ""){
+    missed_fields.push("Enter exhibition name");
+  }
+  // check if ev_date is empty, undefined or null
+  if (req.body[0].ev_date == null || req.body[0].ev_date == undefined || req.body[0].ev_date == ""){
+    missed_fields.push("Enter exhibition date");
+  }
+  // check if ev_description is empty, undefined or null
+  if (req.body[0].ev_description == null || req.body[0].ev_description == undefined || req.body[0].ev_description == ""){
+    missed_fields.push("Enter exhibition description");
+  }
+  // check if ev_site is empty, undefined or null
+  if (req.body[0].ev_site == null || req.body[0].ev_site == undefined || req.body[0].ev_site == ""){
+    missed_fields.push("Enter exhibition site");
+  }
+  // check if ev_room_no is empty, undefined or null
+  if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
+    missed_fields.push("Enter exhibition room number");
+  }
+  if (missed_fields.length > 0){
+    return res.status(400).json({message: missed_fields});
+  }
+  // insert exhibition data into events table
+  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "exhibition"], (err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Exhibition creation failed"});
+    }
+    return res.status(200).json({"message":"Exhibition created successfully"});
+  });
+});
+
+// create auction
+app.post('/createauction', (req, res) => {
+  // check if all required fields are present
+  let missed_fields = [];
+  // check if ev_name is empty, undefined or null
+  if (req.body[0].ev_name == null || req.body[0].ev_name == undefined || req.body[0].ev_name == ""){
+    missed_fields.push("Enter auction name");
+  }
+  // check if ev_date is empty, undefined or null
+  if (req.body[0].ev_date == null || req.body[0].ev_date == undefined || req.body[0].ev_date == ""){
+    missed_fields.push("Enter auction date");
+  }
+  // check if ev_description is empty, undefined or null
+  if (req.body[0].ev_description == null || req.body[0].ev_description == undefined || req.body[0].ev_description == ""){
+    missed_fields.push("Enter auction description");
+  }
+  // check if ev_site is empty, undefined or null
+  if (req.body[0].ev_site == null || req.body[0].ev_site == undefined || req.body[0].ev_site == ""){
+    missed_fields.push("Enter auction site");
+  }
+  // check if ev_room_no is empty, undefined or null
+  if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
+    missed_fields.push("Enter auction room number");
+  }
+  if (missed_fields.length > 0){
+    return res.status(400).json({message: missed_fields});
+  }
+  // insert auction data into events table
+  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "auction"], (err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Auction creation failed"});
+    }
+    return res.status(200).json({"message":"Auction created successfully"});
   });
 });
