@@ -90,6 +90,7 @@ create table donations(
 create table ticket_transactions (
 	tick_id bigint auto_increment primary key,
     tick_class text,
+    ev_id bigint default null,
     purchase_date date default(current_date),
     child_count int default 0,
     adult_count int default 0,
