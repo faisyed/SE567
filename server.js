@@ -1096,3 +1096,78 @@ app.get('/getupcomingevents/:id', (req, res) => {
     return res.status(200).json(data);
   });
 });
+
+// register member
+app.post('/registermember', (req, res) => {
+  // check missing fields
+  let missing_fields = [];
+  // check if first name is empty, undefined or null
+  if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == ""){
+    missing_fields.push("first_name");
+  }
+  // check if last name is empty, undefined or null
+  if (req.body[0].last_name == null || req.body[0].last_name == undefined || req.body[0].last_name == ""){
+    missing_fields.push("last_name");
+  }
+  // check if phone number is empty, undefined or null
+  if (req.body[0].phone_no == null || req.body[0].phone_no == undefined || req.body[0].phone_no == ""){
+    missing_fields.push("phone_no");
+  }
+  // check if email is empty, undefined or null
+  if (req.body[0].email == null || req.body[0].email == undefined || req.body[0].email == ""){
+    missing_fields.push("email");
+  }
+  // check if address1 is empty, undefined or null
+  if (req.body[0].address1 == null || req.body[0].address1 == undefined || req.body[0].address1 == ""){
+    missing_fields.push("address1");
+  }
+  // check if city is empty, undefined or null
+  if (req.body[0].city == null || req.body[0].city == undefined || req.body[0].city == ""){
+    missing_fields.push("city");
+  }
+  // check if state is empty, undefined or null
+  if (req.body[0].state == null || req.body[0].state == undefined || req.body[0].state == ""){
+    missing_fields.push("state");
+  }
+  // check if zipcode is empty, undefined or null
+  if (req.body[0].zipcode == null || req.body[0].zipcode == undefined || req.body[0].zipcode == ""){
+    missing_fields.push("zipcode");
+  }
+  // check if username is empty, undefined or null
+  if (req.body[0].username == null || req.body[0].username == undefined || req.body[0].username == ""){
+    missing_fields.push("username");
+  }
+  // check if password is empty, undefined or null
+  if (req.body[0].password == null || req.body[0].password == undefined || req.body[0].password == ""){
+    missing_fields.push("password");
+  }
+  if (missing_fields.length > 0){
+    return res.status(400).json({message: missed_fields});
+  }
+  // check if username already exists
+  pool.query("SELECT * FROM `login` WHERE username = ?", [req.body[0].username], (err, data) => {
+    if (err){
+      return res.status(400).json({"message":"Username already exists"});
+    }
+  });
+  // insert into members table
+  pool.query("INSERT INTO `members` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2, req.body[0].city, req.body[0].state, req.body[0].zipcode], (err, data) => {
+    if (err){
+      return res.status(400).json({"message":"Member registration failed"});
+    }
+    var member_id = data.insertId;
+    // insert into login table
+    pool.query("INSERT INTO `login` (username, password, user_type, user_id) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, "M", member_id], (err, data) => {
+      if (err){
+        return res.status(400).json({"message":"Member registration failed"});
+      }
+    });
+  });
+  // insert into master_transactions table
+  pool.query("insert into master_transactions (tran_type, user_id, user_type, purchase_date, amount) values (?,?,?,?,?)", ["membership", member_id, "M", new Date(), req.body[0].amount], (err, data) => {
+    if (err){
+      return res.status(400).json({"message":"Member registration failed"});
+    }
+  });
+  return res.status(200).json({"message":"Member registration successful"});
+});
