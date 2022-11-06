@@ -969,25 +969,6 @@ app.post('/createauction', (req, res) => {
   });
 });
 
-// get member details by id
-app.get('/getmemberdetails/:id', (req, res) => {
-  var details = {};
-  pool.query("SELECT * FROM `members` WHERE mem_id = ?", [req.params.id], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Member details retrieval failed"});
-    }
-    details["personal"]=data[0];
-  });
-  // get login details
-  pool.query("SELECT username, password from login where user_id = ? and user_type = ?",[req.params.id, "M"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Member details retrieval failed"});
-    }
-    details["login"]=data[0];
-  });
-  return res.status(200).json(details);
-});
-
 // update member details by id
 app.post('/updatememberdetails/:id', (req, res) => {
   // get old member details
@@ -1379,4 +1360,43 @@ app.post('/checklogin', (req, res) => {
       });
     }
   });
+});
+
+getMemPersonalDetails = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from members where mem_id = ?",[mem_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+getMemLoginDetails = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from login where user_id = ? and user_type = ?",[mem_id, "M"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+app.get("/getmemberdetails/:id", async (req, res) => {
+  try {
+    const personal = await getMemPersonalDetails(parseInt(req.params.id));
+    const login = await getMemLoginDetails(parseInt(req.params.id));
+    if (personal && login) {
+      const details = {
+        "personal": personal,
+        "login": login
+      }
+      return res.status(200).json(details);
+    }
+    return res.status(400).json({"message":"Member details not found"});
+  }catch(err){
+    return res.status(400).json({"message":"Member details not found"});
+  }
 });
