@@ -5,7 +5,7 @@
   "main": "./src/home-classic.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon -e html --delay 2.5 --watch src ./server.js",
+    "start": "nodemon -e 'html,js' --delay 2.5 --watch src ./server.js",
     "start-server": "node ./server.js --watch"
   },
   "author": "",
