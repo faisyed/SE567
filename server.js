@@ -37,6 +37,81 @@ app.get('/', (req, res) => {
   res.sendFile('./src/home.html', {root: __dirname});
 });
 
+
+//CREATE USER
+app.post("/createUser", async (req,res) => {
+  res.sendFile('./src/my-account.html', {root: __dirname});
+  console.log(req.body)
+  const user = req.body.name;
+  const pass = req.body.password;
+  pool.getConnection( async (err, connection) => {
+      if (err) throw (err)
+      const sqlSearch = "SELECT * FROM users WHERE username = ?"
+      const search_query = mysql.format(sqlSearch,[user])
+      const sqlInsert = "INSERT INTO users VALUES (0,?,?)"
+      const insert_query = mysql.format(sqlInsert,[user, pass])
+      await connection.query (search_query, async (err, result) => {
+          if (err) throw (err)
+          console.log("------> Search Results")
+          console.log(result.length)
+          if (result.length != 0) {
+              connection.release()
+              console.log("------> User already exists")
+              res.sendStatus(409) 
+          } 
+          else {
+              await connection.query (insert_query, (err, result)=> {
+                  connection.release()
+                  if (err) throw (err)
+                  console.log ("--------> Created new User")
+                  console.log(result.insertId)
+                  res.sendStatus(201)
+              })
+          }
+      }) 
+  }) 
+}) 
+
+
+//LOGIN (AUTHENTICATE USER)
+app.post("/login", (req, res)=> {
+  res.sendFile('./src/my-account.html', {root: __dirname});
+  const user = req.body.name
+  const password = req.body.password
+  pool.getConnection ( async (err, connection)=> {
+      if (err) throw (err)
+      const sqlSearch = "Select * from users where username = ?"
+      const search_query = mysql.format(sqlSearch,[user])
+      await connection.query (search_query, async (err, result) => {
+      connection.release()
+
+      if (err) throw (err)
+      if (result.length == 0) {
+          console.log("--------> User does not exist")
+          res.sendStatus(404)
+      } 
+      else {
+          const pass = result[0].password
+          console.log(password, pass)
+      
+          if (password == pass) {
+              console.log("---------> Login Successful")
+              res.send(`${user} is logged in!`)
+          } 
+          else {
+              console.log("---------> Password Incorrect")
+              res.send("Password incorrect!")
+          }
+      }
+      }) 
+  }) 
+})
+
+
+
+
+
+/*************Group 4 start *************/
 /*
 API to get all art collections from database to display on UI
 */
@@ -44,7 +119,7 @@ app.get("/getArts/",(req,res) => {
   pool.query("SELECT * FROM `objects`", (err, data) => {
     if (err){ 
         console.log(err);
-        throw(err);
+        res.status(400).send("Backend Issue. Please reload the page");
     }
     var result = [];
     Object.keys(data).forEach(function(key) {
@@ -59,7 +134,7 @@ app.get("/getArts/",(req,res) => {
       });
     });
 
-    res.send(result);
+    res.status(200).send(result);
   });
 
 });
@@ -69,26 +144,26 @@ API to get a paritcular art details from database where id is sent as URL parame
 Example: localhost:3000/getArt?id=10
 GET REQUEST
 */
-app.get("/getArt/:id",(req,res) => {
+app.get("/getArt/",(req,res) => {
   //validation
   let missed = [];
-
-  if (req.params.id == null || req.params.id == undefined || req.params.id == "" || !Number.isInteger(parseInt(req.params.id))) {
-    missed.push("Invalid id");
+  
+  if (req.query.id == null || req.query.id == undefined || req.query.id == "" || !Number.isInteger(parseInt(req.query.id))) {
+    missed.push("Invalid id!");
   }
 
   if (missed.length > 0) {
       res.status(400).send(missed);
       return;
   }
-
-  pool.query("SELECT * FROM `objects` where `obj_id` = ?", [parseInt(req.params.id)], (err, data) => {
+  
+  pool.query("SELECT * FROM `objects` where `obj_id` = ?", [parseInt(req.query.id)], (err, data) => {
     if (err){ 
         console.log(err);
-        throw(err);
+        res.status(400).send("Failed fetching the Art details");
     };
 
-    res.send(data);
+    res.status(200).send(data);
   });
 
 });
@@ -117,7 +192,7 @@ app.post("/getArtsCol/",(req,res) => {
   pool.query("SELECT * FROM `objects` where `obj_class` = ?", [req.body.type], (err, data) => {
     if (err){ 
         console.log(err);
-        throw(err);
+        res.status(400).send("Fetching Arts by type failed");
     };
       var result = [];
       Object.keys(data).forEach(function(key) {
@@ -132,7 +207,7 @@ app.post("/getArtsCol/",(req,res) => {
         });
       });
 
-      res.send(result);
+      res.status(200).send(result);
   });
 
 });
@@ -159,7 +234,7 @@ app.get("/searchKey/",(req,res) => {
   pool.query("select * from objects where obj_title like ? or obj_medium like ? or obj_inscription like ?", [`%${req.query.key}%`,`%${req.query.key}%`,`%${req.query.key}%`], (err, data) => {
     if (err){
         console.log(err);
-        throw(err);
+        res.status(400).send("Fetching arts by keyword failed");
     };
     var result = [];
       Object.keys(data).forEach(function(key) {
@@ -174,17 +249,14 @@ app.get("/searchKey/",(req,res) => {
         });
       });
 
-      res.send(result);
+      res.status(200).send(result);
   });
 
 });
 
-/*Api for Search by keyword for fetching collections
+/*Api for Search by Name for fetching collections
 Example: localhost:3000/searchName/
-POST REQUEST
-request body = {
-  "name": "fpl"
-}
+
 */
 app.get("/searchName/",(req,res) => {
   //validation
@@ -201,7 +273,7 @@ app.get("/searchName/",(req,res) => {
   pool.query("select * from objects where obj_attribution = ?", [req.query.name], (err, data) => {
     if (err){
         console.log(err);
-        throw(err);
+        res.status(400).send("Fetching arts by Author name failed");
     };
     var result = [];
       Object.keys(data).forEach(function(key) {
@@ -216,7 +288,7 @@ app.get("/searchName/",(req,res) => {
         });
       });
 
-      res.send(result);
+      res.status(200).send(result);
   });
 
 });
@@ -250,7 +322,7 @@ app.get("/searchPrice/",(req,res) => {
   pool.query("select * from `objects` where `price` between ? and ?", [parseInt(req.query.from),parseInt(req.query.to)], (err, data) => {
     if (err){
         console.log(err);
-        throw(err);
+        res.status(400).send("Fetching arts by price failed");
     };
 
     var result = [];
@@ -266,7 +338,7 @@ app.get("/searchPrice/",(req,res) => {
         });
       });
 
-      res.send(result);
+      res.status(200).send(result);
 
   });
 
@@ -312,14 +384,14 @@ app.post("/addArt/",(req,res) => {
   pool.query("insert into `objects` (`obj_title`, `obj_beginyear`, `obj_endyear`, `obj_medium`, `obj_dimensions`, `obj_inscription`, `obj_attribution`, `obj_class`, `loc_site`, `loc_room`, `loc_description`, `img_url`, `price`) values (?,?,?,?,?,?,?,?,?,?,?,?,?)", [req.body.obj_title, req.body.obj_beginyear, req.body.obj_endyear, req.body.obj_medium, req.body.obj_dimensions,req.body.obj_inscription,req.body.obj_attribution,req.body.obj_class,req.body.loc_site,req.body.loc_room,req.body.loc_description,req.body.img_url,parseFloat(req.body.price)], (err, data) => {
     if (err){
         console.log(err);
-        throw(err);
+        res.status(400).send("Failed adding new Art");
     }
     res.status(200).send(data);
   });
 
 } );
 
-//add a new art
+//Buy Art
 app.post("/buyArt/", async (req,res) => {
   //validation
   let missed = [];
@@ -346,14 +418,14 @@ app.post("/buyArt/", async (req,res) => {
       console.log(err);
       missed.push("id does not exist in the database");
       res.status(400).send(missed);
-      throw(err);
+
     }
 
     if(data.length > 0 && data[0].obj_id > 0){
       pool.query("insert into `shop_transactions` (`obj_oid`, `total_amount`, `user_id`, `user_type`, `purchase_date`) values (?,?,?,?,?)", [data[0].obj_id, data[0].price, req.body.user_id, req.body.user_type, new Date()], (err, data) => {
         if (err){
             console.log(err);
-            throw(err);
+            res.status(400).send(missed);
         }
         res.status(200).send(data);
       });
@@ -365,6 +437,7 @@ app.post("/buyArt/", async (req,res) => {
   });
 
 });
+/*************Group 4 End *************/
 
 // make a donation
 app.post("/makeDonation/",(req,res) => {
