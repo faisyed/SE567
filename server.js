@@ -1294,7 +1294,7 @@ app.post('/checklogin', (req, res) => {
         }
         return res.status(200).json(data);
       });
-    } else if (data[0].user_type == "M"){
+    } else {
       pool.query("select * from members where mem_id = ? and is_active = ?",[data[0].user_id, "Y"], (err, data) => {
         if (err){
           return res.status(400).json({"message":"Login failed"});
