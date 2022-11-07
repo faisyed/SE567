@@ -785,39 +785,6 @@ app.post('/contactus', (req, res) => {
   });
 });
 
-// get past shows
-app.get('/pastshows', (req, res) => {
-  // get past shows from shows table
-  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["show"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Past shows not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get past exhibitions
-app.get('/pastexhibitions', (req, res) => {
-  // get past exhibitions from shows table
-  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["exhibition"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Past exhibitions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get past auctions
-app.get('/pastauctions', (req, res) => {
-  // get past auctions from shows table
-  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["auction"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Past auctions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
 // create show
 app.post('/createshow', (req, res) => {
   // check if all required fields are present
@@ -1393,6 +1360,39 @@ getCurrentShows = () => {
   });
 }
 
+getPastShows = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["show"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getPastExhibitions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["exhibition"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getPastAuctions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["auction"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -1517,6 +1517,45 @@ app.get('/currentshows', async (req, res) => {
     return res.status(400).json({"message":"No shows found"});
   }catch(err){
     return res.status(400).json({"message":"Shows not found"});
+  }
+});
+
+// get past shows
+app.get('/pastshows', async (req, res) => {
+  try{
+    const shows = await getPastShows();
+    if (shows){
+      return res.status(200).json(shows);
+    }
+    return res.status(400).json({"message":"No shows found"});
+  }catch(err){
+    return res.status(400).json({"message":"Shows not found"});
+  }
+});
+
+// get past exhibitions
+app.get('/pastexhibitions', async (req, res) => {
+  try{
+    const exhibitions = await getPastExhibitions();
+    if (exhibitions){
+      return res.status(200).json(exhibitions);
+    }
+    return res.status(400).json({"message":"No exhibitions found"});
+  }catch(err){
+    return res.status(400).json({"message":"Exhibitions not found"});
+  }
+});
+
+// get past auctions
+app.get('/pastauctions', async (req, res) => {
+  try{
+    const auctions = await getPastAuctions();
+    if (auctions){
+      return res.status(200).json(auctions);
+    }
+    return res.status(400).json({"message":"No auctions found"});
+  }catch(err){
+    return res.status(400).json({"message":"Auctions not found"});
   }
 });
 
