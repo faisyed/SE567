@@ -631,6 +631,17 @@ insertMember = (details) => {
   });
 }
 
+insertEmployee = (details) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `employees` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [details.first_name, details.last_name, details.phone_no, details.email, details.address1, details.address2, details.city, details.state, details.zipcode], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+  });
+  });
+}
+
 checkMemberExist = (fname, lname) => {
   pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [fname, lname, "Y"], (err, data) => {
     if (err){
@@ -1491,7 +1502,7 @@ app.post('/registermember', async (req, res) => {
 });
 
 // create employee
-app.post('/createemployee', (req, res) => {
+app.post('/createemployee', async (req, res) => {
   // check missing fields
   let missing_fields = [];
   // check if first name is empty, undefined or null
@@ -1537,30 +1548,17 @@ app.post('/createemployee', (req, res) => {
   if (missing_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // check if username already exists
-  pool.query("SELECT * FROM `login` WHERE username = ?", [req.body[0].username], (err, data) => {
-    if (err){
-      return res.status(400).json({"message":"Username already exists"});
+  try{
+    const existEmployee = await pool.query("SELECT * FROM `login` WHERE username = ?", [req.body[0].username]);
+    if (existEmployee.length > 0){
+      return res.status(400).json({message: "Username already exists"});
     }
-    if (data.length > 0){
-      return res.status(400).json({"message":"Username already exists"});
-    }
-  });
-  // insert into employees table
-  pool.query("INSERT INTO `employees` (first_name, last_name, phone_no, email_id, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2, req.body[0].city, req.body[0].state, req.body[0].zipcode], (err, data) => {
-    if (err){
+    const newEmployee = await insertEmployee(req.body[0]);
+    const newLogin = await pool.query("INSERT INTO `login` (username, password, user_id, user_type) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, newEmployee.insertId, "E"]);
+    return res.status(200).json({message: "Employee registered successfully"});
+  }catch(err){
       return res.status(400).json({"message":"Employee registration failed"});
-    }
-    console.log(data);
-    var employee_id = data.insertId;
-    // insert into login table
-    pool.query("INSERT INTO `login` (username, password, user_type, user_id) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, "E", employee_id], (err, data) => {
-      if (err){
-        return res.status(400).json({"message":"Employee registration failed"});
-      }
-    });
-    return res.status(200).json({"message":"Employee registration successful"});
-  });
+  }
 });
 
 // update employee details by id
