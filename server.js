@@ -850,17 +850,6 @@ app.get('/currentauctions', (req, res) => {
   });
 });
 
-// get event details by id
-app.get('/eventdetails/:id', (req, res) => {
-  // get event details from shows table
-  pool.query("select * from `events` where ev_id=?",[req.params.id],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Event details not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
 // create show
 app.post('/createshow', (req, res) => {
   // check if all required fields are present
@@ -1392,6 +1381,17 @@ getLastPurchasedArts = (mem_id) => {
   });
 }
 
+getEventDetails = (ev_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_id=?",[ev_id],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -1464,6 +1464,19 @@ app.get('/getlastpurchasedarts/:id', async (req, res) => {
     return res.status(400).json({"message":"No arts purchased"});
   }catch(err){
     return res.status(400).json({"message":"Arts not found"});
+  }
+});
+
+// get event details by id
+app.get('/eventdetails/:id', async (req, res) => {
+  try{
+    const event = await getEventDetails(parseInt(req.params.id));
+    if (event){
+      return res.status(200).json(event);
+    }
+    return res.status(400).json({"message":"Event not found"});
+  }catch(err){
+    return res.status(400).json({"message":"Event not found"});
   }
 });
 
