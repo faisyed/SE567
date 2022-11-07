@@ -455,9 +455,20 @@ getMemPersonalDetails = (mem_id) => {
   });
 }
 
-getMemLoginDetails = (mem_id) => {
+getMemLoginDetails = (mem_id, user_type = 'M') => {
   return new Promise((resolve, reject) => {
-    pool.query("select * from login where user_id = ? and user_type = ?",[mem_id, "M"], (err, data) => {
+    pool.query("select * from login where user_id = ? and user_type = ?",[mem_id, user_type], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+getEmployeePersonalDetails = (emp_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `employees` where `emp_id` = ?",[emp_id], (err, data) => {
       if (err){
         reject(err);
       }
@@ -619,6 +630,25 @@ app.get("/getmemberdetails/:id", async (req, res) => {
   }catch(err){
     console.error(err);
     return res.status(400).json({"message":"Member details not found"});
+  }
+});
+
+app.get("/getemployeedetails/:id", async (req, res) => {
+  try {
+    const personal = await getEmployeePersonalDetails(parseInt(req.params.id));
+    const login = await getMemLoginDetails(parseInt(req.params.id), 'E');
+    console.log("persona",personal,login);
+    if (personal && login) {
+      const details = {
+        "personal": personal,
+        "login": login
+      }
+      return res.status(200).json(details);
+    }
+    return res.status(200).json({"message":"Employee details not found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Employee details not found with an error"});
   }
 });
 
