@@ -440,6 +440,350 @@ app.post("/buyArt/", async (req,res) => {
 });
 /*************Group 4 End *************/
 
+/*
+  Below section of code consists of all the necessary helper functions
+*/
+//====================================================================================================
+getMemPersonalDetails = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from members where mem_id = ?",[mem_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+getMemLoginDetails = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from login where user_id = ? and user_type = ?",[mem_id, "M"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+getUpComingEmployeeEvents = (emp_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select e.ev_name as name, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.event_employee_map em on e.ev_id = em.ev_id where em.ev_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[emp_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getUpComingMemberEvents = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.ticket_transactions t on e.ev_id = t.ev_id where t.user_type=? and t.user_id=? and e.ev_type in (?,?,?) and e.ev_date>=curdate() order by e.ev_date limit 5", ["M", mem_id, "show", "exhibition", "auction"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getLastPurchasedTickets = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from db_se_567.ticket_transactions t join db_se_567.events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit=5",[mem_id,"M"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getLastPurchasedArts = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("SELECT select o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from db_se_567.shop_transactions s join db_se_567.sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit=5",[mem_id,"M"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getEventDetails = (ev_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_id=?",[ev_id],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+getCurrentAuctions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["auction"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getCurrentExhibitions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["exhibition"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getCurrentShows = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["show"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getPastShows = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["show"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getPastExhibitions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["exhibition"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getPastAuctions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["auction"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getTotalDonations = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("SELECT sum(amount) as total_donations FROM `master_transactions` where tran_type=? and user_id=?", ["donation",mem_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+//====================================================================================================
+
+/*
+  Below section of code consists of all the necessary get api calls
+*/
+//==================================================================================================
+app.get("/getmemberdetails/:id", async (req, res) => {
+  try {
+    const personal = await getMemPersonalDetails(parseInt(req.params.id));
+    const login = await getMemLoginDetails(parseInt(req.params.id));
+    if (personal && login) {
+      const details = {
+        "personal": personal,
+        "login": login
+      }
+      return res.status(200).json(details);
+    }
+    return res.status(400).json({"message":"Member details not found"});
+  }catch(err){
+    return res.status(400).json({"message":"Member details not found"});
+  }
+});
+
+// get upcoming events for employee
+app.get('/getupcomingemployeeevents/:id', async (req, res) => {
+  try {
+    const events = await getUpComingEmployeeEvents(parseInt(req.params.id));
+    if (events){
+      return res.status(200).json(events);
+    }
+    return res.status(400).json({"message":"No upcoming events"});
+  }catch(err){
+    return res.status(400).json({"message":"Upcoming events not found"});
+  }
+});
+
+// get upcoming events for member
+app.get('/getupcomingevents/:id', async (req, res) => {
+  try{
+    const events = await getUpComingMemberEvents(parseInt(req.params.id));
+    if (events){
+      return res.status(200).json(events);
+    }
+    return res.status(400).json({"message":"No upcoming events"});
+  }catch(err){
+    return res.status(400).json({"message":"Upcoming events not found"});
+  }
+});
+
+// get last 5 purchased tickets
+app.get('/getlastpurchasedtickets/:id', async (req, res) => {
+  try{
+    const tickets = await getLastPurchasedTickets(parseInt(req.params.id));
+    if (tickets){
+      return res.status(200).json(tickets);
+    }
+    return res.status(400).json({"message":"No tickets purchased"});
+  }catch(err){
+    return res.status(400).json({"message":"Tickets not found"});
+  }
+});
+
+// get last 5 purchased arts
+app.get('/getlastpurchasedarts/:id', async (req, res) => {
+  try{
+    const arts = await getLastPurchasedArts(parseInt(req.params.id));
+    if (arts){
+      return res.status(200).json(arts);
+    }
+    return res.status(400).json({"message":"No arts purchased"});
+  }catch(err){
+    return res.status(400).json({"message":"Arts not found"});
+  }
+});
+
+// get event details by id
+app.get('/eventdetails/:id', async (req, res) => {
+  try{
+    const event = await getEventDetails(parseInt(req.params.id));
+    if (event){
+      return res.status(200).json(event);
+    }
+    return res.status(400).json({"message":"Event not found"});
+  }catch(err){
+    return res.status(400).json({"message":"Event not found"});
+  }
+});
+
+// get current or upcoming auctions
+app.get('/currentauctions', async (req, res) => {
+  try{
+    const auctions = await getCurrentAuctions();
+    if (auctions){
+      return res.status(200).json(auctions);
+    }
+    return res.status(400).json({"message":"No auctions found"});
+  }catch(err){
+    return res.status(400).json({"message":"Auctions not found"});
+  }
+});
+
+//get cuurent or upcoming exhibitions
+app.get('/currentexhibitions', async (req, res) => {
+  try{
+    const exhibitions = await getCurrentExhibitions();
+    if (exhibitions){
+      return res.status(200).json(exhibitions);
+    }
+    return res.status(400).json({"message":"No exhibitions found"});
+  }catch(err){
+    return res.status(400).json({"message":"Exhibitions not found"});
+  }
+});
+
+// get current or upcoming shows
+app.get('/currentshows', async (req, res) => {
+  try{
+    const shows = await getCurrentShows();
+    if (shows){
+      return res.status(200).json(shows);
+    }
+    return res.status(400).json({"message":"No shows found"});
+  }catch(err){
+    return res.status(400).json({"message":"Shows not found"});
+  }
+});
+
+// get past shows
+app.get('/pastshows', async (req, res) => {
+  try{
+    const shows = await getPastShows();
+    if (shows){
+      return res.status(200).json(shows);
+    }
+    return res.status(400).json({"message":"No shows found"});
+  }catch(err){
+    return res.status(400).json({"message":"Shows not found"});
+  }
+});
+
+// get past exhibitions
+app.get('/pastexhibitions', async (req, res) => {
+  try{
+    const exhibitions = await getPastExhibitions();
+    if (exhibitions){
+      return res.status(200).json(exhibitions);
+    }
+    return res.status(400).json({"message":"No exhibitions found"});
+  }catch(err){
+    return res.status(400).json({"message":"Exhibitions not found"});
+  }
+});
+
+// get past auctions
+app.get('/pastauctions', async (req, res) => {
+  try{
+    const auctions = await getPastAuctions();
+    if (auctions){
+      return res.status(200).json(auctions);
+    }
+    return res.status(400).json({"message":"No auctions found"});
+  }catch(err){
+    return res.status(400).json({"message":"Auctions not found"});
+  }
+});
+
+// get total donations for a member
+app.get("/getDonations/:id", async (req,res) => {
+  try{
+    const donations = await getTotalDonations(parseInt(req.params.id));
+    if (donations){
+      return res.status(200).json({"Total_Donations":donations});
+    }
+    return res.status(400).json({"message":"No donations found"});
+  }catch(err){
+    return res.status(400).json({"message":"Donations not found"});
+  }
+});
+
+//==================================================================================================
+
+/*
+  Below section of code consists of all the necessary post api calls
+*/
+//==================================================================================================
+
 // make a donation
 app.post("/makeDonation/",(req,res) => {
   let missed_fields = [];
@@ -1235,350 +1579,5 @@ app.post('/checklogin', (req, res) => {
     }
   });
 });
-
-/*
-  Below section of code consists of all the necessary helper functions
-*/
-//====================================================================================================
-getMemPersonalDetails = (mem_id) => {
-  return new Promise((resolve, reject) => {
-    pool.query("select * from members where mem_id = ?",[mem_id], (err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data[0]);
-    });
-  });
-}
-
-getMemLoginDetails = (mem_id) => {
-  return new Promise((resolve, reject) => {
-    pool.query("select * from login where user_id = ? and user_type = ?",[mem_id, "M"], (err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data[0]);
-    });
-  });
-}
-
-getUpComingEmployeeEvents = (emp_id) => {
-  return new Promise((resolve, reject) => {
-    pool.query("select e.ev_name as name, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.event_employee_map em on e.ev_id = em.ev_id where em.ev_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[emp_id], (err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data);
-    });
-  });
-}
-
-getUpComingMemberEvents = (mem_id) => {
-  return new Promise((resolve, reject) => {
-    pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.ticket_transactions t on e.ev_id = t.ev_id where t.user_type=? and t.user_id=? and e.ev_type in (?,?,?) and e.ev_date>=curdate() order by e.ev_date limit 5", ["M", mem_id, "show", "exhibition", "auction"], (err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data);
-    });
-  });
-}
-
-getLastPurchasedTickets = (mem_id) => {
-  return new Promise((resolve, reject) => {
-    pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from db_se_567.ticket_transactions t join db_se_567.events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit=5",[mem_id,"M"], (err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data);
-    });
-  });
-}
-
-getLastPurchasedArts = (mem_id) => {
-  return new Promise((resolve, reject) => {
-    pool.query("SELECT select o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from db_se_567.shop_transactions s join db_se_567.sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit=5",[mem_id,"M"], (err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data);
-    });
-  });
-}
-
-getEventDetails = (ev_id) => {
-  return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_id=?",[ev_id],(err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data[0]);
-    });
-  });
-}
-
-getCurrentAuctions = () => {
-  return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["auction"],(err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data);
-    });
-  });
-}
-
-getCurrentExhibitions = () => {
-  return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["exhibition"],(err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data);
-    });
-  });
-}
-
-getCurrentShows = () => {
-  return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["show"],(err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data);
-    });
-  });
-}
-
-getPastShows = () => {
-  return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["show"],(err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data);
-    });
-  });
-}
-
-getPastExhibitions = () => {
-  return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["exhibition"],(err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data);
-    });
-  });
-}
-
-getPastAuctions = () => {
-  return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["auction"],(err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data);
-    });
-  });
-}
-
-getTotalDonations = (mem_id) => {
-  return new Promise((resolve, reject) => {
-    pool.query("SELECT sum(amount) as total_donations FROM `master_transactions` where tran_type=? and user_id=?", ["donation",mem_id], (err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data[0]);
-    });
-  });
-}
-
-//====================================================================================================
-
-/*
-  Below section of code consists of all the necessary get api calls
-*/
-//==================================================================================================
-app.get("/getmemberdetails/:id", async (req, res) => {
-  try {
-    const personal = await getMemPersonalDetails(parseInt(req.params.id));
-    const login = await getMemLoginDetails(parseInt(req.params.id));
-    if (personal && login) {
-      const details = {
-        "personal": personal,
-        "login": login
-      }
-      return res.status(200).json(details);
-    }
-    return res.status(400).json({"message":"Member details not found"});
-  }catch(err){
-    return res.status(400).json({"message":"Member details not found"});
-  }
-});
-
-// get upcoming events for employee
-app.get('/getupcomingemployeeevents/:id', async (req, res) => {
-  try {
-    const events = await getUpComingEmployeeEvents(parseInt(req.params.id));
-    if (events){
-      return res.status(200).json(events);
-    }
-    return res.status(400).json({"message":"No upcoming events"});
-  }catch(err){
-    return res.status(400).json({"message":"Upcoming events not found"});
-  }
-});
-
-// get upcoming events for member
-app.get('/getupcomingevents/:id', async (req, res) => {
-  try{
-    const events = await getUpComingMemberEvents(parseInt(req.params.id));
-    if (events){
-      return res.status(200).json(events);
-    }
-    return res.status(400).json({"message":"No upcoming events"});
-  }catch(err){
-    return res.status(400).json({"message":"Upcoming events not found"});
-  }
-});
-
-// get last 5 purchased tickets
-app.get('/getlastpurchasedtickets/:id', async (req, res) => {
-  try{
-    const tickets = await getLastPurchasedTickets(parseInt(req.params.id));
-    if (tickets){
-      return res.status(200).json(tickets);
-    }
-    return res.status(400).json({"message":"No tickets purchased"});
-  }catch(err){
-    return res.status(400).json({"message":"Tickets not found"});
-  }
-});
-
-// get last 5 purchased arts
-app.get('/getlastpurchasedarts/:id', async (req, res) => {
-  try{
-    const arts = await getLastPurchasedArts(parseInt(req.params.id));
-    if (arts){
-      return res.status(200).json(arts);
-    }
-    return res.status(400).json({"message":"No arts purchased"});
-  }catch(err){
-    return res.status(400).json({"message":"Arts not found"});
-  }
-});
-
-// get event details by id
-app.get('/eventdetails/:id', async (req, res) => {
-  try{
-    const event = await getEventDetails(parseInt(req.params.id));
-    if (event){
-      return res.status(200).json(event);
-    }
-    return res.status(400).json({"message":"Event not found"});
-  }catch(err){
-    return res.status(400).json({"message":"Event not found"});
-  }
-});
-
-// get current or upcoming auctions
-app.get('/currentauctions', async (req, res) => {
-  try{
-    const auctions = await getCurrentAuctions();
-    if (auctions){
-      return res.status(200).json(auctions);
-    }
-    return res.status(400).json({"message":"No auctions found"});
-  }catch(err){
-    return res.status(400).json({"message":"Auctions not found"});
-  }
-});
-
-//get cuurent or upcoming exhibitions
-app.get('/currentexhibitions', async (req, res) => {
-  try{
-    const exhibitions = await getCurrentExhibitions();
-    if (exhibitions){
-      return res.status(200).json(exhibitions);
-    }
-    return res.status(400).json({"message":"No exhibitions found"});
-  }catch(err){
-    return res.status(400).json({"message":"Exhibitions not found"});
-  }
-});
-
-// get current or upcoming shows
-app.get('/currentshows', async (req, res) => {
-  try{
-    const shows = await getCurrentShows();
-    if (shows){
-      return res.status(200).json(shows);
-    }
-    return res.status(400).json({"message":"No shows found"});
-  }catch(err){
-    return res.status(400).json({"message":"Shows not found"});
-  }
-});
-
-// get past shows
-app.get('/pastshows', async (req, res) => {
-  try{
-    const shows = await getPastShows();
-    if (shows){
-      return res.status(200).json(shows);
-    }
-    return res.status(400).json({"message":"No shows found"});
-  }catch(err){
-    return res.status(400).json({"message":"Shows not found"});
-  }
-});
-
-// get past exhibitions
-app.get('/pastexhibitions', async (req, res) => {
-  try{
-    const exhibitions = await getPastExhibitions();
-    if (exhibitions){
-      return res.status(200).json(exhibitions);
-    }
-    return res.status(400).json({"message":"No exhibitions found"});
-  }catch(err){
-    return res.status(400).json({"message":"Exhibitions not found"});
-  }
-});
-
-// get past auctions
-app.get('/pastauctions', async (req, res) => {
-  try{
-    const auctions = await getPastAuctions();
-    if (auctions){
-      return res.status(200).json(auctions);
-    }
-    return res.status(400).json({"message":"No auctions found"});
-  }catch(err){
-    return res.status(400).json({"message":"Auctions not found"});
-  }
-});
-
-// get total donations for a member
-app.get("/getDonations/:id", async (req,res) => {
-  try{
-    const donations = await getTotalDonations(parseInt(req.params.id));
-    if (donations){
-      return res.status(200).json({"Total_Donations":donations});
-    }
-    return res.status(400).json({"message":"No donations found"});
-  }catch(err){
-    return res.status(400).json({"message":"Donations not found"});
-  }
-});
-
-//==================================================================================================
-
-/*
-  Below section of code consists of all the necessary post api calls
-*/
-//==================================================================================================
-
 
 //==================================================================================================
