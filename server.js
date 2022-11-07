@@ -598,6 +598,28 @@ getTotalDonations = (mem_id) => {
   });
 }
 
+insertEvent = (details, type) => {
+  return new Promise((resolve, reject) => {
+    pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [details.ev_name, details.ev_date, details.ev_description, details.ev_site, details.ev_room_no, type], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+insertMember = (details) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `members` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [details.first_name, details.last_name, details.phone_no, details.email, details.address1, details.address2, details.city, details.state, details.zipcode], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+  });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -1133,7 +1155,7 @@ app.post('/contactus', (req, res) => {
 });
 
 // create show
-app.post('/createshow', (req, res) => {
+app.post('/createshow', async (req, res) => {
   // check if all required fields are present
   let missed_fields = [];
   // check if ev_name is empty, undefined or null
@@ -1156,20 +1178,27 @@ app.post('/createshow', (req, res) => {
   if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
     missed_fields.push("Enter show room number");
   }
+  // check if assigned employees is empty, undefined or null
+  if (req.body[0].assigned_employees == null || req.body[0].assigned_employees == undefined || req.body[0].assigned_employees == ""){
+    missed_fields.push("Assign employees to show");
+  }
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // insert show data into events table
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "show"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Show creation failed"});
+  try{
+    // insert show data into events table
+    const event = await insertEvent(req.body[0],"show");
+    for (var i = 0; i < req.body[0].assigned_employees.length; i++){
+      await pool.query("INSERT INTO `event_employee_map` (ev_id, emp_id) VALUES (?,?)", [event.insertId, req.body[0].assigned_employees[i]]);
     }
     return res.status(200).json({"message":"Show created successfully"});
-  });
+  }catch(err){
+    return res.status(400).json({message: "Create show failed"});
+  }
 });
 
 // create exhibition
-app.post('/createexhibition', (req, res) => {
+app.post('/createexhibition', async (req, res) => {
   // check if all required fields are present
   let missed_fields = [];
   // check if ev_name is empty, undefined or null
@@ -1192,20 +1221,27 @@ app.post('/createexhibition', (req, res) => {
   if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
     missed_fields.push("Enter exhibition room number");
   }
+  // check if assigned employees is empty, undefined or null
+  if (req.body[0].assigned_employees == null || req.body[0].assigned_employees == undefined || req.body[0].assigned_employees == ""){
+    missed_fields.push("Assign employees to exhibition");
+  }
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // insert exhibition data into events table
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "exhibition"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Exhibition creation failed"});
+  try{
+    // insert exhibition data into events table
+    const event = await insertEvent(req.body[0],"exhibition");
+    for (var i = 0; i < req.body[0].assigned_employees.length; i++){
+      await pool.query("INSERT INTO `event_employee_map` (ev_id, emp_id) VALUES (?,?)", [event.insertId, req.body[0].assigned_employees[i]]);
     }
     return res.status(200).json({"message":"Exhibition created successfully"});
-  });
+  }catch(err){
+    return res.status(400).json({message: "Create exhibition failed"});
+  }
 });
 
 // create auction
-app.post('/createauction', (req, res) => {
+app.post('/createauction', async (req, res) => {
   // check if all required fields are present
   let missed_fields = [];
   // check if ev_name is empty, undefined or null
@@ -1228,16 +1264,23 @@ app.post('/createauction', (req, res) => {
   if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
     missed_fields.push("Enter auction room number");
   }
+  // check if assigned employees is empty, undefined or null
+  if (req.body[0].assigned_employees == null || req.body[0].assigned_employees == undefined || req.body[0].assigned_employees == ""){
+    missed_fields.push("Assign employees to auction");
+  }
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // insert auction data into events table
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "auction"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Auction creation failed"});
+  try{
+    // insert auction data into events table
+    const event = await insertEvent(req.body[0],"auction");
+    for (var i = 0; i < req.body[0].assigned_employees.length; i++){
+      await pool.query("INSERT INTO `event_employee_map` (ev_id, emp_id) VALUES (?,?)", [event.insertId, req.body[0].assigned_employees[i]]);
     }
     return res.status(200).json({"message":"Auction created successfully"});
-  });
+  }catch(err){
+    return res.status(400).json({message: "Create auction failed"});
+  }
 });
 
 // update member details by id
@@ -1380,7 +1423,7 @@ app.post('/registermember', async (req, res) => {
     if (existMember.length > 0){
       return res.status(400).json({message: "Username already exists"});
       }
-    const newMember = await pool.query("INSERT INTO `members` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2, req.body[0].city, req.body[0].state, req.body[0].zipcode]);
+    const newMember = await insertMember(req.body[0]);
     const newLogin = await pool.query("INSERT INTO `login` (username, password, user_id, user_type) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, newMember.insertId, "M"]);
     return res.status(200).json({message: "Member registered successfully"});
   }catch(err){
