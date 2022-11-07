@@ -1442,12 +1442,16 @@ app.post('/createemployee', (req, res) => {
     if (err){
       return res.status(400).json({"message":"Username already exists"});
     }
+    if (data.length > 0){
+      return res.status(400).json({"message":"Username already exists"});
+    }
   });
   // insert into employees table
-  pool.query("INSERT INTO `employees` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2, req.body[0].city, req.body[0].state, req.body[0].zipcode], (err, data) => {
+  pool.query("INSERT INTO `employees` (first_name, last_name, phone_no, email_id, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2, req.body[0].city, req.body[0].state, req.body[0].zipcode], (err, data) => {
     if (err){
       return res.status(400).json({"message":"Employee registration failed"});
     }
+    console.log(data);
     var employee_id = data.insertId;
     // insert into login table
     pool.query("INSERT INTO `login` (username, password, user_type, user_id) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, "E", employee_id], (err, data) => {
@@ -1455,8 +1459,8 @@ app.post('/createemployee', (req, res) => {
         return res.status(400).json({"message":"Employee registration failed"});
       }
     });
+    return res.status(200).json({"message":"Employee registration successful"});
   });
-  return res.status(200).json({"message":"Employee registration successful"});
 });
 
 // update employee details by id
