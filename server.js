@@ -662,6 +662,17 @@ addVisitor = (fname, lname, email, phone) => {
   });
 }
 
+buyTicket = (id, amount, type, child_count, adult_count, senior_count, child_price, adult_price, senior_price, user_type) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, child_price, adult_price, senior_price, total_amount, user_id, user_type) VALUES (?,?,?,?,?,?,?,?,?,?)", [ticket_type, child_count, adult_count, senior_count, child_price, adult_price, senior_price, amount, id, user_type], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+    });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -931,7 +942,7 @@ app.post("/makeDonation/", async (req,res) => {
 });
 
 // buy entry ticket
-app.post("/buyEntryTicket/",(req,res) => {
+app.post("/buyEntryTicket/", async (req,res) => {
   let missed_fields = [];
   // check if first name is empty, undefined or null
   if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == ""){
@@ -977,43 +988,37 @@ app.post("/buyEntryTicket/",(req,res) => {
   if (req.body[0].senior_price == null || req.body[0].senior_price == undefined || req.body[0].senior_price == ""){
     req.body[0].senior_price = 0;
   }
-
   // calculate total amount
   var total_amount = req.body[0].child_count*req.body[0].child_price + req.body[0].adult_count*req.body[0].adult_price+req.body[0].senior_count*req.body[0].senior_price;
   var ticket_type = "entry";
-  // check if user exists as a member
-  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [req.body[0].first_name, req.body[0].last_name, "Y"], (err, data) => {
-    // if user is a member, insert ticket into tickets table
-    if (data.length > 0){
-      pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, child_price, adult_price, senior_price, total_amount, user_id, user_type) VALUES (?,?,?,?,?,?,?,?,?,?)", [ ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, total_amount, data[0].mem_id, "M"], (err, data) => {
-        if (err){
-            return res.status(400).json({"message": "Ticket purchase failed"});
-        }
-        return res.status(200).json({"message":"Ticket purchase successful"});
-      });
+
+  try{
+    const memberExist = await checkMemberExist(req.body[0].first_name,req.body[0].last_name);
+    if (memberExist){
+      const ticket = await buyTicket(memberExist.member_id, total_amount, ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, "M");
+      if (ticket){
+        return res.status(200).json({"message":"Ticket bought successfully"});
+      }
+      return res.status(400).json({"message":"Ticket not bought"});
     }
-    // if user is not a member, insert ticket into tickets table
     else{
-      // create entry in visitors table
-      var visitor_id = 0;
-      pool.query("INSERT INTO `visitors` (first_name, last_name, email, phone_no) VALUES (?,?,?,?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].email, req.body[0].phone], (err, data) => {
-        if (err){
-            return res.status(400).json({"message":"Ticket purchase failed"});
+      const visitor = await addVisitor(req.body[0].first_name,req.body[0].last_name,req.body[0].email,req.body[0].phone);
+      if (visitor){
+        const ticket = await buyTicket(visitor.insertId, total_amount, ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, "V");
+        if (ticket){
+          return res.status(200).json({"message":"Ticket bought successfully"});
         }
-        visitor_id = data.insertId;
-        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, child_price, adult_price, senior_price, total_amount, user_id, user_type) VALUES (?,?,?,?,?,?,?,?,?,?)", [ ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, total_amount, visitor_id, "V"], (err, data) => {
-          if (err){
-              return res.status(400).json({"message":"Ticket purchase failed"});
-          }
-          return res.status(200).json({"message":"Ticket purchase successful"});
-        });
-      });
+        return res.status(400).json({"message":"Ticket not bought"});
+      }
     }
-  });
+  }catch(err){
+    return res.status(400).json({"message":"Ticket purchase failed"});
+  }
 });
 
+
 // buy show ticket
-app.post("/buyShowTicket/",(req,res) => {
+app.post("/buyShowTicket/", async (req,res) => {
   let missed_fields = [];
   // check if first name is empty, undefined or null
   if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == ""){
@@ -1059,44 +1064,37 @@ app.post("/buyShowTicket/",(req,res) => {
   if (req.body[0].senior_price == null || req.body[0].senior_price == undefined || req.body[0].senior_price == ""){
     req.body[0].senior_price = 0;
   }
-
   // calculate total amount
   var total_amount = req.body[0].child_count*req.body[0].child_price + req.body[0].adult_count*req.body[0].adult_price+req.body[0].senior_count*req.body[0].senior_price;
   var ticket_type = "show";
-  // check if user exists as a member
-  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [req.body[0].first_name, req.body[0].last_name, "Y"], (err, data) => {
-    // if user is a member, insert ticket into tickets table
-    if (data.length > 0){
-      pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, child_price, adult_price, senior_price, total_amount, user_id, user_type) VALUES (?,?,?,?,?,?,?,?,?,?)", [ ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, total_amount, data[0].mem_id, "M"], (err, data) => {
-        if (err){
-            return res.status(400).json({"message": "Ticket purchase failed"});
-        }
-        return res.status(200).json({"message":"Ticket purchase successful"});
-      });
+
+  try{
+    const memberExist = await checkMemberExist(req.body[0].first_name,req.body[0].last_name);
+    if (memberExist){
+      const ticket = await buyTicket(memberExist.member_id, total_amount, ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, "M");
+      if (ticket){
+        return res.status(200).json({"message":"Ticket bought successfully"});
+      }
+      return res.status(400).json({"message":"Ticket not bought"});
     }
-    // if user is not a member, insert ticket into tickets table
     else{
-      // create entry in visitors table
-      var visitor_id = 0;
-      pool.query("INSERT INTO `visitors` (first_name, last_name, email, phone_no) VALUES (?,?,?,?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].email, req.body[0].phone], (err, data) => {
-        if (err){
-            return res.status(400).json({"message":"Ticket purchase failed"});
+      const visitor = await addVisitor(req.body[0].first_name,req.body[0].last_name,req.body[0].email,req.body[0].phone);
+      if (visitor){
+        const ticket = await buyTicket(visitor.insertId, total_amount, ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, "V");
+        if (ticket){
+          return res.status(200).json({"message":"Ticket bought successfully"});
         }
-        visitor_id = data.insertId;
-        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, child_price, adult_price, senior_price, total_amount, user_id, user_type) VALUES (?,?,?,?,?,?,?,?,?,?)", [ ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, total_amount, visitor_id, "V"], (err, data) => {
-          if (err){
-              return res.status(400).json({"message":"Ticket purchase failed"});
-          }
-          return res.status(200).json({"message":"Ticket purchase successful"});
-        });
-      });
+        return res.status(400).json({"message":"Ticket not bought"});
+      }
     }
-  });
+  }catch(err){
+    return res.status(400).json({"message":"Ticket purchase failed"});
+  }
 });
 
+
 // buy exhibition ticket
-app.post("/buyExhibitionTicket/",(req,res) => {
-  // check if all required fields are present
+app.post("/buyExhibitionTicket/", async (req,res) => {
   let missed_fields = [];
   // check if first name is empty, undefined or null
   if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == ""){
@@ -1145,35 +1143,29 @@ app.post("/buyExhibitionTicket/",(req,res) => {
   // calculate total amount
   var total_amount = req.body[0].child_count*req.body[0].child_price + req.body[0].adult_count*req.body[0].adult_price+req.body[0].senior_count*req.body[0].senior_price;
   var ticket_type = "exhibition";
-  // check if user exists as a member
-  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [req.body[0].first_name, req.body[0].last_name, "Y"], (err, data) => {
-    // if user is a member, insert ticket into tickets table
-    if (data.length > 0){
-      pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, child_price, adult_price, senior_price, total_amount, user_id, user_type) VALUES (?,?,?,?,?,?,?,?,?,?)", [ ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, total_amount, data[0].mem_id, "M"], (err, data) => {
-        if (err){
-            return res.status(400).json({"message": "Ticket purchase failed"});
-        }
-        return res.status(200).json({"message":"Ticket purchase successful"});
-      });
+
+  try{
+    const memberExist = await checkMemberExist(req.body[0].first_name,req.body[0].last_name);
+    if (memberExist){
+      const ticket = await buyTicket(memberExist.member_id, total_amount, ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, "M");
+      if (ticket){
+        return res.status(200).json({"message":"Ticket bought successfully"});
+      }
+      return res.status(400).json({"message":"Ticket not bought"});
     }
-    // if user is not a member, insert ticket into tickets table
     else{
-      // create entry in visitors table
-      var visitor_id = 0;
-      pool.query("INSERT INTO `visitors` (first_name, last_name, email, phone_no) VALUES (?,?,?,?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].email, req.body[0].phone], (err, data) => {
-        if (err){
-            return res.status(400).json({"message":"Ticket purchase failed"});
+      const visitor = await addVisitor(req.body[0].first_name,req.body[0].last_name,req.body[0].email,req.body[0].phone);
+      if (visitor){
+        const ticket = await buyTicket(visitor.insertId, total_amount, ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, "V");
+        if (ticket){
+          return res.status(200).json({"message":"Ticket bought successfully"});
         }
-        visitor_id = data.insertId;
-        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, child_price, adult_price, senior_price, total_amount, user_id, user_type) VALUES (?,?,?,?,?,?,?,?,?,?)", [ ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, total_amount, visitor_id, "V"], (err, data) => {
-          if (err){
-              return res.status(400).json({"message":"Ticket purchase failed"});
-          }
-          return res.status(200).json({"message":"Ticket purchase successful"});
-        });
-      });
+        return res.status(400).json({"message":"Ticket not bought"});
+      }
     }
-  });
+  }catch(err){
+    return res.status(400).json({"message":"Ticket purchase failed"});
+  }
 });
 
 // post request to save contact us form data
