@@ -631,6 +631,37 @@ insertMember = (details) => {
   });
 }
 
+checkMemberExist = (fname, lname) => {
+  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [fname, lname, "Y"], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve({"member_id": data[0].mem_id});
+  });
+}
+
+makeDonation = (id, amount, type) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `donations` (user_id, user_type, amount) VALUES (?,?,?)", [id, type, amount], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+  });
+  });
+}
+
+addVisitor = (fname, lname, email, phone) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `visitors` (first_name, last_name, email, phone_no) VALUES (?,?,?,?)", [fname, lname, email, phone], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+  });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -850,7 +881,7 @@ app.get("/getDonations/:id", async (req,res) => {
 //==================================================================================================
 
 // make a donation
-app.post("/makeDonation/",(req,res) => {
+app.post("/makeDonation/", async (req,res) => {
   let missed_fields = [];
   // check if first name is empty, undefined or null
   if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == ""){
@@ -875,36 +906,29 @@ app.post("/makeDonation/",(req,res) => {
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // check if user exists as a member
-  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [req.body[0].first_name, req.body[0].last_name, "Y"], (err, data) => {
-    // if user is a member, insert donation into donations table
-    if (data.length > 0){
-      pool.query("INSERT INTO `donations` (user_id, user_type, amount) VALUES (?,?,?)", [data[0].mem_id, "M", req.body[0].amount], (err, data) => {
-        if (err){
-            return res.status(400).json({"message": "Donation failed"});
-        }
-        return res.status(200).json({"message":"Donation successful"});
-      });
+  try{
+    const memberExist = await checkMemberExist(req.body[0].first_name,req.body[0].last_name);
+    if (memberExist){
+      const donation = await makeDonation(memberExist.member_id,req.body[0].amount, "M");
+      if (donation){
+        return res.status(200).json({"message":"Donation made successfully"});
+      }
+      return res.status(400).json({"message":"Donation not made"});
     }
-    // if user is not a member, insert donation into donations table
     else{
-      // create entry in visitors table
-      var visitor_id = 0;
-      pool.query("INSERT INTO `visitors` (first_name, last_name, email, phone_no) VALUES (?,?,?,?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].email, req.body[0].phone], (err, data) => {
-        if (err){
-            return res.status(400).json({"message":"Donation failed"});
+      const visitor = await addVisitor(req.body[0].first_name,req.body[0].last_name,req.body[0].email,req.body[0].phone);
+      if (visitor){
+        const donation = await makeDonation(visitor.visitor_id,req.body[0].amount, "V");
+        if (donation){
+          return res.status(200).json({"message":"Donation made successfully"});
         }
-        visitor_id = data.insertId;
-        pool.query("INSERT INTO `donations` (user_id, user_type, amount) VALUES (?,?,?)", [visitor_id, "V", req.body[0].amount], (err, data) => {
-          if (err){
-              return res.status(400).json({"message":"Donation failed"});
-          }
-          return res.status(200).json({"message":"Donation successful"});
-        });
-      });
+        return res.status(400).json({"message":"Donation not made"});
+      }
     }
-  });
-} );
+  }catch(err){
+    return res.status(400).json({"message":"Donation failed"});
+  }
+});
 
 // buy entry ticket
 app.post("/buyEntryTicket/",(req,res) => {
