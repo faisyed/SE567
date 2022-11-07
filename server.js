@@ -673,6 +673,17 @@ buyTicket = (id, amount, type, child_count, adult_count, senior_count, child_pri
   });
 }
 
+addContact = (name, email, subject, description) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `contact_us` (name, email, subject, description) VALUES (?,?,?,?)", [name, email, subject, description], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+  });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -1169,7 +1180,7 @@ app.post("/buyExhibitionTicket/", async (req,res) => {
 });
 
 // post request to save contact us form data
-app.post('/contactus', (req, res) => {
+app.post('/contactus', async (req, res) => {
   // check if all required fields are present
   let missed_fields = [];
   // check if name is empty, undefined or null
@@ -1191,13 +1202,15 @@ app.post('/contactus', (req, res) => {
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // insert contact us form data into contact_us table
-  pool.query("INSERT INTO `contact_us` (name, email, subject, description) VALUES (?,?,?,?)", [req.body[0].name, req.body[0].email, req.body[0].subject, req.body[0].description], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Contact us form submission failed"});
+  try{
+    const contact = await addContact(req.body[0].name,req.body[0].email,req.body[0].subject,req.body[0].description);
+    if (contact){
+      return res.status(200).json({"message":"Contact us form submitted successfully"});
     }
-    return res.status(200).json({"message":"Contact us form submission successful"});
-  });
+    return res.status(400).json({"message":"Contact us form not submitted"});
+  }catch(err){
+    return res.status(400).json({"message":"Contact us form submission failed"});
+  }
 });
 
 // create show
