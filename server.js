@@ -1319,15 +1319,7 @@ app.post('/updateemployee/:id', (req, res) => {
   return res.status(200).json({"message":"Employee details update successful"});
 });
 
-// get upcoming events for employee
-app.get('/getupcomingemployeeevents/:id', (req, res) => {
-  pool.query("select e.ev_name as name, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.event_employee_map em on e.ev_id = em.ev_id where em.ev_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[req.params.id], (err, data) => {
-    if (err){
-      return res.status(400).json({"message":"Upcoming events not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
+
 
 // check login validation
 app.post('/checklogin', (req, res) => {
@@ -1362,6 +1354,10 @@ app.post('/checklogin', (req, res) => {
   });
 });
 
+/*
+  Below section of code consists of all the necessary helper functions
+*/
+//====================================================================================================
 getMemPersonalDetails = (mem_id) => {
   return new Promise((resolve, reject) => {
     pool.query("select * from members where mem_id = ?",[mem_id], (err, data) => {
@@ -1384,6 +1380,23 @@ getMemLoginDetails = (mem_id) => {
   });
 }
 
+getUpComingEmployeeEvents = (emp_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select e.ev_name as name, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.event_employee_map em on e.ev_id = em.ev_id where em.ev_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[emp_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+//====================================================================================================
+
+/*
+  Below section of code consists of all the necessary get api calls
+*/
+//==================================================================================================
 app.get("/getmemberdetails/:id", async (req, res) => {
   try {
     const personal = await getMemPersonalDetails(parseInt(req.params.id));
@@ -1400,3 +1413,26 @@ app.get("/getmemberdetails/:id", async (req, res) => {
     return res.status(400).json({"message":"Member details not found"});
   }
 });
+
+// get upcoming events for employee
+app.get('/getupcomingemployeeevents/:id', async (req, res) => {
+  try {
+    const events = await getUpComingEmployeeEvents(parseInt(req.params.id));
+    if (events){
+      return res.status(200).json(events);
+    }
+    return res.status(400).json({"message":"No upcoming events"});
+  }catch(err){
+    return res.status(400).json({"message":"Upcoming events not found"});
+  }
+});
+
+//==================================================================================================
+
+/*
+  Below section of code consists of all the necessary post api calls
+*/
+//==================================================================================================
+
+
+//==================================================================================================
