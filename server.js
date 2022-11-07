@@ -1057,26 +1057,6 @@ app.post('/updatememberdetails/:id', (req, res) => {
   return res.status(200).json({"message":"Member details updated successfully"});
 });
 
-// get last 5 purchased arts
-app.get('/getlastpurchasedarts/:id', (req, res) => {
-  pool.query("SELECT select o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from db_se_567.shop_transactions s join db_se_567.sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit=5",[req.params.id,"M"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Last 5 purchased arts retrieval failed"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get last 5 purchased tickets
-app.get('/getlastpurchasedtickets/:id', (req, res) => {
-  pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from db_se_567.ticket_transactions t join db_se_567.events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit=5",[req.params.id,"M"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Last 5 purchased tickets retrieval failed"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
 // register member
 app.post('/registermember', (req, res) => {
   // check missing fields
@@ -1390,6 +1370,28 @@ getUpComingMemberEvents = (mem_id) => {
   });
 }
 
+getLastPurchasedTickets = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from db_se_567.ticket_transactions t join db_se_567.events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit=5",[mem_id,"M"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getLastPurchasedArts = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("SELECT select o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from db_se_567.shop_transactions s join db_se_567.sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit=5",[mem_id,"M"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -1436,6 +1438,32 @@ app.get('/getupcomingevents/:id', async (req, res) => {
     return res.status(400).json({"message":"No upcoming events"});
   }catch(err){
     return res.status(400).json({"message":"Upcoming events not found"});
+  }
+});
+
+// get last 5 purchased tickets
+app.get('/getlastpurchasedtickets/:id', async (req, res) => {
+  try{
+    const tickets = await getLastPurchasedTickets(parseInt(req.params.id));
+    if (tickets){
+      return res.status(200).json(tickets);
+    }
+    return res.status(400).json({"message":"No tickets purchased"});
+  }catch(err){
+    return res.status(400).json({"message":"Tickets not found"});
+  }
+});
+
+// get last 5 purchased arts
+app.get('/getlastpurchasedarts/:id', async (req, res) => {
+  try{
+    const arts = await getLastPurchasedArts(parseInt(req.params.id));
+    if (arts){
+      return res.status(200).json(arts);
+    }
+    return res.status(400).json({"message":"No arts purchased"});
+  }catch(err){
+    return res.status(400).json({"message":"Arts not found"});
   }
 });
 
