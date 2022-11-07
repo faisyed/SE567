@@ -1077,16 +1077,6 @@ app.get('/getlastpurchasedtickets/:id', (req, res) => {
   });
 });
 
-// get upcoming events for member
-app.get('/getupcomingevents/:id', (req, res) => {
-  pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.ticket_transactions t on e.ev_id = t.ev_id where t.user_type=? and t.user_id=? and e.ev_type in (?,?,?) and e.ev_date>=curdate() order by e.ev_date limit 5", ["M", req.params.id, "show", "exhibition", "auction"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Upcoming events retrieval failed"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
 // register member
 app.post('/registermember', (req, res) => {
   // check missing fields
@@ -1319,8 +1309,6 @@ app.post('/updateemployee/:id', (req, res) => {
   return res.status(200).json({"message":"Employee details update successful"});
 });
 
-
-
 // check login validation
 app.post('/checklogin', (req, res) => {
   pool.query("select * from login where username = ? and password = ?",[req.body.username, req.body.password] , (err, data) => {
@@ -1391,6 +1379,17 @@ getUpComingEmployeeEvents = (emp_id) => {
   });
 }
 
+getUpComingMemberEvents = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.ticket_transactions t on e.ev_id = t.ev_id where t.user_type=? and t.user_id=? and e.ev_type in (?,?,?) and e.ev_date>=curdate() order by e.ev_date limit 5", ["M", mem_id, "show", "exhibition", "auction"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -1418,6 +1417,19 @@ app.get("/getmemberdetails/:id", async (req, res) => {
 app.get('/getupcomingemployeeevents/:id', async (req, res) => {
   try {
     const events = await getUpComingEmployeeEvents(parseInt(req.params.id));
+    if (events){
+      return res.status(200).json(events);
+    }
+    return res.status(400).json({"message":"No upcoming events"});
+  }catch(err){
+    return res.status(400).json({"message":"Upcoming events not found"});
+  }
+});
+
+// get upcoming events for member
+app.get('/getupcomingevents/:id', async (req, res) => {
+  try{
+    const events = await getUpComingEvents(parseInt(req.params.id));
     if (events){
       return res.status(200).json(events);
     }
