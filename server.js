@@ -3,6 +3,7 @@ const mysql = require("mysql");
 const path = require('path');
 const bodyParser = require('body-parser');
 const { response } = require("express");
+const { resolve } = require("path");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -817,39 +818,6 @@ app.get('/pastauctions', (req, res) => {
   });
 });
 
-// get current or upcoming shows
-app.get('/currentshows', (req, res) => {
-  // get current or upcoming shows from shows table
-  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["show"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Current or upcoming shows not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get current or upcoming exhibitions
-app.get('/currentexhibitions', (req, res) => {
-  // get current or upcoming exhibitions from shows table
-  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["exhibition"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Current or upcoming exhibitions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get current or upcoming auctions
-app.get('/currentauctions', (req, res) => {
-  // get current or upcoming auctions from shows table
-  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["auction"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Current or upcoming auctions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
 // create show
 app.post('/createshow', (req, res) => {
   // check if all required fields are present
@@ -1392,6 +1360,39 @@ getEventDetails = (ev_id) => {
   });
 }
 
+getCurrentAuctions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["auction"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getCurrentExhibitions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["exhibition"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getCurrentShows = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["show"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -1431,7 +1432,7 @@ app.get('/getupcomingemployeeevents/:id', async (req, res) => {
 // get upcoming events for member
 app.get('/getupcomingevents/:id', async (req, res) => {
   try{
-    const events = await getUpComingEvents(parseInt(req.params.id));
+    const events = await getUpComingMemberEvents(parseInt(req.params.id));
     if (events){
       return res.status(200).json(events);
     }
@@ -1477,6 +1478,45 @@ app.get('/eventdetails/:id', async (req, res) => {
     return res.status(400).json({"message":"Event not found"});
   }catch(err){
     return res.status(400).json({"message":"Event not found"});
+  }
+});
+
+// get current or upcoming auctions
+app.get('/currentauctions', async (req, res) => {
+  try{
+    const auctions = await getCurrentAuctions();
+    if (auctions){
+      return res.status(200).json(auctions);
+    }
+    return res.status(400).json({"message":"No auctions found"});
+  }catch(err){
+    return res.status(400).json({"message":"Auctions not found"});
+  }
+});
+
+//get cuurent or upcoming exhibitions
+app.get('/currentexhibitions', async (req, res) => {
+  try{
+    const exhibitions = await getCurrentExhibitions();
+    if (exhibitions){
+      return res.status(200).json(exhibitions);
+    }
+    return res.status(400).json({"message":"No exhibitions found"});
+  }catch(err){
+    return res.status(400).json({"message":"Exhibitions not found"});
+  }
+});
+
+// get current or upcoming shows
+app.get('/currentshows', async (req, res) => {
+  try{
+    const shows = await getCurrentShows();
+    if (shows){
+      return res.status(200).json(shows);
+    }
+    return res.status(400).json({"message":"No shows found"});
+  }catch(err){
+    return res.status(400).json({"message":"Shows not found"});
   }
 });
 
