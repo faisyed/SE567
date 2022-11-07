@@ -490,7 +490,7 @@ getUpComingMemberEvents = (mem_id) => {
 
 getLastPurchasedTickets = (mem_id) => {
   return new Promise((resolve, reject) => {
-    pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from db_se_567.ticket_transactions t join db_se_567.events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit=5",[mem_id,"M"], (err, data) => {
+    pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from db_se_567.ticket_transactions t join db_se_567.events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit 5",[mem_id,"M"], (err, data) => {
       if (err){
         reject(err);
       }
@@ -501,7 +501,7 @@ getLastPurchasedTickets = (mem_id) => {
 
 getLastPurchasedArts = (mem_id) => {
   return new Promise((resolve, reject) => {
-    pool.query("SELECT select o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from db_se_567.shop_transactions s join db_se_567.sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit=5",[mem_id,"M"], (err, data) => {
+    pool.query("SELECT o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from db_se_567.shop_transactions s join db_se_567.sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit 5",[mem_id,"M"], (err, data) => {
       if (err){
         reject(err);
       }
@@ -615,8 +615,9 @@ app.get("/getmemberdetails/:id", async (req, res) => {
       }
       return res.status(200).json(details);
     }
-    return res.status(400).json({"message":"Member details not found"});
+    return res.status(200).json({"message":"Member details not found"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Member details not found"});
   }
 });
@@ -628,8 +629,9 @@ app.get('/getupcomingemployeeevents/:id', async (req, res) => {
     if (events){
       return res.status(200).json(events);
     }
-    return res.status(400).json({"message":"No upcoming events"});
+    return res.status(200).json({"message":"No upcoming events"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Upcoming events not found"});
   }
 });
@@ -641,8 +643,9 @@ app.get('/getupcomingevents/:id', async (req, res) => {
     if (events){
       return res.status(200).json(events);
     }
-    return res.status(400).json({"message":"No upcoming events"});
+    return res.status(200).json({"message":"No upcoming events"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Upcoming events not found"});
   }
 });
@@ -654,8 +657,9 @@ app.get('/getlastpurchasedtickets/:id', async (req, res) => {
     if (tickets){
       return res.status(200).json(tickets);
     }
-    return res.status(400).json({"message":"No tickets purchased"});
+    return res.status(200).json({"message":"No tickets purchased"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Tickets not found"});
   }
 });
@@ -667,8 +671,9 @@ app.get('/getlastpurchasedarts/:id', async (req, res) => {
     if (arts){
       return res.status(200).json(arts);
     }
-    return res.status(400).json({"message":"No arts purchased"});
+    return res.status(200).json({"message":"No arts purchased"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Arts not found"});
   }
 });
@@ -680,8 +685,9 @@ app.get('/eventdetails/:id', async (req, res) => {
     if (event){
       return res.status(200).json(event);
     }
-    return res.status(400).json({"message":"Event not found"});
+    return res.status(200).json({"message":"Event not found"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Event not found"});
   }
 });
@@ -693,8 +699,9 @@ app.get('/currentauctions', async (req, res) => {
     if (auctions){
       return res.status(200).json(auctions);
     }
-    return res.status(400).json({"message":"No auctions found"});
+    return res.status(200).json({"message":"No auctions found"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Auctions not found"});
   }
 });
@@ -706,8 +713,9 @@ app.get('/currentexhibitions', async (req, res) => {
     if (exhibitions){
       return res.status(200).json(exhibitions);
     }
-    return res.status(400).json({"message":"No exhibitions found"});
+    return res.status(200).json({"message":"No exhibitions found"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Exhibitions not found"});
   }
 });
@@ -719,8 +727,9 @@ app.get('/currentshows', async (req, res) => {
     if (shows){
       return res.status(200).json(shows);
     }
-    return res.status(400).json({"message":"No shows found"});
+    return res.status(200).json({"message":"No shows found"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Shows not found"});
   }
 });
@@ -732,8 +741,9 @@ app.get('/pastshows', async (req, res) => {
     if (shows){
       return res.status(200).json(shows);
     }
-    return res.status(400).json({"message":"No shows found"});
+    return res.status(200).json({"message":"No shows found"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Shows not found"});
   }
 });
@@ -745,8 +755,9 @@ app.get('/pastexhibitions', async (req, res) => {
     if (exhibitions){
       return res.status(200).json(exhibitions);
     }
-    return res.status(400).json({"message":"No exhibitions found"});
+    return res.status(200).json({"message":"No exhibitions found"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Exhibitions not found"});
   }
 });
@@ -758,8 +769,9 @@ app.get('/pastauctions', async (req, res) => {
     if (auctions){
       return res.status(200).json(auctions);
     }
-    return res.status(400).json({"message":"No auctions found"});
+    return res.status(200).json({"message":"No auctions found"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Auctions not found"});
   }
 });
@@ -771,8 +783,9 @@ app.get("/getDonations/:id", async (req,res) => {
     if (donations){
       return res.status(200).json({"Total_Donations":donations});
     }
-    return res.status(400).json({"message":"No donations found"});
+    return res.status(200).json({"message":"No donations found"});
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Donations not found"});
   }
 });
@@ -1366,13 +1379,13 @@ app.post('/registermember', async (req, res) => {
     const existMember = await pool.query("SELECT * FROM `login` WHERE username = ?", [req.body[0].username]);
     if (existMember.length > 0){
       return res.status(400).json({message: "Username already exists"});
-    }
+      }
     const newMember = await pool.query("INSERT INTO `members` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2, req.body[0].city, req.body[0].state, req.body[0].zipcode]);
     const newLogin = await pool.query("INSERT INTO `login` (username, password, user_id, user_type) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, newMember.insertId, "M"]);
     return res.status(200).json({message: "Member registered successfully"});
   }catch(err){
-    return res.status(400).json({"message":"Member registration failed"});
-  }
+      return res.status(400).json({"message":"Member registration failed"});
+    }
 });
 
 // create employee
