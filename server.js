@@ -497,16 +497,6 @@ app.post("/makeDonation/",(req,res) => {
   });
 } );
 
-// get total donations for a member
-app.get("/getDonations/:id",(req,res) => {
-  pool.query("SELECT sum(amount) as total_donations FROM `master_transactions` where tran_type=? and user_id=?", ["donation",req.params.id], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Error in getting donations"});
-    }
-    return res.status(200).json({"message":"Donations fetched successfully", "data": data});
-  });
-});
-
 // buy entry ticket
 app.post("/buyEntryTicket/",(req,res) => {
   let missed_fields = [];
@@ -1393,6 +1383,17 @@ getPastAuctions = () => {
   });
 }
 
+getTotalDonations = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("SELECT sum(amount) as total_donations FROM `master_transactions` where tran_type=? and user_id=?", ["donation",mem_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -1556,6 +1557,19 @@ app.get('/pastauctions', async (req, res) => {
     return res.status(400).json({"message":"No auctions found"});
   }catch(err){
     return res.status(400).json({"message":"Auctions not found"});
+  }
+});
+
+// get total donations for a member
+app.get("/getDonations/:id", async (req,res) => {
+  try{
+    const donations = await getTotalDonations(parseInt(req.params.id));
+    if (donations){
+      return res.status(200).json({"Total_Donations":donations});
+    }
+    return res.status(400).json({"message":"No donations found"});
+  }catch(err){
+    return res.status(400).json({"message":"Donations not found"});
   }
 });
 
