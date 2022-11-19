@@ -5,6 +5,11 @@ const bodyParser = require('body-parser');
 var uuid = require("uuid-int");
 const bcrypt = require("bcrypt");
 const { response } = require("express");
+const { resolve } = require("path");
+const cookieParser = require("cookie-parser");
+const sessions = require('express-session');
+var MySQLStore = require('express-mysql-session')(sessions);
+
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -22,6 +27,8 @@ const config = {
 }
 
 const pool = mysql.createPool(config);
+var sessionStore = new MySQLStore({}, pool);
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`);
@@ -32,13 +39,37 @@ pool.getConnection( (err, connection)=> {
   console.log ("DB connected successful: " + connection.threadId)
 })
 
-app.use(express.static(path.join(__dirname, './src')));
-app.use(express.json());
+// creating 1 hours from milliseconds
+const oneHour = 1000 * 60 * 60;
 
-app.get('/', (req, res) => {        
+//session middleware
+app.use(sessions({
+    secret: "thisismysecrctekeyse567group4",
+    saveUninitialized:true,
+    store: sessionStore,
+    cookie: { maxAge: oneHour },
+    resave: false
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, './src')));
+
+
+app.use(cookieParser());
+
+
+sessionStore.close();
+
+
+app.get('/', (req, res) => {      
   res.sendFile('./src/home.html', {root: __dirname});
 });
 
+app.get('/logout',(req,res) => {
+  req.session.destroy();
+  res.redirect('/');
+});
 
 //CREATE USER
 app.post("/createUser", async (req,res) => {
@@ -110,25 +141,15 @@ app.post("/login", (req, res)=> {
   }) 
 })
 
-// DELETE USER
-app.post('/remove', function (req, res, next) {
-  const user = req.body.username
-  pool.getConnection ( async (err, connection)=> {
-    if (err) throw (err)
-    const sqlSearch = "DELETE FROM login WHERE username = ?"
-    const search_query = mysql.format(sqlSearch,[user])
-    await connection.query(search_query, async (err, result) => {
-      if (err) throw (err)
-      if (result.length == 0) {
-          console.log("--------> User does not exist")
-          res.sendStatus(404)
-      } else {
-          res.send(user+' Deleted')
-        }
-      },
-    )
-  })
-})
+/* For LoggedIn Users user the condition - req.session.loggedin
+if (req.session.loggedin) {
+  // Output username
+  res.send('Welcome back, ' + req.session.username + '!');
+} else {
+  // Not logged in
+  res.send('Please login to view this page!');
+}*/
+
 
 /*
 API to get all art collections from database to display on UI
@@ -1036,6 +1057,7 @@ app.post('/createauction', (req, res) => {
     if (err){
         return res.status(400).json({"message":"Auction creation failed"});
     }
-    return res.status(200).json({"message":"Auction created successfully"});
+    req.session.loggedin = true;
+		req.session.username = req.body.username;
   });
 });
