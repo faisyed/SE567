@@ -67,7 +67,6 @@ create table events (
     ev_description text,
     ev_date date,
     ev_type text,
-    ev_entry_price double default 0,
     ev_site text,
     ev_room_no text
 );
@@ -91,6 +90,7 @@ create table donations(
 create table ticket_transactions (
 	tick_id bigint auto_increment primary key,
     tick_class text,
+    ev_id bigint default null,
     purchase_date date default(current_date),
     child_count int default 0,
     adult_count int default 0,
@@ -139,6 +139,24 @@ create table sold_objects (
    shop_id bigint
 );
 
+-- below section of code is used to create table 'contact_us' in database
+create table contact_us(
+	con_id bigint auto_increment primary key,
+    name text,
+    email text,
+    subject text,
+    description text
+);
+
+-- below section of code is used to create table 'login' in database
+create table login(
+	log_id bigint auto_increment primary key,
+    user_id bigint,
+    user_type varchar(2),
+    username text,
+    password text
+);
+
 -- altering objects table to add auto increment to obj_id and primary key
 ALTER TABLE objects MODIFY obj_id bigint AUTO_INCREMENT PRIMARY KEY;
 
@@ -185,4 +203,16 @@ CREATE TRIGGER event_employee_map_trigger BEFORE DELETE ON events FOR EACH ROW
 BEGIN
     DELETE FROM event_employee_map WHERE ev_id = OLD.ev_id;
 END$$
+DELIMITER ;
+
+-- creating scheduled event to cancel any membership that is expired
+DELIMITER $$
+create event membership_cancellation
+	on schedule
+	every 1 day
+	starts '2022-11-06 00:00:00' on completion preserve enable
+	do
+begin 
+	update members set is_active = 'N' where renewed_date+interval 1 year<curdate();
+end$$
 DELIMITER ;
