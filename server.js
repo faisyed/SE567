@@ -1554,6 +1554,7 @@ app.post('/createemployee', async (req, res) => {
       return res.status(400).json({message: "Username already exists"});
     }
     const newEmployee = await insertEmployee(req.body[0]);
+    console.log(newEmployee);
     const newLogin = await pool.query("INSERT INTO `login` (username, password, user_id, user_type) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, newEmployee.insertId, "E"]);
     return res.status(200).json({message: "Employee registered successfully"});
   }catch(err){
