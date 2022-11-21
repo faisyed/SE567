@@ -1,13 +1,16 @@
 const express = require("express");
 const mysql = require("mysql");
 const path = require('path');
+var cors = require('cors')
 const bodyParser = require('body-parser');
 const { response } = require("express");
+const { resolve } = require("path");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
+app.use(cors())
 const port = 3000;
 
 //Connection to Mysql
@@ -439,8 +442,448 @@ app.post("/buyArt/", async (req,res) => {
 });
 /*************Group 4 End *************/
 
+/*
+  Below section of code consists of all the necessary helper functions
+*/
+//====================================================================================================
+getMemPersonalDetails = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from members where mem_id = ?",[mem_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+getMemLoginDetails = (mem_id, user_type = 'M') => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from login where user_id = ? and user_type = ?",[mem_id, user_type], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+getEmployeePersonalDetails = (emp_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `employees` where `emp_id` = ?",[emp_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+getUpComingEmployeeEvents = (emp_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select e.ev_name as name, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.event_employee_map em on e.ev_id = em.ev_id where em.ev_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[emp_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getUpComingMemberEvents = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.ticket_transactions t on e.ev_id = t.ev_id where t.user_type=? and t.user_id=? and e.ev_type in (?,?,?) and e.ev_date>=curdate() order by e.ev_date limit 5", ["M", mem_id, "show", "exhibition", "auction"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getLastPurchasedTickets = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from db_se_567.ticket_transactions t join db_se_567.events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit 5",[mem_id,"M"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getLastPurchasedArts = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("SELECT o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from db_se_567.shop_transactions s join db_se_567.sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit 5",[mem_id,"M"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getEventDetails = (ev_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_id=?",[ev_id],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+getCurrentAuctions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["auction"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getCurrentExhibitions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["exhibition"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getCurrentShows = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["show"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getPastShows = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["show"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getPastExhibitions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["exhibition"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getPastAuctions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["auction"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getTotalDonations = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("SELECT sum(amount) as total_donations FROM `master_transactions` where tran_type=? and user_id=?", ["donation",mem_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+insertEvent = (details, type) => {
+  return new Promise((resolve, reject) => {
+    pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [details.ev_name, details.ev_date, details.ev_description, details.ev_site, details.ev_room_no, type], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+insertMember = (details) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `members` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [details.first_name, details.last_name, details.phone_no, details.email, details.address1, details.address2, details.city, details.state, details.zipcode], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+  });
+  });
+}
+
+checkMemberExist = (fname, lname) => {
+  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [fname, lname, "Y"], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve({"member_id": data[0].mem_id});
+  });
+}
+
+makeDonation = (id, amount, type) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `donations` (user_id, user_type, amount) VALUES (?,?,?)", [id, type, amount], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+  });
+  });
+}
+
+addVisitor = (fname, lname, email, phone) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `visitors` (first_name, last_name, email, phone_no) VALUES (?,?,?,?)", [fname, lname, email, phone], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+  });
+  });
+}
+
+//====================================================================================================
+
+/*
+  Below section of code consists of all the necessary get api calls
+*/
+//==================================================================================================
+app.get("/getmemberdetails/:id", async (req, res) => {
+  try {
+    const personal = await getMemPersonalDetails(parseInt(req.params.id));
+    const login = await getMemLoginDetails(parseInt(req.params.id));
+    if (personal && login) {
+      const details = {
+        "personal": personal,
+        "login": login
+      }
+      return res.status(200).json(details);
+    }
+    return res.status(200).json({"message":"Member details not found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Member details not found"});
+  }
+});
+
+app.get("/getemployeedetails/:id", async (req, res) => {
+  try {
+    const personal = await getEmployeePersonalDetails(parseInt(req.params.id));
+    const login = await getMemLoginDetails(parseInt(req.params.id), 'E');
+    console.log("persona",personal,login);
+    if (personal && login) {
+      const details = {
+        "personal": personal,
+        "login": login
+      }
+      return res.status(200).json(details);
+    }
+    return res.status(200).json({"message":"Employee details not found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Employee details not found with an error"});
+  }
+});
+
+// get upcoming events for employee
+app.get('/getupcomingemployeeevents/:id', async (req, res) => {
+  try {
+    const events = await getUpComingEmployeeEvents(parseInt(req.params.id));
+    if (events){
+      return res.status(200).json(events);
+    }
+    return res.status(200).json({"message":"No upcoming events"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Upcoming events not found"});
+  }
+});
+
+// get upcoming events for member
+app.get('/getupcomingevents/:id', async (req, res) => {
+  try{
+    const events = await getUpComingMemberEvents(parseInt(req.params.id));
+    if (events){
+      return res.status(200).json(events);
+    }
+    return res.status(200).json({"message":"No upcoming events"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Upcoming events not found"});
+  }
+});
+
+// get last 5 purchased tickets
+app.get('/getlastpurchasedtickets/:id', async (req, res) => {
+  try{
+    const tickets = await getLastPurchasedTickets(parseInt(req.params.id));
+    if (tickets){
+      return res.status(200).json(tickets);
+    }
+    return res.status(200).json({"message":"No tickets purchased"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Tickets not found"});
+  }
+});
+
+// get last 5 purchased arts
+app.get('/getlastpurchasedarts/:id', async (req, res) => {
+  try{
+    const arts = await getLastPurchasedArts(parseInt(req.params.id));
+    if (arts){
+      return res.status(200).json(arts);
+    }
+    return res.status(200).json({"message":"No arts purchased"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Arts not found"});
+  }
+});
+
+// get event details by id
+app.get('/eventdetails/:id', async (req, res) => {
+  try{
+    const event = await getEventDetails(parseInt(req.params.id));
+    if (event){
+      return res.status(200).json(event);
+    }
+    return res.status(200).json({"message":"Event not found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Event not found"});
+  }
+});
+
+// get current or upcoming auctions
+app.get('/currentauctions', async (req, res) => {
+  try{
+    const auctions = await getCurrentAuctions();
+    if (auctions){
+      return res.status(200).json(auctions);
+    }
+    return res.status(200).json({"message":"No auctions found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Auctions not found"});
+  }
+});
+
+//get cuurent or upcoming exhibitions
+app.get('/currentexhibitions', async (req, res) => {
+  try{
+    const exhibitions = await getCurrentExhibitions();
+    if (exhibitions){
+      return res.status(200).json(exhibitions);
+    }
+    return res.status(200).json({"message":"No exhibitions found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Exhibitions not found"});
+  }
+});
+
+// get current or upcoming shows
+app.get('/currentshows', async (req, res) => {
+  try{
+    const shows = await getCurrentShows();
+    if (shows){
+      return res.status(200).json(shows);
+    }
+    return res.status(200).json({"message":"No shows found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Shows not found"});
+  }
+});
+
+// get past shows
+app.get('/pastshows', async (req, res) => {
+  try{
+    const shows = await getPastShows();
+    if (shows){
+      return res.status(200).json(shows);
+    }
+    return res.status(200).json({"message":"No shows found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Shows not found"});
+  }
+});
+
+// get past exhibitions
+app.get('/pastexhibitions', async (req, res) => {
+  try{
+    const exhibitions = await getPastExhibitions();
+    if (exhibitions){
+      return res.status(200).json(exhibitions);
+    }
+    return res.status(200).json({"message":"No exhibitions found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Exhibitions not found"});
+  }
+});
+
+// get past auctions
+app.get('/pastauctions', async (req, res) => {
+  try{
+    const auctions = await getPastAuctions();
+    if (auctions){
+      return res.status(200).json(auctions);
+    }
+    return res.status(200).json({"message":"No auctions found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Auctions not found"});
+  }
+});
+
+// get total donations for a member
+app.get("/getDonations/:id", async (req,res) => {
+  try{
+    const donations = await getTotalDonations(parseInt(req.params.id));
+    if (donations){
+      return res.status(200).json({"Total_Donations":donations});
+    }
+    return res.status(200).json({"message":"No donations found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Donations not found"});
+  }
+});
+
+//==================================================================================================
+
+/*
+  Below section of code consists of all the necessary post api calls
+*/
+//==================================================================================================
+
 // make a donation
-app.post("/makeDonation/",(req,res) => {
+app.post("/makeDonation/", async (req,res) => {
   let missed_fields = [];
   // check if first name is empty, undefined or null
   if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == ""){
@@ -465,45 +908,28 @@ app.post("/makeDonation/",(req,res) => {
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // check if user exists as a member
-  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [req.body[0].first_name, req.body[0].last_name, "Y"], (err, data) => {
-    // if user is a member, insert donation into donations table
-    if (data.length > 0){
-      pool.query("INSERT INTO `donations` (user_id, user_type, amount) VALUES (?,?,?)", [data[0].mem_id, "M", req.body[0].amount], (err, data) => {
-        if (err){
-            return res.status(400).json({"message": "Donation failed"});
-        }
-        return res.status(200).json({"message":"Donation successful"});
-      });
+  try{
+    const memberExist = await checkMemberExist(req.body[0].first_name,req.body[0].last_name);
+    if (memberExist){
+      const donation = await makeDonation(memberExist.member_id,req.body[0].amount, "M");
+      if (donation){
+        return res.status(200).json({"message":"Donation made successfully"});
+      }
+      return res.status(400).json({"message":"Donation not made"});
     }
-    // if user is not a member, insert donation into donations table
     else{
-      // create entry in visitors table
-      var visitor_id = 0;
-      pool.query("INSERT INTO `visitors` (first_name, last_name, email, phone_no) VALUES (?,?,?,?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].email, req.body[0].phone], (err, data) => {
-        if (err){
-            return res.status(400).json({"message":"Donation failed"});
+      const visitor = await addVisitor(req.body[0].first_name,req.body[0].last_name,req.body[0].email,req.body[0].phone);
+      if (visitor){
+        const donation = await makeDonation(visitor.visitor_id,req.body[0].amount, "V");
+        if (donation){
+          return res.status(200).json({"message":"Donation made successfully"});
         }
-        visitor_id = data.insertId;
-        pool.query("INSERT INTO `donations` (user_id, user_type, amount) VALUES (?,?,?)", [visitor_id, "V", req.body[0].amount], (err, data) => {
-          if (err){
-              return res.status(400).json({"message":"Donation failed"});
-          }
-          return res.status(200).json({"message":"Donation successful"});
-        });
-      });
+        return res.status(400).json({"message":"Donation not made"});
+      }
     }
-  });
-} );
-
-// get total donations for a member
-app.get("/getDonations/:id",(req,res) => {
-  pool.query("SELECT sum(amount) as total_donations FROM `master_transactions` where tran_type=? and user_id=?", ["donation",req.params.id], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Error in getting donations"});
-    }
-    return res.status(200).json({"message":"Donations fetched successfully", "data": data});
-  });
+  }catch(err){
+    return res.status(400).json({"message":"Donation failed"});
+  }
 });
 
 // buy entry ticket
@@ -784,85 +1210,8 @@ app.post('/contactus', (req, res) => {
   });
 });
 
-// get past shows
-app.get('/pastshows', (req, res) => {
-  // get past shows from shows table
-  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["show"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Past shows not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get past exhibitions
-app.get('/pastexhibitions', (req, res) => {
-  // get past exhibitions from shows table
-  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["exhibition"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Past exhibitions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get past auctions
-app.get('/pastauctions', (req, res) => {
-  // get past auctions from shows table
-  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["auction"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Past auctions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get current or upcoming shows
-app.get('/currentshows', (req, res) => {
-  // get current or upcoming shows from shows table
-  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["show"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Current or upcoming shows not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get current or upcoming exhibitions
-app.get('/currentexhibitions', (req, res) => {
-  // get current or upcoming exhibitions from shows table
-  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["exhibition"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Current or upcoming exhibitions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get current or upcoming auctions
-app.get('/currentauctions', (req, res) => {
-  // get current or upcoming auctions from shows table
-  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["auction"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Current or upcoming auctions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get event details by id
-app.get('/eventdetails/:id', (req, res) => {
-  // get event details from shows table
-  pool.query("select * from `events` where ev_id=?",[req.params.id],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Event details not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
 // create show
-app.post('/createshow', (req, res) => {
+app.post('/createshow', async (req, res) => {
   // check if all required fields are present
   let missed_fields = [];
   // check if ev_name is empty, undefined or null
@@ -885,20 +1234,27 @@ app.post('/createshow', (req, res) => {
   if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
     missed_fields.push("Enter show room number");
   }
+  // check if assigned employees is empty, undefined or null
+  if (req.body[0].assigned_employees == null || req.body[0].assigned_employees == undefined || req.body[0].assigned_employees == ""){
+    missed_fields.push("Assign employees to show");
+  }
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // insert show data into events table
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "show"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Show creation failed"});
+  try{
+    // insert show data into events table
+    const event = await insertEvent(req.body[0],"show");
+    for (var i = 0; i < req.body[0].assigned_employees.length; i++){
+      await pool.query("INSERT INTO `event_employee_map` (ev_id, emp_id) VALUES (?,?)", [event.insertId, req.body[0].assigned_employees[i]]);
     }
     return res.status(200).json({"message":"Show created successfully"});
-  });
+  }catch(err){
+    return res.status(400).json({message: "Create show failed"});
+  }
 });
 
 // create exhibition
-app.post('/createexhibition', (req, res) => {
+app.post('/createexhibition', async (req, res) => {
   // check if all required fields are present
   let missed_fields = [];
   // check if ev_name is empty, undefined or null
@@ -921,20 +1277,27 @@ app.post('/createexhibition', (req, res) => {
   if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
     missed_fields.push("Enter exhibition room number");
   }
+  // check if assigned employees is empty, undefined or null
+  if (req.body[0].assigned_employees == null || req.body[0].assigned_employees == undefined || req.body[0].assigned_employees == ""){
+    missed_fields.push("Assign employees to exhibition");
+  }
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // insert exhibition data into events table
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "exhibition"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Exhibition creation failed"});
+  try{
+    // insert exhibition data into events table
+    const event = await insertEvent(req.body[0],"exhibition");
+    for (var i = 0; i < req.body[0].assigned_employees.length; i++){
+      await pool.query("INSERT INTO `event_employee_map` (ev_id, emp_id) VALUES (?,?)", [event.insertId, req.body[0].assigned_employees[i]]);
     }
     return res.status(200).json({"message":"Exhibition created successfully"});
-  });
+  }catch(err){
+    return res.status(400).json({message: "Create exhibition failed"});
+  }
 });
 
 // create auction
-app.post('/createauction', (req, res) => {
+app.post('/createauction', async (req, res) => {
   // check if all required fields are present
   let missed_fields = [];
   // check if ev_name is empty, undefined or null
@@ -957,35 +1320,23 @@ app.post('/createauction', (req, res) => {
   if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
     missed_fields.push("Enter auction room number");
   }
+  // check if assigned employees is empty, undefined or null
+  if (req.body[0].assigned_employees == null || req.body[0].assigned_employees == undefined || req.body[0].assigned_employees == ""){
+    missed_fields.push("Assign employees to auction");
+  }
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // insert auction data into events table
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "auction"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Auction creation failed"});
+  try{
+    // insert auction data into events table
+    const event = await insertEvent(req.body[0],"auction");
+    for (var i = 0; i < req.body[0].assigned_employees.length; i++){
+      await pool.query("INSERT INTO `event_employee_map` (ev_id, emp_id) VALUES (?,?)", [event.insertId, req.body[0].assigned_employees[i]]);
     }
     return res.status(200).json({"message":"Auction created successfully"});
-  });
-});
-
-// get member details by id
-app.get('/getmemberdetails/:id', (req, res) => {
-  var details = {};
-  pool.query("SELECT * FROM `members` WHERE mem_id = ?", [req.params.id], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Member details retrieval failed"});
-    }
-    details["personal"]=data[0];
-  });
-  // get login details
-  pool.query("SELECT username, password from login where user_id = ? and user_type = ?",[req.params.id, "M"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Member details retrieval failed"});
-    }
-    details["login"]=data[0];
-  });
-  return res.status(200).json(details);
+  }catch(err){
+    return res.status(400).json({message: "Create auction failed"});
+  }
 });
 
 // update member details by id
@@ -1076,38 +1427,8 @@ app.post('/updatememberdetails/:id', (req, res) => {
   return res.status(200).json({"message":"Member details updated successfully"});
 });
 
-// get last 5 purchased arts
-app.get('/getlastpurchasedarts/:id', (req, res) => {
-  pool.query("SELECT select o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from db_se_567.shop_transactions s join db_se_567.sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit=5",[req.params.id,"M"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Last 5 purchased arts retrieval failed"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get last 5 purchased tickets
-app.get('/getlastpurchasedtickets/:id', (req, res) => {
-  pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from db_se_567.ticket_transactions t join db_se_567.events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit=5",[req.params.id,"M"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Last 5 purchased tickets retrieval failed"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get upcoming events for member
-app.get('/getupcomingevents/:id', (req, res) => {
-  pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.ticket_transactions t on e.ev_id = t.ev_id where t.user_type=? and t.user_id=? and e.ev_type in (?,?,?) and e.ev_date>=curdate() order by e.ev_date limit 5", ["M", req.params.id, "show", "exhibition", "auction"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Upcoming events retrieval failed"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// register member
-app.post('/registermember', (req, res) => {
+// register a new member
+app.post('/registermember', async (req, res) => {
   // check missing fields
   let missing_fields = [];
   // check if first name is empty, undefined or null
@@ -1153,32 +1474,17 @@ app.post('/registermember', (req, res) => {
   if (missing_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // check if username already exists
-  pool.query("SELECT * FROM `login` WHERE username = ?", [req.body[0].username], (err, data) => {
-    if (err){
-      return res.status(400).json({"message":"Username already exists"});
-    }
-  });
-  // insert into members table
-  pool.query("INSERT INTO `members` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2, req.body[0].city, req.body[0].state, req.body[0].zipcode], (err, data) => {
-    if (err){
-      return res.status(400).json({"message":"Member registration failed"});
-    }
-    var member_id = data.insertId;
-    // insert into login table
-    pool.query("INSERT INTO `login` (username, password, user_type, user_id) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, "M", member_id], (err, data) => {
-      if (err){
-        return res.status(400).json({"message":"Member registration failed"});
+  try{
+    const existMember = await pool.query("SELECT * FROM `login` WHERE username = ?", [req.body[0].username]);
+    if (existMember.length > 0){
+      return res.status(400).json({message: "Username already exists"});
       }
-    });
-  });
-  // insert into master_transactions table
-  pool.query("insert into master_transactions (tran_type, user_id, user_type, purchase_date, amount) values (?,?,?,?,?)", ["membership", member_id, "M", new Date(), req.body[0].amount], (err, data) => {
-    if (err){
+    const newMember = await insertMember(req.body[0]);
+    const newLogin = await pool.query("INSERT INTO `login` (username, password, user_id, user_type) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, newMember.insertId, "M"]);
+    return res.status(200).json({message: "Member registered successfully"});
+  }catch(err){
       return res.status(400).json({"message":"Member registration failed"});
     }
-  });
-  return res.status(200).json({"message":"Member registration successful"});
 });
 
 // create employee
@@ -1233,12 +1539,16 @@ app.post('/createemployee', (req, res) => {
     if (err){
       return res.status(400).json({"message":"Username already exists"});
     }
+    if (data.length > 0){
+      return res.status(400).json({"message":"Username already exists"});
+    }
   });
   // insert into employees table
-  pool.query("INSERT INTO `employees` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2, req.body[0].city, req.body[0].state, req.body[0].zipcode], (err, data) => {
+  pool.query("INSERT INTO `employees` (first_name, last_name, phone_no, email_id, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2, req.body[0].city, req.body[0].state, req.body[0].zipcode], (err, data) => {
     if (err){
       return res.status(400).json({"message":"Employee registration failed"});
     }
+    console.log(data);
     var employee_id = data.insertId;
     // insert into login table
     pool.query("INSERT INTO `login` (username, password, user_type, user_id) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, "E", employee_id], (err, data) => {
@@ -1246,8 +1556,8 @@ app.post('/createemployee', (req, res) => {
         return res.status(400).json({"message":"Employee registration failed"});
       }
     });
+    return res.status(200).json({"message":"Employee registration successful"});
   });
-  return res.status(200).json({"message":"Employee registration successful"});
 });
 
 // update employee details by id
@@ -1338,16 +1648,6 @@ app.post('/updateemployee/:id', (req, res) => {
   return res.status(200).json({"message":"Employee details update successful"});
 });
 
-// get upcoming events for employee
-app.get('/getupcomingemployeeevents/:id', (req, res) => {
-  pool.query("select e.ev_name as name, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.event_employee_map em on e.ev_id = em.ev_id where em.ev_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[req.params.id], (err, data) => {
-    if (err){
-      return res.status(400).json({"message":"Upcoming events not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
 // check login validation
 app.post('/checklogin', (req, res) => {
   pool.query("select * from login where username = ? and password = ?",[req.body.username, req.body.password] , (err, data) => {
@@ -1367,7 +1667,7 @@ app.post('/checklogin', (req, res) => {
         }
         return res.status(200).json(data);
       });
-    } else if (data[0].user_type == "M"){
+    } else {
       pool.query("select * from members where mem_id = ? and is_active = ?",[data[0].user_id, "Y"], (err, data) => {
         if (err){
           return res.status(400).json({"message":"Login failed"});
@@ -1380,3 +1680,5 @@ app.post('/checklogin', (req, res) => {
     }
   });
 });
+
+//==================================================================================================
