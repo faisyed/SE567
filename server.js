@@ -10,9 +10,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
-app.use(cors({
-  origin: '*',
-}));
+app.use(cors());
 const port = 3000;
 
 //Connection to Mysql
