@@ -57,15 +57,24 @@ app.use(express.static(path.join(__dirname, './src')));
 app.use(cookieParser());
 
 
-sessionStore.close();
-
-
 app.get('/', (req, res) => {      
-  res.sendFile('./src/home.html', {root: __dirname});
+  if (req.session.loggedin) {
+    // Output username
+    res.sendFile('./src/home_loggenIn.html', {root: __dirname});
+  } else {
+    // Not logged in
+    res.sendFile('./src/home.html', {root: __dirname});
+  }
 });
 
 app.get('/logout',(req,res) => {
-  req.session.destroy();
+  req.session.destroy(err => {
+    if(err){
+        return res.redirect('/home')
+    }
+    sessionStore.close()
+    res.redirect('/home')
+})
   res.redirect('/');
 });
 
@@ -128,7 +137,8 @@ app.post("/login", (req, res)=> {
       
           if (password == pass) {
               console.log("---------> Login Successful")
-              res.send(`${user} is logged in!`)
+              // res.send(`${user} is logged in!`)
+              res.sendFile('./src/home_loggedIn.html', {root: __dirname});
           } 
           else {
               console.log("---------> Password Incorrect")
