@@ -134,30 +134,30 @@
 						<div class="col-12 col-md-8 order-md-2">
 							<!-- contactFormWrap -->
 							<div class="contactFormWrap pl-lg-8 mb-6 mb-md-0">
-								<form action="#">
+								<form name="contact_us">
 									<div class="form-row mx-n2">
 										<div class="formCol formCol6 px-2">
 											<div class="form-group mb-4">
-												<input type="text" class="form-control w-100 d-block" placeholder="Name">
+												<input type="text" id="query_name" class="form-control w-100 d-block" placeholder="Name">
 											</div>
 										</div>
 										<div class="formCol formCol6 px-2">
 											<div class="form-group mb-4">
-												<input type="email" class="form-control w-100 d-block" placeholder="Email Address">
+												<input type="email" id="query_email" class="form-control w-100 d-block" placeholder="Email Address">
 											</div>
 										</div>
 										<div class="formCol formCol12 px-2">
 											<div class="form-group mb-4">
-												<input type="text" class="form-control w-100 d-block" placeholder="Subject">
+												<input type="text" id="query_subject" class="form-control w-100 d-block" placeholder="Subject">
 											</div>
 										</div>
 										<div class="formCol formCol12 px-2">
 											<div class="form-group mb-4">
-												<textarea class="form-control w-100 d-block" placeholder="Write your thoughts&hellip;"></textarea>
+												<textarea id="query_desc" class="form-control w-100 d-block" placeholder="Write your thoughts&hellip;"></textarea>
 											</div>
 										</div>
 									</div>
-									<input type="submit" class="btn btn-secondary btnMidMinWidth mt-2 text-uppercase" value="Send Message">
+									<input type="button" onclick="submitQuery()" class="btn btn-secondary btnMidMinWidth mt-2 text-uppercase" value="Send Query">
 								</form>
 							</div>
 						</div>
@@ -217,5 +217,6 @@
 	<script src="js/popper.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
+	<script src="js/helper.js"></script>
 </body>
 </html>
