@@ -140,7 +140,7 @@ async function getPastEvents(event_type){
 
 async function setAndCallEventDetail(event_type,ev_id){
     if (event_type == "shows"){
-        window.location.assign('./single-event.html?ev_id='+ev_id);
+        window.location.assign('./single-show.html?ev_id='+ev_id);
     } else if (event_type == "exhibitions"){
         window.location.assign('./single-exhibition.html?ev_id='+ev_id);
     } else if (event_type == "auctions"){
