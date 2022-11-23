@@ -133,7 +133,7 @@
 									<div class="tab-content">
 										<!-- login-tab -->
 										<div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
-											<form action="/login" method="post">
+											<form action="/checklogin" method="post">
 												<div class="form-group position-relative mb-3">
 													<label class="d-block mb-0">
 														<strong class="d-block font-weight-normal mb-1">User Name or Email <span class="text-brown">*</span></strong>
@@ -164,11 +164,66 @@
 										</div>
 										<!-- register-tab -->
 										<div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
-											<form action="/createUser" method="post">
+											<form action="/registermember" method="post">
 												<div class="form-group position-relative mb-3">
 													<label class="d-block mb-0">
-														<strong class="d-block font-weight-normal mb-1">Email Address <span class="text-brown">*</span></strong>
-														<input type="email" name="username" class="form-control formControlMedium d-block w-100">
+														<strong class="d-block font-weight-normal mb-1">First Name <span class="text-brown">*</span></strong>
+														<input type="text" name="first_name" class="form-control formControlMedium d-block w-100">
+													</label>
+												</div>
+												<div class="form-group position-relative mb-3">
+													<label class="d-block mb-0">
+														<strong class="d-block font-weight-normal mb-1">Last Name <span class="text-brown">*</span></strong>
+														<input type="text" name="last_name" class="form-control formControlMedium d-block w-100">
+													</label>
+												</div> 
+												<!-- first_name, last_name, phone_no, email, address1, address2, city, state, zipcode -->
+												<div class="form-group position-relative mb-3">
+													<label class="d-block mb-0">
+														<strong class="d-block font-weight-normal mb-1">Phone Number <span class="text-brown">*</span></strong>
+														<input type="text" name="phone_no" class="form-control formControlMedium d-block w-100">
+													</label>
+												</div>
+												<div class="form-group position-relative mb-3">
+													<label class="d-block mb-0">
+														<strong class="d-block font-weight-normal mb-1">Email <span class="text-brown">*</span></strong>
+														<input type="text" name="phone_no" class="form-control formControlMedium d-block w-100">
+													</label>
+												</div>
+												<div class="form-group position-relative mb-3">
+													<label class="d-block mb-0">
+														<strong class="d-block font-weight-normal mb-1">Address <span class="text-brown">*</span></strong>
+														<input type="text" name="address1" class="form-control formControlMedium d-block w-100">
+													</label>
+												</div>
+												<div class="form-group position-relative mb-3">
+													<label class="d-block mb-0">
+														<strong class="d-block font-weight-normal mb-1">Address 2<span class="text-brown">*</span></strong>
+														<input type="text" name="address2" class="form-control formControlMedium d-block w-100">
+													</label>
+												</div>
+												<div class="form-group position-relative mb-3">
+													<label class="d-block mb-0">
+														<strong class="d-block font-weight-normal mb-1">City<span class="text-brown">*</span></strong>
+														<input type="text" name="city" class="form-control formControlMedium d-block w-100">
+													</label>
+												</div>
+												<div class="form-group position-relative mb-3">
+													<label class="d-block mb-0">
+														<strong class="d-block font-weight-normal mb-1">State<span class="text-brown">*</span></strong>
+														<input type="text" name="state" class="form-control formControlMedium d-block w-100">
+													</label>
+												</div>
+												<div class="form-group position-relative mb-3">
+													<label class="d-block mb-0">
+														<strong class="d-block font-weight-normal mb-1">Zipcode<span class="text-brown">*</span></strong>
+														<input type="text" name="zipcode" class="form-control formControlMedium d-block w-100">
+													</label>
+												</div>
+												<div class="form-group position-relative mb-3">
+													<label class="d-block mb-0">
+														<strong class="d-block font-weight-normal mb-1">Username<span class="text-brown">*</span></strong>
+														<input type="text" name="username" class="form-control formControlMedium d-block w-100">
 													</label>
 												</div>
 												<div class="form-group position-relative mb-3">
