@@ -122,7 +122,7 @@
 													</ul>
 												</div>
 											</li>
-											<li class="nav-item" style="float: right;" action="/logout" method="get">
+											<li class="nav-item" style="float: right;" onclick="logout()">
 												<a class="nav-link" href="#" aria-haspopup="true" aria-expanded="false">Log Out</a>
 											</li>
 										</ul>
@@ -437,6 +437,20 @@
 		// When the user clicks on <span> (x), close the modal
 		span.onclick = function() { 
 			document.getElementById("modal_demo").style.display = "none";
+		}
+
+		async function logout(){
+			const config = {
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'application/json'
+				},
+				method: 'GET'
+			};
+			var url = "http://localhost:3000/logout/";
+
+			const res = await fetch(url, config);
+			
 		}
 	</script>
 </body>

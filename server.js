@@ -29,6 +29,8 @@ const config = {
 const pool = mysql.createPool(config);
 var sessionStore = new MySQLStore({}, pool);
 
+session = {}
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`);
@@ -74,7 +76,7 @@ insertMember = (details) => {
 
 
 app.get('/', (req, res) => {      
-  if (req.session.loggedin) {
+  if (session.loggedin) {
     // Output username
     res.sendFile('./src/home_loggedIn.html', {root: __dirname});
   } else {
@@ -84,29 +86,28 @@ app.get('/', (req, res) => {
 });
 
 app.get('/logout',(req,res) => {
-  req.session.destroy(err => {
-    if(err){
-        return res.redirect('/home')
-    }
-    sessionStore.close()
-    res.redirect('/home')
-})
-  res.redirect('/');
+  req.session.destroy();
+  req.sessionStore.close();
+  session.loggedin = false;
+  console.log(session, 'session---------')
+  res.clearCookie('connect.sid', { path: '/logout' })
+  res.redirect(200, './src/home.html')
 });
+
+
 
 //CREATE USER
 app.post("/createUser", async (req,res) => {
-  // res.sendFile('./src/my-account.html', {root: __dirname});
+  res.sendFile('./src/my-account.html', {root: __dirname});
   console.log(req.body)
-  const user = req.body.username;
+  const user = req.body.name;
   const pass = req.body.password;
-  const type = req.body.type;
   pool.getConnection( async (err, connection) => {
       if (err) throw (err)
-      const sqlSearch = "SELECT * FROM login WHERE username = ?"
+      const sqlSearch = "SELECT * FROM users WHERE username = ?"
       const search_query = mysql.format(sqlSearch,[user])
-      const sqlInsert = "INSERT INTO login VALUES (0,?,?,?,?)"
-      const insert_query = mysql.format(sqlInsert,[uuid(0).uuid(), type, user, pass])
+      const sqlInsert = "INSERT INTO users VALUES (0,?,?)"
+      const insert_query = mysql.format(sqlInsert,[user, pass])
       await connection.query (search_query, async (err, result) => {
           if (err) throw (err)
           console.log("------> Search Results")
@@ -132,8 +133,8 @@ app.post("/createUser", async (req,res) => {
 
 //LOGIN (AUTHENTICATE USER)
 app.post("/login", (req, res)=> {
-  // res.sendFile('./src/my-account.html', {root: __dirname});
-  const user = req.body.username
+  res.sendFile('./src/my-account.html', {root: __dirname});
+  const user = req.body.name
   const password = req.body.password
   pool.getConnection ( async (err, connection)=> {
       if (err) throw (err)
@@ -154,7 +155,8 @@ app.post("/login", (req, res)=> {
           if (password == pass) {
               console.log("---------> Login Successful")
               // res.send(`${user} is logged in!`)
-              res.sendFile('./src/home_loggedIn.html', {root: __dirname});
+              session.loggedin = true;
+              session.username = user;
           } 
           else {
               console.log("---------> Password Incorrect")
@@ -165,24 +167,19 @@ app.post("/login", (req, res)=> {
   }) 
 })
 
-/* For LoggedIn Users user the condition - req.session.loggedin
-if (req.session.loggedin) {
-  // Output username
-  res.send('Welcome back, ' + req.session.username + '!');
-} else {
-  // Not logged in
-  res.send('Please login to view this page!');
-}*/
 
 
+
+
+/*************Group 4 start *************/
 /*
 API to get all art collections from database to display on UI
 */
-app.post("/getArts/",(req,res) => {
+app.get("/getArts/",(req,res) => {
   pool.query("SELECT * FROM `objects`", (err, data) => {
     if (err){ 
         console.log(err);
-        throw(err);
+        res.status(400).send("Backend Issue. Please reload the page");
     }
     var result = [];
     Object.keys(data).forEach(function(key) {
@@ -197,7 +194,7 @@ app.post("/getArts/",(req,res) => {
       });
     });
 
-    res.send(result);
+    res.status(200).send(result);
   });
 
 });
@@ -207,26 +204,26 @@ API to get a paritcular art details from database where id is sent as URL parame
 Example: localhost:3000/getArt?id=10
 GET REQUEST
 */
-app.get("/getArt/:id",(req,res) => {
+app.get("/getArt/",(req,res) => {
   //validation
   let missed = [];
-
-  if (req.params.id == null || req.params.id == undefined || req.params.id == "" || !Number.isInteger(parseInt(req.params.id))) {
-    missed.push("Invalid id");
+  
+  if (req.query.id == null || req.query.id == undefined || req.query.id == "" || !Number.isInteger(parseInt(req.query.id))) {
+    missed.push("Invalid id!");
   }
 
   if (missed.length > 0) {
       res.status(400).send(missed);
       return;
   }
-
-  pool.query("SELECT * FROM `objects` where `obj_id` = ?", [parseInt(req.params.id)], (err, data) => {
+  
+  pool.query("SELECT * FROM `objects` where `obj_id` = ?", [parseInt(req.query.id)], (err, data) => {
     if (err){ 
         console.log(err);
-        throw(err);
+        res.status(400).send("Failed fetching the Art details");
     };
 
-    res.send(data);
+    res.status(200).send(data);
   });
 
 });
@@ -255,7 +252,7 @@ app.post("/getArtsCol/",(req,res) => {
   pool.query("SELECT * FROM `objects` where `obj_class` = ?", [req.body.type], (err, data) => {
     if (err){ 
         console.log(err);
-        throw(err);
+        res.status(400).send("Fetching Arts by type failed");
     };
       var result = [];
       Object.keys(data).forEach(function(key) {
@@ -270,7 +267,7 @@ app.post("/getArtsCol/",(req,res) => {
         });
       });
 
-      res.send(result);
+      res.status(200).send(result);
   });
 
 });
@@ -297,7 +294,7 @@ app.get("/searchKey/",(req,res) => {
   pool.query("select * from objects where obj_title like ? or obj_medium like ? or obj_inscription like ?", [`%${req.query.key}%`,`%${req.query.key}%`,`%${req.query.key}%`], (err, data) => {
     if (err){
         console.log(err);
-        throw(err);
+        res.status(400).send("Fetching arts by keyword failed");
     };
     var result = [];
       Object.keys(data).forEach(function(key) {
@@ -312,17 +309,14 @@ app.get("/searchKey/",(req,res) => {
         });
       });
 
-      res.send(result);
+      res.status(200).send(result);
   });
 
 });
 
-/*Api for Search by keyword for fetching collections
+/*Api for Search by Name for fetching collections
 Example: localhost:3000/searchName/
-POST REQUEST
-request body = {
-  "name": "fpl"
-}
+
 */
 app.get("/searchName/",(req,res) => {
   //validation
@@ -339,7 +333,7 @@ app.get("/searchName/",(req,res) => {
   pool.query("select * from objects where obj_attribution = ?", [req.query.name], (err, data) => {
     if (err){
         console.log(err);
-        throw(err);
+        res.status(400).send("Fetching arts by Author name failed");
     };
     var result = [];
       Object.keys(data).forEach(function(key) {
@@ -354,7 +348,7 @@ app.get("/searchName/",(req,res) => {
         });
       });
 
-      res.send(result);
+      res.status(200).send(result);
   });
 
 });
@@ -388,7 +382,7 @@ app.get("/searchPrice/",(req,res) => {
   pool.query("select * from `objects` where `price` between ? and ?", [parseInt(req.query.from),parseInt(req.query.to)], (err, data) => {
     if (err){
         console.log(err);
-        throw(err);
+        res.status(400).send("Fetching arts by price failed");
     };
 
     var result = [];
@@ -404,7 +398,7 @@ app.get("/searchPrice/",(req,res) => {
         });
       });
 
-      res.send(result);
+      res.status(200).send(result);
 
   });
 
@@ -450,14 +444,14 @@ app.post("/addArt/",(req,res) => {
   pool.query("insert into `objects` (`obj_title`, `obj_beginyear`, `obj_endyear`, `obj_medium`, `obj_dimensions`, `obj_inscription`, `obj_attribution`, `obj_class`, `loc_site`, `loc_room`, `loc_description`, `img_url`, `price`) values (?,?,?,?,?,?,?,?,?,?,?,?,?)", [req.body.obj_title, req.body.obj_beginyear, req.body.obj_endyear, req.body.obj_medium, req.body.obj_dimensions,req.body.obj_inscription,req.body.obj_attribution,req.body.obj_class,req.body.loc_site,req.body.loc_room,req.body.loc_description,req.body.img_url,parseFloat(req.body.price)], (err, data) => {
     if (err){
         console.log(err);
-        throw(err);
+        res.status(400).send("Failed adding new Art");
     }
     res.status(200).send(data);
   });
 
 } );
 
-//add a new art
+//Buy Art
 app.post("/buyArt/", async (req,res) => {
   //validation
   let missed = [];
@@ -484,14 +478,14 @@ app.post("/buyArt/", async (req,res) => {
       console.log(err);
       missed.push("id does not exist in the database");
       res.status(400).send(missed);
-      throw(err);
+
     }
 
     if(data.length > 0 && data[0].obj_id > 0){
       pool.query("insert into `shop_transactions` (`obj_oid`, `total_amount`, `user_id`, `user_type`, `purchase_date`) values (?,?,?,?,?)", [data[0].obj_id, data[0].price, req.body.user_id, req.body.user_type, new Date()], (err, data) => {
         if (err){
             console.log(err);
-            throw(err);
+            res.status(400).send(missed);
         }
         res.status(200).send(data);
       });
@@ -503,18 +497,33 @@ app.post("/buyArt/", async (req,res) => {
   });
 
 });
+/*************Group 4 End *************/
 
-//get all members
-app.get("/getAllMem/",(req,res) => {
-  pool.query("SELECT * FROM `members`", (err, data) => {
-    if (err){
-        console.log(err);
-        throw(err);
-    }
-    res.send(data);
+/*
+  Below section of code consists of all the necessary helper functions
+*/
+//====================================================================================================
+getMemPersonalDetails = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from members where mem_id = ?",[mem_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
   });
+}
 
-} );
+getMemLoginDetails = (mem_id, user_type = 'M') => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from login where user_id = ? and user_type = ?",[mem_id, user_type], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
 
 
 getMemPersonalDetails = (mem_id) => {
@@ -573,8 +582,27 @@ app.get("/getMem/:id",(req,res) => {
     res.send(data);
   });
 
-} );
+getUpComingEmployeeEvents = (emp_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select e.ev_name as name, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.event_employee_map em on e.ev_id = em.ev_id where em.ev_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[emp_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
 
+getUpComingMemberEvents = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.ticket_transactions t on e.ev_id = t.ev_id where t.user_type=? and t.user_id=? and e.ev_type in (?,?,?) and e.ev_date>=curdate() order by e.ev_date limit 5", ["M", mem_id, "show", "exhibition", "auction"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
 
 //insert new member
 
@@ -652,8 +680,27 @@ app.post("/register/",(req,res) => {
     }
     res.send(data);
   });
+getLastPurchasedTickets = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from db_se_567.ticket_transactions t join db_se_567.events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit 5",[mem_id,"M"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
 
-} );
+getLastPurchasedArts = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("SELECT o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from db_se_567.shop_transactions s join db_se_567.sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit 5",[mem_id,"M"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
 
 // update member details by id
 app.post('/updatememberdetails/:id', (req, res) => {
@@ -755,11 +802,367 @@ app.put("/updateMem/:id",(req,res) => {
     }
     res.send(data);
   });
+getEventDetails = (ev_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_id=?",[ev_id],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
 
-} );
+getCurrentAuctions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["auction"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getCurrentExhibitions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["exhibition"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getCurrentShows = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["show"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getPastShows = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["show"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getPastExhibitions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["exhibition"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getPastAuctions = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["auction"],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getTotalDonations = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("SELECT sum(amount) as total_donations FROM `master_transactions` where tran_type=? and user_id=?", ["donation",mem_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+insertEvent = (details, type) => {
+  return new Promise((resolve, reject) => {
+    pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [details.ev_name, details.ev_date, details.ev_description, details.ev_site, details.ev_room_no, type], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+insertMember = (details) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `members` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [details.first_name, details.last_name, details.phone_no, details.email, details.address1, details.address2, details.city, details.state, details.zipcode], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+  });
+  });
+}
+
+checkMemberExist = (fname, lname) => {
+  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [fname, lname, "Y"], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve({"member_id": data[0].mem_id});
+  });
+}
+
+makeDonation = (id, amount, type) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `donations` (user_id, user_type, amount) VALUES (?,?,?)", [id, type, amount], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+  });
+  });
+}
+
+addVisitor = (fname, lname, email, phone) => {
+  return new Promise((resolve, reject) =>{
+    pool.query("INSERT INTO `visitors` (first_name, last_name, email, phone_no) VALUES (?,?,?,?)", [fname, lname, email, phone], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve(data);
+  });
+  });
+}
+
+//====================================================================================================
+
+/*
+  Below section of code consists of all the necessary get api calls
+*/
+//==================================================================================================
+app.get("/getmemberdetails/:id", async (req, res) => {
+  try {
+    const personal = await getMemPersonalDetails(parseInt(req.params.id));
+    const login = await getMemLoginDetails(parseInt(req.params.id));
+    if (personal && login) {
+      const details = {
+        "personal": personal,
+        "login": login
+      }
+      return res.status(200).json(details);
+    }
+    return res.status(200).json({"message":"Member details not found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Member details not found"});
+  }
+});
+
+app.get("/getemployeedetails/:id", async (req, res) => {
+  try {
+    const personal = await getEmployeePersonalDetails(parseInt(req.params.id));
+    const login = await getMemLoginDetails(parseInt(req.params.id), 'E');
+    console.log("persona",personal,login);
+    if (personal && login) {
+      const details = {
+        "personal": personal,
+        "login": login
+      }
+      return res.status(200).json(details);
+    }
+    return res.status(200).json({"message":"Employee details not found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Employee details not found with an error"});
+  }
+});
+
+// get upcoming events for employee
+app.get('/getupcomingemployeeevents/:id', async (req, res) => {
+  try {
+    const events = await getUpComingEmployeeEvents(parseInt(req.params.id));
+    if (events){
+      return res.status(200).json(events);
+    }
+    return res.status(200).json({"message":"No upcoming events"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Upcoming events not found"});
+  }
+});
+
+// get upcoming events for member
+app.get('/getupcomingevents/:id', async (req, res) => {
+  try{
+    const events = await getUpComingMemberEvents(parseInt(req.params.id));
+    if (events){
+      return res.status(200).json(events);
+    }
+    return res.status(200).json({"message":"No upcoming events"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Upcoming events not found"});
+  }
+});
+
+// get last 5 purchased tickets
+app.get('/getlastpurchasedtickets/:id', async (req, res) => {
+  try{
+    const tickets = await getLastPurchasedTickets(parseInt(req.params.id));
+    if (tickets){
+      return res.status(200).json(tickets);
+    }
+    return res.status(200).json({"message":"No tickets purchased"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Tickets not found"});
+  }
+});
+
+// get last 5 purchased arts
+app.get('/getlastpurchasedarts/:id', async (req, res) => {
+  try{
+    const arts = await getLastPurchasedArts(parseInt(req.params.id));
+    if (arts){
+      return res.status(200).json(arts);
+    }
+    return res.status(200).json({"message":"No arts purchased"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Arts not found"});
+  }
+});
+
+// get event details by id
+app.get('/eventdetails/:id', async (req, res) => {
+  try{
+    const event = await getEventDetails(parseInt(req.params.id));
+    if (event){
+      return res.status(200).json(event);
+    }
+    return res.status(200).json({"message":"Event not found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Event not found"});
+  }
+});
+
+// get current or upcoming auctions
+app.get('/currentauctions', async (req, res) => {
+  try{
+    const auctions = await getCurrentAuctions();
+    if (auctions){
+      return res.status(200).json(auctions);
+    }
+    return res.status(200).json({"message":"No auctions found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Auctions not found"});
+  }
+});
+
+//get cuurent or upcoming exhibitions
+app.get('/currentexhibitions', async (req, res) => {
+  try{
+    const exhibitions = await getCurrentExhibitions();
+    if (exhibitions){
+      return res.status(200).json(exhibitions);
+    }
+    return res.status(200).json({"message":"No exhibitions found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Exhibitions not found"});
+  }
+});
+
+// get current or upcoming shows
+app.get('/currentshows', async (req, res) => {
+  try{
+    const shows = await getCurrentShows();
+    if (shows){
+      return res.status(200).json(shows);
+    }
+    return res.status(200).json({"message":"No shows found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Shows not found"});
+  }
+});
+
+// get past shows
+app.get('/pastshows', async (req, res) => {
+  try{
+    const shows = await getPastShows();
+    if (shows){
+      return res.status(200).json(shows);
+    }
+    return res.status(200).json({"message":"No shows found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Shows not found"});
+  }
+});
+
+// get past exhibitions
+app.get('/pastexhibitions', async (req, res) => {
+  try{
+    const exhibitions = await getPastExhibitions();
+    if (exhibitions){
+      return res.status(200).json(exhibitions);
+    }
+    return res.status(200).json({"message":"No exhibitions found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Exhibitions not found"});
+  }
+});
+
+// get past auctions
+app.get('/pastauctions', async (req, res) => {
+  try{
+    const auctions = await getPastAuctions();
+    if (auctions){
+      return res.status(200).json(auctions);
+    }
+    return res.status(200).json({"message":"No auctions found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Auctions not found"});
+  }
+});
+
+// get total donations for a member
+app.get("/getDonations/:id", async (req,res) => {
+  try{
+    const donations = await getTotalDonations(parseInt(req.params.id));
+    if (donations){
+      return res.status(200).json({"Total_Donations":donations});
+    }
+    return res.status(200).json({"message":"No donations found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Donations not found"});
+  }
+});
+
+//==================================================================================================
+
+/*
+  Below section of code consists of all the necessary post api calls
+*/
+//==================================================================================================
 
 // make a donation
-app.post("/makeDonation/",(req,res) => {
+app.post("/makeDonation/", async (req,res) => {
   let missed_fields = [];
   // check if first name is empty, undefined or null
   if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == ""){
@@ -784,45 +1187,28 @@ app.post("/makeDonation/",(req,res) => {
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // check if user exists as a member
-  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [req.body[0].first_name, req.body[0].last_name, "Y"], (err, data) => {
-    // if user is a member, insert donation into donations table
-    if (data.length > 0){
-      pool.query("INSERT INTO `donations` (user_id, user_type, amount) VALUES (?,?,?)", [data[0].mem_id, "M", req.body[0].amount], (err, data) => {
-        if (err){
-            return res.status(400).json({"message": "Donation failed"});
-        }
-        return res.status(200).json({"message":"Donation successful"});
-      });
+  try{
+    const memberExist = await checkMemberExist(req.body[0].first_name,req.body[0].last_name);
+    if (memberExist){
+      const donation = await makeDonation(memberExist.member_id,req.body[0].amount, "M");
+      if (donation){
+        return res.status(200).json({"message":"Donation made successfully"});
+      }
+      return res.status(400).json({"message":"Donation not made"});
     }
-    // if user is not a member, insert donation into donations table
     else{
-      // create entry in visitors table
-      var visitor_id = 0;
-      pool.query("INSERT INTO `visitors` (first_name, last_name, email, phone_no) VALUES (?,?,?,?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].email, req.body[0].phone], (err, data) => {
-        if (err){
-            return res.status(400).json({"message":"Donation failed"});
+      const visitor = await addVisitor(req.body[0].first_name,req.body[0].last_name,req.body[0].email,req.body[0].phone);
+      if (visitor){
+        const donation = await makeDonation(visitor.visitor_id,req.body[0].amount, "V");
+        if (donation){
+          return res.status(200).json({"message":"Donation made successfully"});
         }
-        visitor_id = data.insertId;
-        pool.query("INSERT INTO `donations` (user_id, user_type, amount) VALUES (?,?,?)", [visitor_id, "V", req.body[0].amount], (err, data) => {
-          if (err){
-              return res.status(400).json({"message":"Donation failed"});
-          }
-          return res.status(200).json({"message":"Donation successful"});
-        });
-      });
+        return res.status(400).json({"message":"Donation not made"});
+      }
     }
-  });
-} );
-
-// get total donations for a member
-app.get("/getDonations/:id",(req,res) => {
-  pool.query("SELECT sum(amount) as total_donations FROM `master_transactions` where tran_type=? and user_id=?", ["donation",req.params.id], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Error in getting donations"});
-    }
-    return res.status(200).json({"message":"Donations fetched successfully", "data": data});
-  });
+  }catch(err){
+    return res.status(400).json({"message":"Donation failed"});
+  }
 });
 
 // buy entry ticket
@@ -1103,85 +1489,8 @@ app.post('/contactus', (req, res) => {
   });
 });
 
-// get past shows
-app.get('/pastshows', (req, res) => {
-  // get past shows from shows table
-  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["show"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Past shows not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get past exhibitions
-app.get('/pastexhibitions', (req, res) => {
-  // get past exhibitions from shows table
-  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["exhibition"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Past exhibitions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get past auctions
-app.get('/pastauctions', (req, res) => {
-  // get past auctions from shows table
-  pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["auction"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Past auctions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get current or upcoming shows
-app.get('/currentshows', (req, res) => {
-  // get current or upcoming shows from shows table
-  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["show"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Current or upcoming shows not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get current or upcoming exhibitions
-app.get('/currentexhibitions', (req, res) => {
-  // get current or upcoming exhibitions from shows table
-  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["exhibition"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Current or upcoming exhibitions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get current or upcoming auctions
-app.get('/currentauctions', (req, res) => {
-  // get current or upcoming auctions from shows table
-  pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["auction"],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Current or upcoming auctions not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
-// get event details by id
-app.get('/eventdetails/:id', (req, res) => {
-  // get event details from shows table
-  pool.query("select * from `events` where ev_id=?",[req.params.id],(err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Event details not found"});
-    }
-    return res.status(200).json(data);
-  });
-});
-
 // create show
-app.post('/createshow', (req, res) => {
+app.post('/createshow', async (req, res) => {
   // check if all required fields are present
   let missed_fields = [];
   // check if ev_name is empty, undefined or null
@@ -1204,20 +1513,27 @@ app.post('/createshow', (req, res) => {
   if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
     missed_fields.push("Enter show room number");
   }
+  // check if assigned employees is empty, undefined or null
+  if (req.body[0].assigned_employees == null || req.body[0].assigned_employees == undefined || req.body[0].assigned_employees == ""){
+    missed_fields.push("Assign employees to show");
+  }
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // insert show data into events table
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "show"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Show creation failed"});
+  try{
+    // insert show data into events table
+    const event = await insertEvent(req.body[0],"show");
+    for (var i = 0; i < req.body[0].assigned_employees.length; i++){
+      await pool.query("INSERT INTO `event_employee_map` (ev_id, emp_id) VALUES (?,?)", [event.insertId, req.body[0].assigned_employees[i]]);
     }
     return res.status(200).json({"message":"Show created successfully"});
-  });
+  }catch(err){
+    return res.status(400).json({message: "Create show failed"});
+  }
 });
 
 // create exhibition
-app.post('/createexhibition', (req, res) => {
+app.post('/createexhibition', async (req, res) => {
   // check if all required fields are present
   let missed_fields = [];
   // check if ev_name is empty, undefined or null
@@ -1240,20 +1556,27 @@ app.post('/createexhibition', (req, res) => {
   if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
     missed_fields.push("Enter exhibition room number");
   }
+  // check if assigned employees is empty, undefined or null
+  if (req.body[0].assigned_employees == null || req.body[0].assigned_employees == undefined || req.body[0].assigned_employees == ""){
+    missed_fields.push("Assign employees to exhibition");
+  }
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // insert exhibition data into events table
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "exhibition"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Exhibition creation failed"});
+  try{
+    // insert exhibition data into events table
+    const event = await insertEvent(req.body[0],"exhibition");
+    for (var i = 0; i < req.body[0].assigned_employees.length; i++){
+      await pool.query("INSERT INTO `event_employee_map` (ev_id, emp_id) VALUES (?,?)", [event.insertId, req.body[0].assigned_employees[i]]);
     }
     return res.status(200).json({"message":"Exhibition created successfully"});
-  });
+  }catch(err){
+    return res.status(400).json({message: "Create exhibition failed"});
+  }
 });
 
 // create auction
-app.post('/createauction', (req, res) => {
+app.post('/createauction', async (req, res) => {
   // check if all required fields are present
   let missed_fields = [];
   // check if ev_name is empty, undefined or null
@@ -1276,13 +1599,370 @@ app.post('/createauction', (req, res) => {
   if (req.body[0].ev_room_no == null || req.body[0].ev_room_no == undefined || req.body[0].ev_room_no == ""){
     missed_fields.push("Enter auction room number");
   }
+  // check if assigned employees is empty, undefined or null
+  if (req.body[0].assigned_employees == null || req.body[0].assigned_employees == undefined || req.body[0].assigned_employees == ""){
+    missed_fields.push("Assign employees to auction");
+  }
   if (missed_fields.length > 0){
     return res.status(400).json({message: missed_fields});
   }
-  // insert auction data into events table
-  pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [req.body[0].ev_name, req.body[0].ev_date, req.body[0].ev_description, req.body[0].ev_site, req.body[0].ev_room_no, "auction"], (err, data) => {
+  try{
+    // insert auction data into events table
+    const event = await insertEvent(req.body[0],"auction");
+    for (var i = 0; i < req.body[0].assigned_employees.length; i++){
+      await pool.query("INSERT INTO `event_employee_map` (ev_id, emp_id) VALUES (?,?)", [event.insertId, req.body[0].assigned_employees[i]]);
+    }
+    return res.status(200).json({"message":"Auction created successfully"});
+  }catch(err){
+    return res.status(400).json({message: "Create auction failed"});
+  }
+});
+
+// update member details by id
+app.post('/updatememberdetails/:id', (req, res) => {
+  // get old member details
+  var old_details = null;
+  pool.query("SELECT * FROM `members` WHERE mem_id = ?", [req.params.id], (err, data) => {
     if (err){
-        return res.status(400).json({"message":"Auction creation failed"});
+        return res.status(400).json({"message":"Member details retrieval failed"});
+    }
+    old_details=data[0];
+  });
+  // get old login details
+  var old_login = null;
+  pool.query("SELECT username, password from login where user_id = ? and user_type = ?",[req.params.id, "M"], (err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Member details retrieval failed"});
+    }
+    old_login=data[0];
+  });
+  var update_details = {};
+  // check if phone_no is empty, undefined or null
+  if (req.body[0].phone_no == null || req.body[0].phone_no == undefined || req.body[0].phone_no == ""){
+    update_details["phone_no"]=old_details.phone_no;
+  }else{
+    update_details["phone_no"]=req.body[0].phone_no;
+  }
+  // check if email is empty, undefined or null
+  if (req.body[0].email == null || req.body[0].email == undefined || req.body[0].email == ""){
+    update_details["email"]=old_details.email;
+  }else{
+    update_details["email"]=req.body[0].email;
+  }
+  // check if address1 is empty, undefined or null
+  if (req.body[0].address1 == null || req.body[0].address1 == undefined || req.body[0].address1 == ""){
+    update_details["address1"]=old_details.address1;
+  }else{
+    update_details["address1"]=req.body[0].address1;
+  }
+  // check if address2 is empty, undefined or null
+  if (req.body[0].address2 == null || req.body[0].address2 == undefined || req.body[0].address2 == ""){
+    update_details["address2"]=old_details.address2;
+  }else{
+    update_details["address2"]=req.body[0].address2;
+  }
+  // check if city is empty, undefined or null
+  if (req.body[0].city == null || req.body[0].city == undefined || req.body[0].city == ""){
+    update_details["city"]=old_details.city;
+  }else{
+    update_details["city"]=req.body[0].city;
+  }
+  // check if state is empty, undefined or null
+  if (req.body[0].state == null || req.body[0].state == undefined || req.body[0].state == ""){
+    update_details["state"]=old_details.state;
+  }else{
+    update_details["state"]=req.body[0].state;
+  }
+  // check if zipcode is empty, undefined or null
+  if (req.body[0].zipcode == null || req.body[0].zipcode == undefined || req.body[0].zipcode == ""){
+    update_details["zipcode"]=old_details.zipcode;
+  }else{
+    update_details["zipcode"]=req.body[0].zipcode;
+  }
+  // check if username is empty, undefined or null
+  if (req.body[0].username == null || req.body[0].username == undefined || req.body[0].username == ""){
+    update_details["username"]=old_login.username;
+  }else{
+    update_details["username"]=req.body[0].username;
+  }
+  // check if password is empty, undefined or null
+  if (req.body[0].password == null || req.body[0].password == undefined || req.body[0].password == ""){
+    update_details["password"]=old_login.password;
+  }else{
+    update_details["password"]=req.body[0].password;
+  }
+  // update member personal details
+  pool.query("UPDATE `members` SET phone_no = ?, email = ?, address1 = ?, address2 = ?, city = ?, state = ?, zipcode = ? WHERE mem_id = ?", [update_details["phone_no"], update_details["email"], update_details["address1"], update_details["address2"], update_details["city"], update_details["state"], update_details["zipcode"], req.params.id], (err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Member details update failed"});
+    }
+  });
+  // update member login details
+  pool.query("UPDATE `login` SET username = ?, password = ? WHERE user_id = ? and user_type = ?", [update_details["username"], update_details["password"], req.params.id, "M"], (err, data) => {
+    if (err){
+        return res.status(400).json({"message":"Member details update failed"});
+    }
+  });
+  return res.status(200).json({"message":"Member details updated successfully"});
+});
+
+// register a new member
+app.post('/registermember', async (req, res) => {
+  // check missing fields
+  let missing_fields = [];
+  // check if first name is empty, undefined or null
+  if (req.body.first_name == null || req.body.first_name == undefined || req.body.first_name == ""){
+    missing_fields.push("first_name");
+  }
+  // check if last name is empty, undefined or null
+  if (req.body.last_name == null || req.body.last_name == undefined || req.body.last_name == ""){
+    missing_fields.push("last_name");
+  }
+  // check if phone number is empty, undefined or null
+  if (req.body.phone_no == null || req.body.phone_no == undefined || req.body.phone_no == ""){
+    missing_fields.push("phone_no");
+  }
+  // check if email is empty, undefined or null
+  if (req.body.email == null || req.body.email == undefined || req.body.email == ""){
+    missing_fields.push("email");
+  }
+  // check if address1 is empty, undefined or null
+  if (req.body.address1 == null || req.body.address1 == undefined || req.body.address1 == ""){
+    missing_fields.push("address1");
+  }
+  // check if city is empty, undefined or null
+  if (req.body.city == null || req.body.city == undefined || req.body.city == ""){
+    missing_fields.push("city");
+  }
+  // check if state is empty, undefined or null
+  if (req.body.state == null || req.body.state == undefined || req.body.state == ""){
+    missing_fields.push("state");
+  }
+  // check if zipcode is empty, undefined or null
+  if (req.body.zipcode == null || req.body.zipcode == undefined || req.body.zipcode == ""){
+    missing_fields.push("zipcode");
+  }
+  // check if username is empty, undefined or null
+  if (req.body.username == null || req.body.username == undefined || req.body.username == ""){
+    missing_fields.push("username");
+  }
+  // check if password is empty, undefined or null
+  if (req.body.password == null || req.body.password == undefined || req.body.password == ""){
+    missing_fields.push("password");
+  }
+  // if (missing_fields.length > 0){
+  //   console.log("jfskjbdfkjsdbfjksbdkfjsbdfjk")
+  //   return res.status(400).json({message: missing_fields});
+  // }
+  try{
+    const existMember = await pool.query("SELECT * FROM `login` WHERE username = ?", [req.body.username]);
+    if (existMember.length > 0){
+      return res.status(400).json({message: "Username already exists"});
+      }
+    const newMember = await insertMember(req.body);
+    const newLogin = await pool.query("INSERT INTO `login` (username, password, user_id, user_type) VALUES (?, ?, ?, ?)", [req.body.username, req.body.password, newMember.insertId, "M"]);
+    session.loggedin = true;
+		session.user_id = req.body.user_id;
+		session.user_type = req.body.user_type;
+    res.sendFile('./src/home_loggedIn.html', {root: __dirname});
+    return res.status(200);
+  }catch(err){
+      return res.status(400).json({"message":"Member registration failed"});
+    }
+});
+
+// create employee
+app.post('/createemployee', (req, res) => {
+  // check missing fields
+  let missing_fields = [];
+  // check if first name is empty, undefined or null
+  if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == ""){
+    missing_fields.push("first_name");
+  }
+  // check if last name is empty, undefined or null
+  if (req.body[0].last_name == null || req.body[0].last_name == undefined || req.body[0].last_name == ""){
+    missing_fields.push("last_name");
+  }
+  // check if phone number is empty, undefined or null
+  if (req.body[0].phone_no == null || req.body[0].phone_no == undefined || req.body[0].phone_no == ""){
+    missing_fields.push("phone_no");
+  }
+  // check if email is empty, undefined or null
+  if (req.body[0].email == null || req.body[0].email == undefined || req.body[0].email == ""){
+    missing_fields.push("email");
+  }
+  // check if address1 is empty, undefined or null
+  if (req.body[0].address1 == null || req.body[0].address1 == undefined || req.body[0].address1 == ""){
+    missing_fields.push("address1");
+  }
+  // check if city is empty, undefined or null
+  if (req.body[0].city == null || req.body[0].city == undefined || req.body[0].city == ""){
+    missing_fields.push("city");
+  }
+  // check if state is empty, undefined or null
+  if (req.body[0].state == null || req.body[0].state == undefined || req.body[0].state == ""){
+    missing_fields.push("state");
+  }
+  // check if zipcode is empty, undefined or null
+  if (req.body[0].zipcode == null || req.body[0].zipcode == undefined || req.body[0].zipcode == ""){
+    missing_fields.push("zipcode");
+  }
+  // check if username is empty, undefined or null
+  if (req.body[0].username == null || req.body[0].username == undefined || req.body[0].username == ""){
+    missing_fields.push("username");
+  }
+  // check if password is empty, undefined or null
+  if (req.body[0].password == null || req.body[0].password == undefined || req.body[0].password == ""){
+    missing_fields.push("password");
+  }
+  if (missing_fields.length > 0){
+    return res.status(400).json({message: missed_fields});
+  }
+  // check if username already exists
+  pool.query("SELECT * FROM `login` WHERE username = ?", [req.body[0].username], (err, data) => {
+    if (err){
+      return res.status(400).json({"message":"Username already exists"});
+    }
+    if (data.length > 0){
+      return res.status(400).json({"message":"Username already exists"});
+    }
+  });
+  // insert into employees table
+  pool.query("INSERT INTO `employees` (first_name, last_name, phone_no, email_id, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].phone_no, req.body[0].email, req.body[0].address1, req.body[0].address2, req.body[0].city, req.body[0].state, req.body[0].zipcode], (err, data) => {
+    if (err){
+      return res.status(400).json({"message":"Employee registration failed"});
+    }
+    console.log(data);
+    var employee_id = data.insertId;
+    // insert into login table
+    pool.query("INSERT INTO `login` (username, password, user_type, user_id) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, "E", employee_id], (err, data) => {
+      if (err){
+        return res.status(400).json({"message":"Employee registration failed"});
+      }
+    });
+    return res.status(200).json({"message":"Employee registration successful"});
+  });
+});
+
+// update employee details by id
+app.post('/updateemployee/:id', (req, res) => {
+  // get old employee details
+  var old_details = null;
+  pool.query("SELECT * FROM `employees` WHERE employee_id = ?", [req.params.id], (err, data) => {
+    if (err){
+      return res.status(400).json({"message":"Employee details update failed"});
+    }
+    old_details = data[0];
+  });
+  // get old login details
+  var old_login_details = null;
+  pool.query("SELECT * FROM `login` WHERE user_id = ? AND user_type = ?", [req.params.id, "E"], (err, data) => {
+    if (err){
+      return res.status(400).json({"message":"Employee details update failed"});
+    }
+    old_login_details = data[0];
+  });
+  var update_details = {};
+  // check if phone number is empty, undefined or null
+  if (req.body[0].phone_no == null || req.body[0].phone_no == undefined || req.body[0].phone_no == ""){
+    update_details["phone_no"] = old_details.phone_no;
+  } else {
+    update_details["phone_no"] = req.body[0].phone_no;
+  }
+  // check if email is empty, undefined or null
+  if (req.body[0].email == null || req.body[0].email == undefined || req.body[0].email == ""){
+    update_details["email"] = old_details.email;
+  } else {
+    update_details["email"] = req.body[0].email;
+  }
+  // check if address1 is empty, undefined or null
+  if (req.body[0].address1 == null || req.body[0].address1 == undefined || req.body[0].address1 == ""){
+    update_details["address1"] = old_details.address1;
+  } else {
+    update_details["address1"] = req.body[0].address1;
+  }
+  // check if address2 is empty, undefined or null
+  if (req.body[0].address2 == null || req.body[0].address2 == undefined || req.body[0].address2 == ""){
+    update_details["address2"] = old_details.address2;
+  } else {
+    update_details["address2"] = req.body[0].address2;
+  }
+  // check if city is empty, undefined or null
+  if (req.body[0].city == null || req.body[0].city == undefined || req.body[0].city == ""){
+    update_details["city"] = old_details.city;
+  } else {
+    update_details["city"] = req.body[0].city;
+  }
+  // check if state is empty, undefined or null
+  if (req.body[0].state == null || req.body[0].state == undefined || req.body[0].state == ""){
+    update_details["state"] = old_details.state;
+  } else {
+    update_details["state"] = req.body[0].state;
+  }
+  // check if zipcode is empty, undefined or null
+  if (req.body[0].zipcode == null || req.body[0].zipcode == undefined || req.body[0].zipcode == ""){
+    update_details["zipcode"] = old_details.zipcode;
+  } else {
+    update_details["zipcode"] = req.body[0].zipcode;
+  }
+  // check if username is empty, undefined or null
+  if (req.body[0].username == null || req.body[0].username == undefined || req.body[0].username == ""){
+    update_details["username"] = old_login_details.username;
+  } else {
+    update_details["username"] = req.body[0].username;
+  }
+  // check if password is empty, undefined or null
+  if (req.body[0].password == null || req.body[0].password == undefined || req.body[0].password == ""){
+    update_details["password"] = old_login_details.password;
+  } else {
+    update_details["password"] = req.body[0].password;
+  }
+  // update employees table
+  pool.query("UPDATE `employees` SET phone_no = ?, email = ?, address1 = ?, address2 = ?, city = ?, state = ?, zipcode = ? WHERE employee_id = ?", [update_details.phone_no, update_details.email, update_details.address1, update_details.address2, update_details.city, update_details.state, update_details.zipcode, req.params.id], (err, data) => {
+    if (err){
+      return res.status(400).json({"message":"Employee details update failed"});
+    }
+  });
+  // update login table
+  pool.query("UPDATE `login` SET username = ?, password = ? WHERE user_id = ? AND user_type = ?", [update_details.username, update_details.password, req.params.id, "E"], (err, data) => {
+    if (err){
+      return res.status(400).json({"message":"Employee details update failed"});
+    }
+  });
+  return res.status(200).json({"message":"Employee details update successful"});
+});
+
+// check login validation
+app.post('/checklogin', (req, res) => {
+  pool.query("select * from login where username = ? and password = ?",[req.body.username, req.body.password] , (err, data) => {
+    if (err){
+      return res.status(400).json({"message":"Login failed"});
+    }
+    if (data.length == 0){
+      return res.status(400).json({"message":"invalid username or password"});
+    }
+    if (data[0].user_type == "E"){
+      pool.query("select * from employees where emp_id = ? and is_active = ?",[data[0].user_id, "Y"], (err, data) => {
+        if (err){
+          return res.status(400).json({"message":"Login failed"});
+        }
+        if (data.length == 0){
+          return res.status(400).json({"message":"account not active"});
+        }
+        return res.status(200).json(data);
+      });
+    } else {
+      pool.query("select * from members where mem_id = ? and is_active = ?",[data[0].user_id, "Y"], (err, data) => {
+        if (err){
+          return res.status(400).json({"message":"Login failed"});
+        }
+        if (data.length == 0){
+          return res.status(400).json({"message":"account not active"});
+        }
+        return res.status(200).json(data);
+      });
     }
   });
 });
+
+//==================================================================================================
