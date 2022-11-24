@@ -516,7 +516,54 @@ app.get("/getAllMem/",(req,res) => {
 
 } );
 
-//get member with id
+
+getMemPersonalDetails = (mem_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from members where mem_id = ?",[mem_id], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+getMemLoginDetails = (mem_id, user_type = 'M') => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from login where user_id = ? and user_type = ?",[mem_id, user_type], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data[0]);
+    });
+  });
+}
+
+
+app.get("/getmemberdetails/:id", async (req, res) => {
+  try {
+    const personal = await getMemPersonalDetails(parseInt(req.params.id));
+    const login = await getMemLoginDetails(parseInt(req.params.id));
+    if (personal && login) {
+      const details = {
+        "personal": personal,
+        "login": login
+      }
+      
+      //res.sendFile('./src/home_loggedIn.html', {root: __dirname});
+      return res.status(200).json(details);
+    }
+    return res.status(200).json({"message":"Member details not found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Member details not found"});
+  }
+});
+
+
+
+
+//get member with id old delete later
 app.get("/getMem/:id",(req,res) => {
   pool.query("SELECT * FROM `members` where mem_id=?", [req.params.id], (err, data) => {
     if (err){
