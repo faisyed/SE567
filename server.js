@@ -679,20 +679,26 @@ insertEvent = (details, type) => {
 insertMember = (details) => {
   return new Promise((resolve, reject) =>{
     pool.query("INSERT INTO `members` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [details.first_name, details.last_name, details.phone_no, details.email, details.address1, details.address2, details.city, details.state, details.zipcode], (err, data) => {
-    if (err){
-      reject(err);
-    }
-    resolve(data);
-  });
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
   });
 }
 
-checkMemberExist = (fname, lname) => {
-  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [fname, lname, "Y"], (err, data) => {
-    if (err){
-      reject(err);
-    }
-    resolve({"member_id": data[0].mem_id});
+checkMemberExist = (fname, lname, email) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select mem_id from `members` where first_name=? and last_name=? and email=? and is_active=?", [fname, lname, email, "Y"], (err, data) => {
+      if (err){
+        reject(err);
+      }
+      if (data.length > 0){
+        resolve({"member_id": data[0].mem_id});
+      } else{
+        resolve();
+      }
+    });
   });
 }
 
@@ -713,7 +719,7 @@ addVisitor = (fname, lname, email, phone) => {
     if (err){
       reject(err);
     }
-    resolve(data);
+    resolve({"visitor_id": data.insertId});
   });
   });
 }
@@ -1028,7 +1034,8 @@ app.post("/makeDonation/", async (req,res) => {
     return res.status(400).json({message: missed_fields});
   }
   try{
-    const memberExist = await checkMemberExist(req.body[0].first_name,req.body[0].last_name);
+    const memberExist = await checkMemberExist(req.body[0].first_name,req.body[0].last_name,req.body[0].email);
+    //extract member id from the result
     if (memberExist){
       const donation = await makeDonation(memberExist.member_id,req.body[0].amount, "M");
       if (donation){
@@ -1047,6 +1054,7 @@ app.post("/makeDonation/", async (req,res) => {
       }
     }
   }catch(err){
+    console.error(err);
     return res.status(400).json({"message":"Donation failed"});
   }
 });
@@ -1856,7 +1864,7 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if (email_type == "purchase_art"){
     var subject = "Artwork Purchase Confirmation";
-    var body = "Dear Member, \n\nThank you for purchasing the art work. Your purchase is successfully proceed. \n\nThank you.";
+    var body = "Dear Member, \n\nThank you for purchasing the art work. Your purchase is successfully processed. \n\nThank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
@@ -1873,7 +1881,7 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if (email_type == "purchase_ticket"){
     var subject = "Ticket Purchase Confirmation";
-    var body = "Dear Member, \n\nThank you for purchasing the ticket. Your purchase is successfully proceed. \n\nThank you.";
+    var body = "Dear Member, \n\nThank you for purchasing the ticket. Your purchase is successfully processed. \n\nThank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
@@ -1925,6 +1933,23 @@ app.post("/sendEmails" , async (req, res) => {
   } else if (email_type == "credentials"){
     var subject = "Art Gallery Login Credentials";
     var body = "Dear Member, \n\nYour username is '" + req.body[0].username + "' and password is '" + req.body[0].password + "'. \n\nThank you.";
+    var email_list = req.body[0].email_list;
+    let mailDetails = {
+      from: 'art.gallery.notifications@gmail.com',
+      to: email_list,
+      subject: subject,
+      text: body
+    };
+    mailTransporter.sendMail(mailDetails, function(err, data) {
+      if(err) {
+          return res.status(400).json({"message":"Email sending failed"});
+      } else {
+          return res.status(200).json({"message":"Email sent successfully"});
+      }
+    });
+  } else if(email_type == "donation"){
+    var subject = "Donation Confirmation";
+    var body = "Dear Member, \n\nThank you for your donation. Your donation is successfully processed. \n\nThank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',

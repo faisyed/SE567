@@ -127,70 +127,67 @@
 					<div class="row">
 						<div class="col-12 col-md-6">
 							<!-- donationBoxWrap -->
-							<div class="donationBoxWrap border px-3 pb-4 px-md-6 pb-md-9 mt-2">
-								<form action="#">
-									<!-- dbHeadingWrap -->
-									<div class="dbHeadingWrap bg-brown mx-n3 px-3 mx-md-n6 px-md-6 py-3 mb-6">
-										<h3 class="text-white mb-0">Make Donation Now</h3>
-									</div>
-									<!-- dbSpentShow -->
-									<div class="dbSpentShow d-flex w-100 text-secondary position-relative mb-4">
-										<strong class="curr text-center position-absolute font-weight-normal border-right d-flex align-items-center justify-content-center bg-grayf7f7f7">$</strong>
-										<input type="text" class="showField" readonly value="50">
-									</div>
-									<!-- dnRadioList -->
-									<ul class="list-unstyled dnRadioList text-secondary text-center d-flex flex-wrap mb-5">
-										<li>
-											<input id="dn1" type="radio" name="donationPay" class="custom-control-input" checked>
-											<label for="dn1">$50.00</label>
-										</li>
-										<li>
-											<input id="dn2" type="radio" name="donationPay" class="custom-control-input">
-											<label for="dn2">$100.00</label>
-										</li>
-										<li>
-											<input id="dn3" type="radio" name="donationPay" class="custom-control-input">
-											<label for="dn3">$150.00</label>
-										</li>
-										<li>
-											<input id="dn4" type="radio" name="donationPay" class="custom-control-input">
-											<label for="dn4">$200.00</label>
-										</li>
-									</ul>
-									<strong class="font-weight-normal d-block h4 fontBase mb-4">Personal Information</strong>
-									<div class="form-row mx-n2">
-										<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
-											<div class="form-group position-relative mb-2">
-												<label class="d-block">
-													<strong class="d-block font-weight-normal mb-1">First Name <span class="text-brown">*</span></strong>
-													<input type="text" class="form-control formControlMedium">
-												</label>
-											</div>
-										</div>
-										<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
-											<div class="form-group position-relative mb-2">
-												<label class="d-block">
-													<strong class="d-block font-weight-normal mb-1">Last Name <span class="text-brown">*</span></strong>
-													<input type="text" class="form-control formControlMedium">
-												</label>
-											</div>
-										</div>
-										<div class="col-12 px-2">
-											<div class="form-group position-relative mb-2">
-												<label class="d-block">
-													<strong class="d-block font-weight-normal mb-1">Email Address <span class="text-brown">*</span></strong>
-													<input type="email" class="form-control formControlMedium">
-												</label>
-											</div>
+							<div class="donationBoxWrap border px-3 pb-4 px-md-6 pb-md-9 mt-2 pt-4">
+								<strong class="font-weight-normal d-block h4 fontBase mb-4">Personal Information</strong>
+								<div class="form-row mx-n2">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">First Name <span class="text-brown">*</span></strong>
+												<input type="text" id="first_name" class="form-control formControlMedium">
+											</label>
 										</div>
 									</div>
-									<!-- dbSpentShow -->
-									<div class="dbSpentShow dbSpentShowII d-flex w-100 text-secondary position-relative mb-4 mt-2">
-										<strong class="curr text-center position-absolute font-weight-normal border-right d-flex align-items-center justify-content-center bg-grayf7f7f7 px-3">Donation Total:</strong>
-										<input type="text" class="showField" readonly value="£50">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Last Name <span class="text-brown">*</span></strong>
+												<input type="text" id="last_name" class="form-control formControlMedium">
+											</label>
+										</div>
 									</div>
-									<input type="submit" class="btn btn-secondary text-uppercase d-block w-100 mt-6" value="donate now">
-								</form>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Email Address <span class="text-brown">*</span></strong>
+												<input type="email" id="email" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Contact No <span class="text-brown">*</span></strong>
+												<input type="text" id="phone" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+								</div>
+								<!-- dnRadioList -->
+								<ul class="list-unstyled dnRadioList text-secondary text-center d-flex flex-wrap mb-5">
+									<li>
+										<input id="dn1" type="radio" name="donationPay" class="custom-control-input" checked>
+										<label for="dn1">$50.00</label>
+									</li>
+									<li>
+										<input id="dn2" type="radio" name="donationPay" class="custom-control-input">
+										<label for="dn2">$100.00</label>
+									</li>
+									<li>
+										<input id="dn3" type="radio" name="donationPay" class="custom-control-input">
+										<label for="dn3">$150.00</label>
+									</li>
+									<li>
+										<input id="dn4" type="radio" name="donationPay" class="custom-control-input">
+										<label for="dn4">$200.00</label>
+									</li>
+								</ul>
+								<!-- dbSpentShow -->
+								<div class="dbSpentShow dbSpentShowII d-flex w-100 text-secondary position-relative mb-4 mt-2">
+									<strong class="curr text-center position-absolute font-weight-normal border-right d-flex align-items-center justify-content-center bg-grayf7f7f7 px-3">Donation Total:</strong>
+									<input type="text" id="total_amount" class="showField w-80" readonly value="50.00">
+								</div>
+								<input type="submit" onclick="donateAmount()" class="btn btn-secondary text-uppercase d-block w-100 mt-6" value="donate now">
 							</div>
 						</div>
 					</div>
@@ -237,5 +234,26 @@
 	<script src="js/popper.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
+	<script src="js/helper.js"></script>
+	<script>
+		let amount = document.querySelector('#total_amount');
+		document.body.addEventListener('change', function(e) {
+			let target = e.target;
+			switch(target.id){
+				case 'dn1':
+					amount.value = '50.00';
+					break;
+				case 'dn2':
+					amount.value = '100.00';
+					break;
+				case 'dn3':
+					amount.value = '150.00';
+					break;
+				case 'dn4':
+					amount.value = '200.00';
+					break;
+			}
+		});
+	</script>
 </body>
 </html>

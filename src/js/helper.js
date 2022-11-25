@@ -250,3 +250,46 @@ async function getCredentials(){
         alert("Error in getting credentials");
     }
 }
+
+async function donateAmount(){
+    var first_name = document.getElementById("first_name").value;
+    var last_name = document.getElementById("last_name").value;
+    var email = document.getElementById("email").value;
+    var phone = document.getElementById("phone").value;
+    var total_amount = document.getElementById("total_amount").value;
+    // convert total_amount to float
+    total_amount = parseFloat(total_amount);
+    try{
+        var url1 = "http://localhost:3000/makeDonation/";
+        var data1 = [{"first_name":first_name,"last_name":last_name,"email":email,"phone":phone,"amount":total_amount}];
+        const config1 = {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify(data1)
+        };
+        var res1 = await fetch(url1, config1);
+        if (res1.status == 200){
+            alert("Donation successful");
+            var url2 = "http://localhost:3000/sendEmails/";
+            var data2 = [{"email_type":"donation","email_list":email}];
+            const config2 = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(data2)
+            };
+            var res2 = await fetch(url2, config2);
+            window.location.assign('./donate.html');
+        } else{
+            console.log(res);
+            alert("Error in donation");
+        }
+    } catch (err) {
+        alert("Error in donating amount");
+    }
+}
