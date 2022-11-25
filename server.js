@@ -718,6 +718,28 @@ getRenewalEmails = () => {
   });
 }
 
+getCredentials = (first_name, last_name, email) => {
+  return new Promise((resolve, reject) => {
+    var found = false;
+    pool.query("select l.username as username, l.password as password from `login` l join `members` m on l.user_id=m.mem_id where l.user_type=? and m.first_name=? and m.last_name=? and m.email=?",["M",first_name,last_name,email],(err, data) => {
+      if (err){
+        reject(err);
+      } if (data.length > 0){
+        found = true;
+        resolve(data);
+      }
+    });
+    if (!found){
+      pool.query("select l.username as username, l.password as password from `login` l join `employees` e on l.user_id=e.emp_id where l.user_type=? and e.first_name=? and e.last_name=? and e.email_id=?",["E",first_name,last_name,email],(err, data) => {
+        if (err){
+          reject(err);
+        }
+        resolve(data);
+      });
+    }
+  });
+
+}
 
 //====================================================================================================
 
@@ -943,12 +965,30 @@ app.get("/getRenewalEmails", async (req,res) => {
   }
 });
 
+
 //==================================================================================================
 
 /*
   Below section of code consists of all the necessary post api calls
 */
 //==================================================================================================
+
+
+app.get("/getCredentials/", async (req,res) => {
+  try{
+    var first_name = req.query.first_name;
+    var last_name = req.query.last_name;
+    var email = req.query.email;
+    const credentials = await getCredentials(first_name,last_name, email);
+    if (credentials){
+      return res.status(200).json(credentials);
+    }
+    return res.status(300).json({"message":"Credentials not found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Error when getting credentials"});
+  }
+});
 
 // make a donation
 app.post("/makeDonation/", async (req,res) => {
@@ -1852,6 +1892,40 @@ app.post("/sendEmails" , async (req, res) => {
   } else if (email_type == "cancel_event"){
     var subject = "Event Cancellation";
     var body = "Dear Member, \n\nThe event you have registered for has been cancelled. Please visit your portal to get more information. \n\nThank you.";
+    var email_list = req.body[0].email_list;
+    let mailDetails = {
+      from: 'art.gallery.notifications@gmail.com',
+      to: email_list,
+      subject: subject,
+      text: body
+    };
+    mailTransporter.sendMail(mailDetails, function(err, data) {
+      if(err) {
+          return res.status(400).json({"message":"Email sending failed"});
+      } else {
+          return res.status(200).json({"message":"Email sent successfully"});
+      }
+    });
+  } else if (email_type == "contact_us_reply"){
+    var subject = "Contact Us Reply";
+    var body = "Dear Member, \n\nThank you for contacting us. We have received your message and will get back to you shortly. \n\nThank you.";
+    var email_list = req.body[0].email_list;
+    let mailDetails = {
+      from: 'art.gallery.notifications@gmail.com',
+      to: email_list,
+      subject: subject,
+      text: body
+    };
+    mailTransporter.sendMail(mailDetails, function(err, data) {
+      if(err) {
+          return res.status(400).json({"message":"Email sending failed"});
+      } else {
+          return res.status(200).json({"message":"Email sent successfully"});
+      }
+    });
+  } else if (email_type == "credentials"){
+    var subject = "Art Gallery Login Credentials";
+    var body = "Dear Member, \n\nYour username is '" + req.body[0].username + "' and password is '" + req.body[0].password + "'. \n\nThank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
