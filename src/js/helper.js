@@ -52,6 +52,12 @@ async function eventDetails(){
     // get event id from url
     var entries = window.location.search.substring(1).split("&");
     var event_id = entries[0].split("=")[1];
+    var show_purchase = entries[1].split("=")[1];
+    if (show_purchase == "true"){
+        document.getElementById("purchase_ticket").style.visibility = "visible";
+    } else {
+        document.getElementById("purchase_ticket").style.visibility = "hidden";
+    }
     var url = "http://localhost:3000/eventdetails/" + event_id;
     try{
         const res = await fetch(url);
@@ -99,6 +105,7 @@ async function setEventList(event_type){
 
 async function getCurrentEvents(event_type){
     var url = "";
+    var show_purchase = true;
     if(event_type == "shows"){
         url = "http://localhost:3000/currentshows";
     } else if(event_type == "exhibitions"){
@@ -121,7 +128,7 @@ async function getCurrentEvents(event_type){
             html+= '<div class="col-12 col-md-6 px-xl-4">';
             html+= '<article class="currExibitColumn mb-6 mb-lg-9 mb-xl-14 mx-auto">';
             html+= '<h2 class="mb-3">'
-            html+= '<a href="javascript:setAndCallEventDetail('+'\''+event_type+'\''+','+data[i].ev_id+')">'+ data[i].ev_name +'</a>';
+            html+= '<a href="javascript:setAndCallEventDetail('+'\''+event_type+'\''+','+data[i].ev_id+','+show_purchase+')">'+ data[i].ev_name +'</a>';
             html+= '</h2>';
             html+= '<time datetime="2011-01-12" class="d-block cecTime text-gray777">'+ date[0] +'</time>'
             html+= '</article>';
@@ -137,6 +144,7 @@ async function getCurrentEvents(event_type){
 
 async function getPastEvents(event_type){
     var url = "";
+    var show_purchase = false;
     if(event_type == "shows"){
         url = "http://localhost:3000/pastshows";
     } else if(event_type == "exhibitions"){
@@ -159,7 +167,7 @@ async function getPastEvents(event_type){
             html+= '<div class="col-12 col-md-6 px-xl-4">';
             html+= '<article class="currExibitColumn mb-6 mb-lg-9 mb-xl-14 mx-auto">';
             html+= '<h2 class="mb-3">'
-            html+= '<a href="javascript:setAndCallEventDetail('+'\''+event_type+'\''+','+data[i].ev_id+')">'+ data[i].ev_name +'</a>';
+            html+= '<a href="javascript:setAndCallEventDetail('+'\''+event_type+'\''+','+data[i].ev_id+','+show_purchase+')">'+ data[i].ev_name +'</a>';
             html+= '</h2>';
             html+= '<time datetime="2011-01-12" class="d-block cecTime text-gray777">'+ date[0] +'</time>'
             html+= '</article>';
@@ -173,13 +181,13 @@ async function getPastEvents(event_type){
     }
 }
 
-async function setAndCallEventDetail(event_type,ev_id){
+async function setAndCallEventDetail(event_type,ev_id,show_purchase){
     if (event_type == "shows"){
-        window.location.assign('./single-show.html?ev_id='+ev_id);
+        window.location.assign('./single-show.html?ev_id='+ev_id+'&show_purchase='+show_purchase);
     } else if (event_type == "exhibitions"){
-        window.location.assign('./single-exhibition.html?ev_id='+ev_id);
+        window.location.assign('./single-exhibition.html?ev_id='+ev_id+'&show_purchase='+show_purchase);
     } else if (event_type == "auctions"){
-        window.location.assign('./single-auction.html?ev_id='+ev_id); 
+        window.location.assign('./single-auction.html?ev_id='+ev_id+'&show_purchase='+show_purchase); 
     }
 }
 
