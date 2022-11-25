@@ -53,10 +53,13 @@ async function eventDetails(){
     var entries = window.location.search.substring(1).split("&");
     var event_id = entries[0].split("=")[1];
     var show_purchase = entries[1].split("=")[1];
-    if (show_purchase == "true"){
-        document.getElementById("purchase_ticket").style.visibility = "visible";
-    } else {
-        document.getElementById("purchase_ticket").style.visibility = "hidden";
+    var element = document.getElementById("purchase_ticket");
+    if (element != null) {
+        if (show_purchase == "true"){
+            document.getElementById("purchase_ticket").style.visibility = "visible";
+        } else {
+            document.getElementById("purchase_ticket").style.visibility = "hidden";
+        }
     }
     var url = "http://localhost:3000/eventdetails/" + event_id;
     try{
