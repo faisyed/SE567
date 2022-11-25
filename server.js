@@ -1495,6 +1495,18 @@ app.post('/updatememberdetails/:id', (req, res) => {
   return res.status(200).json({"message":"Member details updated successfully"});
 });
 
+//get all members -- testing purposes
+app.get("/getAllMem/",(req,res) => {
+  pool.query("SELECT * FROM `members`", (err, data) => {
+    if (err){
+        console.log(err);
+        throw(err);
+    }
+    res.send(data);
+  });
+
+} );
+
 // register a new member
 app.post('/registermember', async (req, res) => {
   // check missing fields
@@ -1540,7 +1552,7 @@ app.post('/registermember', async (req, res) => {
     missing_fields.push("password");
   }
   // if (missing_fields.length > 0){
-  //   console.log("jfskjbdfkjsdbfjksbdkfjsbdfjk")
+  // console.log("jfskjbdfkjsdbfjksbdkfjsbdfjk")
   //   return res.status(400).json({message: missing_fields});
   // }
   try{
