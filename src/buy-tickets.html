@@ -15,7 +15,7 @@
 	<!-- include the site responsive stylesheet -->
 	<link rel="stylesheet" href="css/responsive.css">
 </head>
-<body>
+<body onload="fillTicketDetails()">
 	<!-- pageWrapper -->
 	<div id="pageWrapper">
 		<div class="phStickyWrap phVii w-100">
@@ -165,6 +165,8 @@
 										</div>
 									</div>
 								</div>
+								<p id ="event_type" hidden></p>
+								<p id ="event_id" hidden></p>
 								<h4 class="fontBase mt-7">Choose your Ticket</h4>
                                 <div class="ttTableWrap">
                                     <table class="w-100 ticketTable text-gray777">
@@ -301,6 +303,7 @@
         let adult_subtotal = document.getElementById("adult_subtotal");
         document.body.addEventListener('change', function(e) {
             if (e.target.id == "adult_count") {
+				adult_price = parseFloat(document.getElementById("adult_price").innerHTML);
                 adult_count = parseInt(e.target.value);
                 adult_subtotal.innerHTML = adult_count * adult_price;
             }
@@ -313,6 +316,7 @@
         let senior_subtotal = document.getElementById("senior_subtotal");
         document.body.addEventListener('change', function(e) {
             if (e.target.id == "senior_count") {
+				senior_price = parseFloat(document.getElementById("senior_price").innerHTML);
                 senior_count = parseInt(e.target.value);
                 senior_subtotal.innerHTML = senior_count * senior_price;
             }
@@ -325,6 +329,7 @@
         let student_subtotal = document.getElementById("student_subtotal");
         document.body.addEventListener('change', function(e) {
             if (e.target.id == "student_count") {
+				student_price = parseFloat(document.getElementById("student_price").innerHTML);
                 student_count = parseInt(e.target.value);
                 student_subtotal.innerHTML = student_count * student_price;
             }
@@ -337,12 +342,13 @@
         let other_subtotal = document.getElementById("other_subtotal");
         document.body.addEventListener('change', function(e) {
             if (e.target.id == "other_count") {
+				other_price = parseFloat(document.getElementById("other_price").innerHTML);
                 other_count = parseInt(e.target.value);
                 other_subtotal.innerHTML = other_count * other_price;
             }
             updateTotal();
         });
-		
+
         function updateTotal() {
             let ticket_total = document.getElementById("ticket_total");
             ticket_total.innerHTML = adult_count * adult_price + senior_count * senior_price + student_count * student_price + other_count * other_price;

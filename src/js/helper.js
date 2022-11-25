@@ -64,8 +64,33 @@ async function eventDetails(){
         document.getElementById("ev_date_2").innerText = date[0];
         var location = "Room No. " + data.ev_room_no + ", in " + data.ev_site;
         document.getElementById("ev_loc").innerText = location;
+        document.getElementById("event_id").innerHTML = event_id;
+        document.getElementById("event_price").innerHTML = data.ev_price;
     } catch (err) {
         alert("Error in fetching event details");
+    }
+}
+
+async function fillTicketDetails() {
+    let entries = window.location.search;
+    if (entries != "") {
+        entries = entries.substring(1).split("&");
+        let event_id = entries[0].split("=")[1];
+        let event_price = entries[1].split("=")[1];
+        let event_date = entries[2].split("=")[1];
+        let event_type = entries[3].split("=")[1];
+        event_price = parseFloat(event_price);
+        console.log(event_date);
+        
+        document.getElementById("adult_price").innerHTML = event_price;
+        document.getElementById("adult_subtotal").innerHTML = event_price/2;
+        document.getElementById("senior_price").innerHTML = event_price/2;
+        document.getElementById("other_price").innerHTML = event_price/2;
+        document.getElementById("student_price").innerHTML = (event_price*3)/4;
+
+        document.getElementById("event_id").innerHTML = event_id;
+        document.getElementById("event_type").innerHTML = event_type;
+        document.getElementById("ev_date").value = event_date;
     }
 }
 
@@ -156,6 +181,17 @@ async function setAndCallEventDetail(event_type,ev_id){
         window.location.assign('./single-exhibition.html?ev_id='+ev_id);
     } else if (event_type == "auctions"){
         window.location.assign('./single-auction.html?ev_id='+ev_id); 
+    }
+}
+
+async function purchaseEventTickets(event_type){
+    var ev_id = document.getElementById("event_id").innerHTML;
+    var ev_price = document.getElementById("event_price").innerHTML;
+    var ev_date =  document.getElementById("ev_date_1").innerHTML;
+    if (event_type == "show"){
+        window.location.assign('./buy-tickets.html?ev_id='+ev_id+'&ev_price='+ev_price+'&ev_date='+ev_date+'&ev_type=show');
+    } else if (event_type == "exhibition"){
+        window.location.assign('./buy-tickets.html?ev_id='+ev_id+'&ev_price='+ev_price+'&ev_date='+ev_date+'&ev_type=exhibition');
     }
 }
 
@@ -362,9 +398,12 @@ async function purchaseTickets(){
     // get ticket_total
     var ticket_total = parseFloat(document.getElementById("ticket_total").innerHTML);
 
+    var event_id = document.getElementById("event_id").innerHTML;
+    var event_type = document.getElementById("event_type").innerHTML;
+
     try {
         var url1 = "http://localhost:3000/buyEntryTicket/";
-        var data1 = [{"first_name":first_name,"last_name":last_name,"email":email,"phone":phone,"ev_date":ev_date,"adult_count":adult_count,"child_count":child_count,"senior_count":senior_count,"student_count":student_count,"other_count":other_count,"adult_price":adult_price,"child_price":child_price,"senior_price":senior_price,"student_price":student_price,"other_price":other_price,"ticket_total":ticket_total}];
+        var data1 = [{"first_name":first_name,"last_name":last_name,"email":email,"phone":phone,"ev_date":ev_date,"adult_count":adult_count,"child_count":child_count,"senior_count":senior_count,"student_count":student_count,"other_count":other_count,"adult_price":adult_price,"child_price":child_price,"senior_price":senior_price,"student_price":student_price,"other_price":other_price,"ticket_total":ticket_total,"event_id":event_id,"event_type":event_type}];
         const config1 = {
             headers: {
                 'Content-Type': 'application/json',

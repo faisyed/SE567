@@ -1056,13 +1056,21 @@ app.post("/buyEntryTicket/", async (req,res) => {
   var other_price = req.body[0].other_price;
   
   var ticket_total = req.body[0].ticket_total;
-  var ticket_type = "entry";
+  
+  var event_id = req.body[0].event_id;
+  if (event_id == "" || event_id == null){
+    event_id = null;
+  }
+  var ticket_type = req.body[0].event_type;
+  if (ticket_type == "" || ticket_type == null){
+    ticket_type = "entry";
+  }
   
   try{
     const memberExist = await checkMemberExist(first_name,last_name,email);
     //extract member id from the result
     if (memberExist){
-      pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, memberExist.member_id, "M", ev_date], (err, data) => {
+      pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date, ev_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, memberExist.member_id, "M", ev_date, event_id], (err, data) => {
         if (err){
             return res.status(400).json({"message": "Ticket purchase failed"});
         }
@@ -1079,7 +1087,7 @@ app.post("/buyEntryTicket/", async (req,res) => {
             return res.status(400).json({"message":"Ticket purchase failed"});
         }
         visitor_id = data.insertId;
-        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, visitor_id, "V", ev_date], (err, data) => {
+        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date, ev_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, visitor_id, "V", ev_date, event_id], (err, data) => {
           if (err){
               console.log(err);
               return res.status(400).json({"message":"Ticket purchase failed"});
