@@ -1865,6 +1865,23 @@ app.post("/sendEmails" , async (req, res) => {
           return res.status(200).json({"message":"Email sent successfully"});
       }
     });
+  } else if (email_type == "contact_us_reply"){
+    var subject = "Contact Us Reply";
+    var body = "Dear Member, \n\nThank you for contacting us. We have received your message and will get back to you shortly. \n\nThank you.";
+    var email_list = req.body[0].email_list;
+    let mailDetails = {
+      from: 'art.gallery.notifications@gmail.com',
+      to: email_list,
+      subject: subject,
+      text: body
+    };
+    mailTransporter.sendMail(mailDetails, function(err, data) {
+      if(err) {
+          return res.status(400).json({"message":"Email sending failed"});
+      } else {
+          return res.status(200).json({"message":"Email sent successfully"});
+      }
+    });
   }
 });
 //==================================================================================================

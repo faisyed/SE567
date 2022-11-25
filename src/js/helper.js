@@ -26,6 +26,17 @@ async function submitQuery(){
     try{
         const res = await fetch(url, config);
         if (res.status === 200) {
+            var data = [{email_list: email,email_type:"contact_us_reply"}];
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(data)
+            };
+            var url = "http://localhost:3000/sendEmails/";
+            var email_resp = await fetch(url, config);
             alert("Query Submitted Successfully");
             document.getElementById("query_name").value = "";
             document.getElementById("query_email").value = "";
