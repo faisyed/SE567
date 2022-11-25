@@ -210,3 +210,43 @@ async function sendRenewalMails(){
         alert("Error in sending renewal emails");
     }
 }
+
+async function getCredentials(){
+    var first_name = document.getElementById("first_name").value;
+    var last_name = document.getElementById("last_name").value;
+    var email = document.getElementById("email").value;
+    try{
+        const data = {"first_name":first_name,"last_name":last_name,"email":email};
+        var url = "http://localhost:3000/getCredentials/?" + (new URLSearchParams(data)).toString();
+        // send data to server
+
+        var res1 = await fetch(url);
+        var data1 = await res1.json();
+        if (res1.status == 200){
+            // send the email
+            var url2= "http://localhost:3000/sendEmails/";
+            var data2 = [{"email_type":"credentials","email_list":email,"username":data1[0].username,"password":data1[0].password}];
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(data2)
+            };
+            var res2 = await fetch(url2, config);
+            if (res2.status != 200){
+                alert("Error in sending emails");
+            }else{
+                alert("Credentials sent to email successfully");
+                window.location.assign('./my-account.html');
+            }
+        } else if(res1.status == 300) {
+            alert("Credentials not found");
+        } else{
+            alert("Error in fetching credentials");
+        }
+    } catch (err) {
+        alert("Error in getting credentials");
+    }
+}
