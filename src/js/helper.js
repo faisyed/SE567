@@ -401,7 +401,7 @@ async function purchaseTickets(){
     var event_type = document.getElementById("event_type").innerHTML;
 
     try {
-        var url1 = "http://localhost:3000/buyEntryTicket/";
+        var url1 = "http://localhost:3000/buyTickets/";
         var data1 = [{"first_name":first_name,"last_name":last_name,"email":email,"phone":phone,"ev_date":ev_date,"adult_count":adult_count,"child_count":child_count,"senior_count":senior_count,"student_count":student_count,"other_count":other_count,"adult_price":adult_price,"child_price":child_price,"senior_price":senior_price,"student_price":student_price,"other_price":other_price,"ticket_total":ticket_total,"event_id":event_id,"event_type":event_type}];
         const config1 = {
             headers: {
