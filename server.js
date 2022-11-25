@@ -522,17 +522,6 @@ getMemLoginDetails = (mem_id, user_type = 'M') => {
   });
 }
 
-getEmployeePersonalDetails = (emp_id) => {
-  return new Promise((resolve, reject) => {
-    pool.query("select * from `employees` where `emp_id` = ?",[emp_id], (err, data) => {
-      if (err){
-        reject(err);
-      }
-      resolve(data[0]);
-    });
-  });
-}
-
 getUpComingEmployeeEvents = (emp_id) => {
   return new Promise((resolve, reject) => {
     pool.query("select e.ev_name as name, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.event_employee_map em on e.ev_id = em.ev_id where em.ev_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[emp_id], (err, data) => {
