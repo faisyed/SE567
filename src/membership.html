@@ -139,12 +139,11 @@
 								<!-- bulletList -->
 								<ul class="bulletList bulletListIII list-unstyled mb-8 mb-lg-11">
 									<li>Free entry to gallery during membership period</li>
-									<li>10% discount on all tickets and arts purchased purchased</li>
+									<li>Discounts on all tickets and arts purchased purchased</li>
 									<li>Exclusive access to auctions and fundraisers</li>
-									<li>Complimentary current exhibition catalogues</li>
 								</ul>
 								<div class="row mb-1 align-items-center">
-									<div class="col-12 col-sm-6 d-flex">
+									<div class="col-12 offset-lg-2 col-sm-6 d-flex">
 										<!-- memberColumn -->
 										<article class="memberColumn w-100 border text-center text-gray777 position-relative mb-6 mb-lg-8 ">
 											<header class="mcHead bg-grayf9f9f9 border-bottom">
@@ -152,13 +151,129 @@
 											</header>
 											<div class="descrWrap pt-4 px-4 pb-8">
 												<i class="icnWrap d-flex align-items-center justify-content-center rounded-circle mx-auto icomoon-user mb-3"><span class="sr-only">icon</span></i>
-												<h3 class="mb-4">$80<span class="textSmall fontBase text-gray777">/year</span></h3>
+												<h3 class="mb-4">$100<span class="textSmall fontBase text-gray777">/year</span></h3>
 												<p class="mb-7">Invitations to members-only events, priority registration and discounts, and more.</p>
-												<a href="javascript:void(0);" class="btn text-uppercase btnGre5 btnGre5Outline bdr2">Join Now</a>
+												<a href="javascript:showRegistrationForm();" class="btn text-uppercase btnGre5 btnGre5Outline bdr2">Join Now</a>
 											</div>
 										</article>
 									</div>
 								</div>
+							</div>
+						</div>
+						<div class="col-18 offset-lg-2 col-md-8" id="registerDiv" style="display: none;">
+							<!-- donationBoxWrap -->
+                            <div class="bg-brown py-3 px-lg-5">
+                                <h3 class="text-white mb-0 ml-50">Fill Details To Register</h3>
+                            </div>
+							<div class="donationBoxWrap border px-3 pb-4 px-md-6 pb-md-9 mt-2 pt-4">
+								<strong class="font-weight-normal d-block h4 fontBase mb-4"><b>Personal Information:</b></strong>
+								<div class="form-row mx-n2">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">First Name <span class="text-brown">*</span></strong>
+												<input type="text" id="first_name" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Last Name <span class="text-brown">*</span></strong>
+												<input type="text" id="last_name" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Email Address <span class="text-brown">*</span></strong>
+												<input type="email" id="email" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Contact No <span class="text-brown">*</span></strong>
+												<input type="text" id="phone" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+                                    <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Street Address 1 <span class="text-brown">*</span></strong>
+												<input type="text" id="address1" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Street Address 2</strong>
+												<input type="text" id="address2" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">City <span class="text-brown">*</span></strong>
+												<input type="text" id="city" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">State <span class="text-brown">*</span></strong>
+												<input type="text" id="state" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Zip Code <span class="text-brown">*</span></strong>
+												<input type="text" id="zip" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									
+								</div>
+								<strong class="font-weight-normal d-block h4 fontBase mb-4 pt-5"><b>Login Information:</b></strong>
+								<div class="form-row mx-n1">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Username <span class="text-brown">*</span></strong>
+												<input type="text" id="username" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-row mx-n1">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Password <span class="text-brown">*</span></strong>
+												<input type="password" id="pass" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-row mx-n1">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Confirm Password <span class="text-brown">*</span></strong>
+												<input type="text" id="conf_pass" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+								</div>
+								<input type="submit" onclick="registerNewMember()" class="btn btn-secondary text-uppercase d-block w-100 mt-6" value="Confirm Booking">
 							</div>
 						</div>
 					</div>
@@ -205,5 +320,6 @@
 	<script src="js/popper.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
+	<script src="js/helper.js"></script>
 </body>
 </html>

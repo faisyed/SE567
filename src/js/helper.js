@@ -444,3 +444,112 @@ async function purchaseTickets(){
         alert("Ticket purchase failed");
     }
 }
+
+async function showRegistrationForm(){
+    document.getElementById("registerDiv").style.display = "block";
+}
+
+async function registerNewMember(){
+    var first_name = document.getElementById("first_name").value;
+    var last_name = document.getElementById("last_name").value;
+    var email = document.getElementById("email").value;
+    var phone = document.getElementById("phone").value;
+    var address1 = document.getElementById("address1").value;
+    var address2 = document.getElementById("address2").value;
+    var city = document.getElementById("city").value;
+    var state = document.getElementById("state").value;
+    var zip = document.getElementById("zip").value;
+
+    // validate the fields to be non-empty, null or undefined and send alert if empty
+    if (first_name == "" || first_name == null || first_name == undefined){
+        alert("Please enter first name");
+        return;
+    }
+    if (last_name == "" || last_name == null || last_name == undefined){
+        alert("Please enter last name");
+        return;
+    }
+    if (email == "" || email == null || email == undefined){
+        alert("Please enter email");
+        return;
+    }
+    if (phone == "" || phone == null || phone == undefined){
+        alert("Please enter phone");
+        return;
+    }
+    if (address1 == "" || address1 == null || address1 == undefined){
+        alert("Please enter address1");
+        return;
+    }
+    if (city == "" || city == null || city == undefined){
+        alert("Please enter city");
+        return;
+    }
+    if (state == "" || state == null || state == undefined){
+        alert("Please enter state");
+        return;
+    }
+    if (zip == "" || zip == null || zip == undefined){
+        alert("Please enter zip");
+        return;
+    }
+
+    var username = document.getElementById("username").value;
+    var pass = document.getElementById("pass").value;
+    var conf_pass = document.getElementById("conf_pass").value;
+
+    // validate the fields to be non-empty, null or undefined and send alert if empty
+    if (username == "" || username == null || username == undefined){
+        alert("Please enter username");
+        return;
+    }
+    if (pass == "" || pass == null || pass == undefined){
+        alert("Please enter password");
+        return;
+    }
+    if (conf_pass == "" || conf_pass == null || conf_pass == undefined){
+        alert("Please enter confirm password");
+        return;
+    }
+
+    // validate the password and confirm password fields to be same
+    if (pass != conf_pass){
+        alert("Password and confirm password fields do not match");
+        return;
+    }
+
+    try {
+        var url1 = "http://localhost:3000/registermember/";
+        var data1 = [{"first_name":first_name,"last_name":last_name,"email":email,"phone":phone,"address1":address1,"address2":address2,"city":city,"state":state,"zip":zip,"username":username,"password":pass}];
+        const config1 = {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify(data1)
+        };
+        var res1 = await fetch(url1, config1);
+        if (res1.status == 200){
+            alert("Member registered successfully");
+            var url2 = "http://localhost:3000/sendEmails/";
+            var data2 = [{"email_type":"register","email_list":email}];
+            const config2 = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(data2)
+            };
+            var res2 = await fetch(url2, config2);
+            window.location.assign('./membership.html');
+        } else if(res1.status == 300){
+            alert("username already exists");
+        } else{
+            alert("Member registration failed");
+        }
+    } catch (err) {
+        alert("Registration failed");
+    }
+}

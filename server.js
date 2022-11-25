@@ -678,7 +678,7 @@ insertEvent = (details, type) => {
 
 insertMember = (details) => {
   return new Promise((resolve, reject) =>{
-    pool.query("INSERT INTO `members` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [details.first_name, details.last_name, details.phone_no, details.email, details.address1, details.address2, details.city, details.state, details.zipcode], (err, data) => {
+    pool.query("INSERT INTO `members` (first_name, last_name, phone_no, email, address1, address2, city, state, zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [details.first_name, details.last_name, details.phone, details.email, details.address1, details.address2, details.city, details.state, details.zip], (err, data) => {
       if (err){
         reject(err);
       }
@@ -1353,65 +1353,21 @@ app.post('/updatememberdetails/:id', (req, res) => {
 
 // register a new member
 app.post('/registermember', async (req, res) => {
-  // check missing fields
-  let missing_fields = [];
-  // check if first name is empty, undefined or null
-  if (req.body.first_name == null || req.body.first_name == undefined || req.body.first_name == ""){
-    missing_fields.push("first_name");
-  }
-  // check if last name is empty, undefined or null
-  if (req.body.last_name == null || req.body.last_name == undefined || req.body.last_name == ""){
-    missing_fields.push("last_name");
-  }
-  // check if phone number is empty, undefined or null
-  if (req.body.phone_no == null || req.body.phone_no == undefined || req.body.phone_no == ""){
-    missing_fields.push("phone_no");
-  }
-  // check if email is empty, undefined or null
-  if (req.body.email == null || req.body.email == undefined || req.body.email == ""){
-    missing_fields.push("email");
-  }
-  // check if address1 is empty, undefined or null
-  if (req.body.address1 == null || req.body.address1 == undefined || req.body.address1 == ""){
-    missing_fields.push("address1");
-  }
-  // check if city is empty, undefined or null
-  if (req.body.city == null || req.body.city == undefined || req.body.city == ""){
-    missing_fields.push("city");
-  }
-  // check if state is empty, undefined or null
-  if (req.body.state == null || req.body.state == undefined || req.body.state == ""){
-    missing_fields.push("state");
-  }
-  // check if zipcode is empty, undefined or null
-  if (req.body.zipcode == null || req.body.zipcode == undefined || req.body.zipcode == ""){
-    missing_fields.push("zipcode");
-  }
-  // check if username is empty, undefined or null
-  if (req.body.username == null || req.body.username == undefined || req.body.username == ""){
-    missing_fields.push("username");
-  }
-  // check if password is empty, undefined or null
-  if (req.body.password == null || req.body.password == undefined || req.body.password == ""){
-    missing_fields.push("password");
-  }
-  // if (missing_fields.length > 0){
-  //   console.log("jfskjbdfkjsdbfjksbdkfjsbdfjk")
-  //   return res.status(400).json({message: missing_fields});
-  // }
   try{
     const existMember = await pool.query("SELECT * FROM `login` WHERE username = ?", [req.body.username]);
     if (existMember.length > 0){
-      return res.status(400).json({message: "Username already exists"});
-      }
-    const newMember = await insertMember(req.body);
-    const newLogin = await pool.query("INSERT INTO `login` (username, password, user_id, user_type) VALUES (?, ?, ?, ?)", [req.body.username, req.body.password, newMember.insertId, "M"]);
+      return res.status(300).json({message: "Username already exists"});
+    }
+    const newMember = await insertMember(req.body[0]);
+    const newLogin = await pool.query("INSERT INTO `login` (username, password, user_id, user_type) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, newMember.insertId, "M"]);
+    const master_transaction = await pool.query("INSERT INTO `master_transactions` (tran_type, user_id, user_type, purchase_date, amount) VALUES (?, ?, ?, ?, ?)",["registration", newMember.insertId, "M", new Date(), 100]);
     session.loggedin = true;
 		session.user_id = req.body.user_id;
 		session.user_type = req.body.user_type;
     res.sendFile('./src/home_loggedIn.html', {root: __dirname});
     return res.status(200);
   }catch(err){
+    console.log(err);
       return res.status(400).json({"message":"Member registration failed"});
     }
 });
