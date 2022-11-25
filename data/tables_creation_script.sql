@@ -157,6 +157,13 @@ create table login(
     password text
 );
 
+-- below section of code is used to create table 'renewal_email_list' in database
+create table renewal_email_list(
+	email_id bigint auto_increment primary key,
+    address text,
+    sent varchar(2) default 'N'
+);
+
 -- altering objects table to add auto increment to obj_id and primary key
 ALTER TABLE objects MODIFY obj_id bigint AUTO_INCREMENT PRIMARY KEY;
 
