@@ -77,7 +77,8 @@ app.get('/logout',(req,res) => {
   session.loggedin = false;
   console.log(session, 'session---------')
   res.clearCookie('connect.sid', { path: '/logout' })
-  res.redirect(200, './src/home.html')
+  console.log('./src/home.html', {root: __dirname})
+  return res.sendFile('./src/home.html', {root: __dirname})
 });
 
 
@@ -1713,6 +1714,7 @@ app.post('/checklogin', (req, res) => {
         if (data.length == 0){
           return res.status(400).json({"message":"account not active"});
         }
+        res.sendFile('./src/home_loggedIn.html', {root: __dirname});
         return res.status(200).json(data);
       });
     } else {
@@ -1723,7 +1725,7 @@ app.post('/checklogin', (req, res) => {
         if (data.length == 0){
           return res.status(400).json({"message":"account not active"});
         }
-        return res.status(200).json(data);
+        return res.sendFile('./src/home_loggedIn.html', {root: __dirname});
       });
     }
   });
