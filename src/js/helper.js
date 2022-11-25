@@ -144,7 +144,58 @@ async function setAndCallEventDetail(event_type,ev_id){
     } else if (event_type == "exhibitions"){
         window.location.assign('./single-exhibition.html?ev_id='+ev_id);
     } else if (event_type == "auctions"){
-        window.location.assign('./single-auction.html?ev_id='+ev_id);
+        window.location.assign('./single-auction.html?ev_id='+ev_id); 
     }
 }
 
+async function sendRenewalMails(){
+    try{
+        var url1 = "http://localhost:3000/getRenewalEmails/";
+        const res1 = await fetch(url1);
+        const data1 = await res1.json();
+        // form a list of email addresses
+        var emails = "";
+        for(var i=0; i<data1.length; i++){
+            emails += data1[i].address + ",";
+        }
+        // remove the last comma
+        emails = emails.substring(0, emails.length - 1);
+        const data2 = [{"email_type":"renewal","email_list":emails}];
+        const config1 = {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify(data2)
+        };
+        var url2 = "http://localhost:3000/sendEmails/";
+        // send the email
+        var res2 = await fetch(url2, config1);
+        if (res2.status != 200){
+            alert("Error in sending emails");
+        }
+        // form a list of email ids
+        var data3 = [];
+        for(var i=0; i<data1.length; i++){
+            data3.push({email_id: data1[i].email_id});
+        }
+        const config2 = {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify(data3)
+        };
+        var url3 = "http://localhost:3000/updateEmailStatus/";
+        var res3 = await fetch(url3, config2);
+        if (res3.status != 200){
+            alert("Error in updating email status");
+        }else{
+            alert("Emails sent successfully");
+        }
+    } catch (err) {
+        alert("Error in sending renewal emails");
+    }
+}
