@@ -15,7 +15,7 @@
 	<!-- include the site responsive stylesheet -->
 	<link rel="stylesheet" href="css/responsive.css">
 </head>
-<body>
+<body onload="setEventList('auctions')">
 	<!-- pageWrapper -->
 	<div id="pageWrapper">
 		<div class="phStickyWrap phVii w-100">
@@ -71,7 +71,7 @@
 													<!-- mnDropList -->
 													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
 														<li>
-															<a href="event-list.html">Event</a>
+															<a href="show-list.html">Show</a>
 														</li>
 														<li>
 															<a href="exhibition-list.html">Exhibition</a>
@@ -130,137 +130,15 @@
 						<!-- exhiTabList -->
 						<ul class="nav nav-tabs justify-content-center exhiTabList mt-4 mt-lg-8" role="tablist">
 							<li class="nav-item">
-								<a class="nav-link" id="upcoming-tab" data-toggle="tab" href="#upcoming" role="tab" aria-controls="upcoming" aria-selected="true">Upcoming</a>
+								<a class="nav-link" id="upcoming-tab" data-toggle="tab" href="javascript:getCurrentEvents('auctions');" role="tab" aria-controls="upcoming" aria-selected="true">Upcoming</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link" id="past-tab" data-toggle="tab" href="#past" role="tab" aria-controls="past" aria-selected="false">Past</a>
+								<a class="nav-link" id="past-tab" data-toggle="tab" href="javascript:getPastEvents('auctions')" role="tab" aria-controls="past" aria-selected="false">Past</a>
 							</li>
 						</ul>
 					</header>
 					<!-- tab-content -->
-					<div class="tab-content">
-						<!-- upcoming-tab -->
-						<div class="tab-pane show active fade" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
-							<div class="row mx-xl-n4">
-								<div class="col-12 col-md-6 px-xl-4">
-									<!-- currExibitColumn -->
-									<article class="currExibitColumn mb-6 mb-lg-9 mb-xl-14 mx-auto">
-										<div class="imgHolder mb-3 mb-lg-6">
-											<a href="single-auction.html">
-												<img src="http://placehold.it/365x270" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<strong class="catagoryTitle d-block font-weight-normal text-uppercase mb-2">Auction</strong>
-										<h2 class="mb-3">
-											<a href="single-auction.html">Mutiny: Works by Géricault</a>
-										</h2>
-										<time datetime="2011-01-12" class="d-block cecTime text-gray777">13 Oct 2018 - 15 Feb 2019</time>
-									</article>
-								</div>
-								<div class="col-12 col-md-6 px-xl-4">
-									<!-- currExibitColumn -->
-									<article class="currExibitColumn mb-6 mb-lg-9 mb-xl-14 mx-auto">
-										<div class="imgHolder mb-3 mb-lg-6">
-											<a href="single-auction.html">
-												<img src="http://placehold.it/365x270" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<strong class="catagoryTitle d-block font-weight-normal text-uppercase mb-2">Now On view</strong>
-										<h2 class="mb-3">
-											<a href="single-auction.html">The Upstairs Room of A art Taminiau</a>
-										</h2>
-										<time datetime="2011-01-12" class="d-block cecTime text-gray777">25 Oct 2018 - 10 May 2019</time>
-									</article>
-								</div>
-								<div class="col-12 col-md-6 px-xl-4">
-									<!-- currExibitColumn -->
-									<article class="currExibitColumn mb-6 mb-lg-9 mb-xl-14 mx-auto">
-										<div class="imgHolder mb-3 mb-lg-6">
-											<a href="single-auction.html">
-												<img src="http://placehold.it/365x270" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<strong class="catagoryTitle d-block font-weight-normal text-uppercase mb-2">Auction</strong>
-										<h2 class="mb-3">
-											<a href="single-auction.html">Meaning less Fractions </a>
-										</h2>
-										<time datetime="2011-01-12" class="d-block cecTime text-gray777">18 Sep 2018 - 15 Mar 2019</time>
-									</article>
-								</div>
-								<div class="col-12 col-md-6 px-xl-4">
-									<!-- currExibitColumn -->
-									<article class="currExibitColumn mb-6 mb-lg-9 mb-xl-14 mx-auto">
-										<div class="imgHolder mb-3 mb-lg-6">
-											<a href="single-auction.html">
-												<img src="http://placehold.it/365x270" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<strong class="catagoryTitle d-block font-weight-normal text-uppercase mb-2">Auction</strong>
-										<h2 class="mb-3">
-											<a href="single-auction.html">Romer Young Gallery</a>
-										</h2>
-										<time datetime="2011-01-12" class="d-block cecTime text-gray777">13 Oct 2018 - 15 Feb 2019</time>
-									</article>
-								</div>
-							</div>
-							<div class="btnHolder text-center">
-								<a href="single-auction.html" class="btn laodMore btn-outline-light bdr2 btnLgMinWidth">Load More</a>
-							</div>
-						</div>
-						<!-- past-tab -->
-						<div class="tab-pane fade" id="past" role="tabpanel" aria-labelledby="past-tab">
-							<div class="row mx-xl-n4">
-								<div class="col-12 col-md-6 px-xl-4">
-									<!-- currExibitColumn -->
-									<article class="currExibitColumn mb-6 mb-lg-9 mb-xl-14 mx-auto">
-										<div class="imgHolder mb-3 mb-lg-6">
-											<a href="single-auction.html">
-												<img src="http://placehold.it/365x270" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<strong class="catagoryTitle d-block font-weight-normal text-uppercase mb-2">Now On view</strong>
-										<h2 class="mb-3">
-											<a href="single-auction.html">The Upstairs Room of A art Taminiau</a>
-										</h2>
-										<time datetime="2011-01-12" class="d-block cecTime text-gray777">25 Oct 2018 - 10 May 2019</time>
-									</article>
-								</div>
-								<div class="col-12 col-md-6 px-xl-4">
-									<!-- currExibitColumn -->
-									<article class="currExibitColumn mb-6 mb-lg-9 mb-xl-14 mx-auto">
-										<div class="imgHolder mb-3 mb-lg-6">
-											<a href="single-auction.html">
-												<img src="http://placehold.it/365x270" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<strong class="catagoryTitle d-block font-weight-normal text-uppercase mb-2">Auction</strong>
-										<h2 class="mb-3">
-											<a href="single-auction.html">Meaning less Fractions </a>
-										</h2>
-										<time datetime="2011-01-12" class="d-block cecTime text-gray777">18 Sep 2018 - 15 Mar 2019</time>
-									</article>
-								</div>
-								<div class="col-12 col-md-6 px-xl-4">
-									<!-- currExibitColumn -->
-									<article class="currExibitColumn mb-6 mb-lg-9 mb-xl-14 mx-auto">
-										<div class="imgHolder mb-3 mb-lg-6">
-											<a href="single-auction.html">
-												<img src="http://placehold.it/365x270" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<strong class="catagoryTitle d-block font-weight-normal text-uppercase mb-2">Auction</strong>
-										<h2 class="mb-3">
-											<a href="single-auction.html">Romer Young Gallery</a>
-										</h2>
-										<time datetime="2011-01-12" class="d-block cecTime text-gray777">13 Oct 2018 - 15 Feb 2019</time>
-									</article>
-								</div>
-							</div>
-							<div class="btnHolder text-center">
-								<a href="single-auction.html" class="btn laodMore btn-outline-light bdr2 btnLgMinWidth">Load More</a>
-							</div>
-						</div>
-					</div>
+					<div class="tab-content" id="tab_content"></div>
 				</div>
 			</section>
 		</main>
@@ -304,5 +182,6 @@
 	<script src="js/popper.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
+	<script src="js/helper.js"></script>
 </body>
 </html>
