@@ -15,7 +15,7 @@
 	<!-- include the site responsive stylesheet -->
 	<link rel="stylesheet" href="css/responsive.css">
 </head>
-<body>
+<body onload="eventDetails()">
 	<!-- pageWrapper -->
 	<div id="pageWrapper">
 		<div class="phStickyWrap phVii w-100">
@@ -71,7 +71,7 @@
 													<!-- mnDropList -->
 													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
 														<li>
-															<a href="event-list.html">Event</a>
+															<a href="show-list.html">Show</a>
 														</li>
 														<li>
 															<a href="exhibition-list.html">Exhibition</a>
@@ -118,15 +118,15 @@
 				<div class="container">
 					<!-- scHeadingHead -->
 					<header class="scHeadingHead text-center mb-7 mb-md-10 mb-lg-14">
-						<a href="javascript:void(0);" class="scBtnBack textDecorationNone d-inline-block align-top mb-5 mb-lg-8"><i class="fas fa-angle-left icn"><span class="sr-only">icon</span></i> Back to all Exhibitions</a>
-						<h1 class="mb-5">Palileo Descent VR withtim Creek</h1>
-						<time datetime="2011-01-12" class="d-block scTime text-gray777">13 Oct 2018 - 15 Feb 2019</time>
+						<a href="exhibition-list.html" class="scBtnBack textDecorationNone d-inline-block align-top mb-5 mb-lg-8"><i class="fas fa-angle-left icn"><span class="sr-only">icon</span></i> Back to all Exhibitions</a>
+						<h1 id="ev_name" class="mb-5"></h1>
+						<time id="ev_date_1" datetime="2011-01-12" class="d-block scTime text-gray777"></time>
 					</header>
 					<div class="row">
 						<div class="col-12 col-md-8 mb-6">
 							<!-- eabDescrText -->
 							<div class="eabDescrText eabDescrTextIII fontSerif">
-								<p>Shown for the first time in the United States, this comprehensive collection of ukiyo-e paintings brings the “floating world” and its metropolitan amusements to life.</p>
+								<p id="ev_desc"></p>
 							</div>
 						</div>
 						<div class="col-12 col-md-4">
@@ -135,14 +135,12 @@
 								<dl class="mb-0 scsInfosList text-gray777">
 									<dt class="d-block text-secondary font-weight-normal">Date:</dt>
 									<dd class="d-block mb-5">
-										<time datetime="2011-01-12">13 Oct 2018 - 15 Feb 2019</time>
+										<p id="ev_date_2"></p>
 									</dd>
 									<dt class="d-block text-secondary font-weight-normal">Location:</dt>
-									<dd class="d-block mb-5">Cambridge, MA</dd>
-									<dt class="d-block text-secondary font-weight-normal">Curators:</dt>
-									<dd class="d-block mb-5">Stanlee crew</dd>
-									<dt class="d-block text-secondary font-weight-normal">Duration:</dt>
-									<dd class="d-block mb-5">60 Minutes (approximately)</dd>
+									<dd class="d-block mb-5">
+										<p id="ev_loc"></p>
+									</dd>
 									<a href="javascript:void(0);" class="btn btn-secondary mb-4 text-uppercase d-block w-100">Order Ticket</a>
 								</dl>
 							</aside>
@@ -191,5 +189,6 @@
 	<script src="js/popper.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
+	<script src="js/helper.js"></script>
 </body>
 </html>

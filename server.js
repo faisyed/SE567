@@ -5,6 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { response } = require("express");
 const { resolve } = require("path");
+const nodemailer = require('nodemailer');
 const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
 var MySQLStore = require('express-mysql-session')(sessions);
@@ -25,6 +26,15 @@ const config = {
   user: "admin",
   password: "database567"
 }
+
+var mailTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+      user: 'art.gallery.notifications@gmail.com',
+      pass: 'aqxtcqmodcvtekbw'
+  }
+});
+
 
 const pool = mysql.createPool(config);
 var sessionStore = new MySQLStore({}, pool);
@@ -61,7 +71,7 @@ app.use(express.static(path.join(__dirname, './src')));
 app.use(cookieParser());
 
 
-app.get('/', (req, res) => {      
+app.get('/', (req, res) => {
   if (session.loggedin) {
     // Output username
     res.sendFile('./src/home_loggedIn.html', {root: __dirname});
@@ -77,7 +87,8 @@ app.get('/logout',(req,res) => {
   session.loggedin = false;
   console.log(session, 'session---------')
   res.clearCookie('connect.sid', { path: '/logout' })
-  res.redirect(200, './src/home.html')
+  console.log('./src/home.html', {root: __dirname})
+  return res.sendFile('./src/home.html', {root: __dirname})
 });
 
 
@@ -696,6 +707,18 @@ addVisitor = (fname, lname, email, phone) => {
   });
 }
 
+getRenewalEmails = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select email_id,address from `renewal_email_list` where sent=?",['N'],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+
 //====================================================================================================
 
 /*
@@ -904,6 +927,19 @@ app.get("/getDonations/:id", async (req,res) => {
   }catch(err){
     console.error(err);
     return res.status(400).json({"message":"Donations not found"});
+  }
+});
+
+app.get("/getRenewalEmails", async (req,res) => {
+  try{
+    const emails = await getRenewalEmails();
+    if (emails){
+      return res.status(200).json(emails);
+    }
+    return res.status(200).json({"message":"No emails found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Emails not found"});
   }
 });
 
@@ -1702,6 +1738,7 @@ app.post('/checklogin', (req, res) => {
         if (data.length == 0){
           return res.status(400).json({"message":"account not active"});
         }
+        res.sendFile('./src/home_loggedIn.html', {root: __dirname});
         return res.status(200).json(data);
       });
     } else {
@@ -1712,10 +1749,111 @@ app.post('/checklogin', (req, res) => {
         if (data.length == 0){
           return res.status(400).json({"message":"account not active"});
         }
-        return res.status(200).json(data);
+        return res.sendFile('./src/home_loggedIn.html', {root: __dirname});
       });
     }
   });
 });
 
+app.post("/updateEmailStatus" , async (req, res) => {
+  // loop over request body and update email status
+  for (var i = 0; i < req.body.length; i++){
+    pool.query("update renewal_email_list set sent=? where email_id = ?",['Y', req.body[i].email_id], (err, data) => {
+      if (err){
+        return res.status(400).json({"message":"Email status update failed"});
+      }
+    });
+  }
+  res.status(200).json({"message":"Email status update successful"});
+});
+
+app.post("/sendEmails" , async (req, res) => {
+  var email_type = req.body[0].email_type;
+  if (email_type == "renewal"){
+    var subject = "Membership Renewal Reminder";
+    var body = "Dear Member, \n\nThis is a reminder that your membership is about to expire in 10 days. Please renew your membership to continue enjoying the benefits of being a member of the Art Gallery. \n\nThank you.";
+    var email_list = req.body[0].email_list;
+    let mailDetails = {
+      from: 'art.gallery.notifications@gmail.com',
+      bcc: email_list,
+      subject: subject,
+      text: body
+    };
+    mailTransporter.sendMail(mailDetails, function(err, data) {
+      if(err) {
+          return res.status(400).json({"message":"Email sending failed"});
+      } else {
+          return res.status(200).json({"message":"Email sent successfully"});
+      }
+    });
+  } else if (email_type == "register"){
+    var subject = "Membership Registration Confirmation";
+    var body = "Dear Member, \n\nThank you for registering for the Art Gallery. Your membership is now active. \n\nThank you.";
+    var email_list = req.body[0].email_list;
+    let mailDetails = {
+      from: 'art.gallery.notifications@gmail.com',
+      to: email_list,
+      subject: subject,
+      text: body
+    };
+    mailTransporter.sendMail(mailDetails, function(err, data) {
+      if(err) {
+          return res.status(400).json({"message":"Email sending failed"});
+      } else {
+          return res.status(200).json({"message":"Email sent successfully"});
+      }
+    });
+  } else if (email_type == "purchase_art"){
+    var subject = "Artwork Purchase Confirmation";
+    var body = "Dear Member, \n\nThank you for purchasing the art work. Your purchase is successfully proceed. \n\nThank you.";
+    var email_list = req.body[0].email_list;
+    let mailDetails = {
+      from: 'art.gallery.notifications@gmail.com',
+      to: email_list,
+      subject: subject,
+      text: body
+    };
+    mailTransporter.sendMail(mailDetails, function(err, data) {
+      if(err) {
+          return res.status(400).json({"message":"Email sending failed"});
+      } else {
+          return res.status(200).json({"message":"Email sent successfully"});
+      }
+    });
+  } else if (email_type == "purchase_ticket"){
+    var subject = "Ticket Purchase Confirmation";
+    var body = "Dear Member, \n\nThank you for purchasing the ticket. Your purchase is successfully proceed. \n\nThank you.";
+    var email_list = req.body[0].email_list;
+    let mailDetails = {
+      from: 'art.gallery.notifications@gmail.com',
+      to: email_list,
+      subject: subject,
+      text: body
+    };
+    mailTransporter.sendMail(mailDetails, function(err, data) {
+      if(err) {
+          return res.status(400).json({"message":"Email sending failed"});
+      } else {
+          return res.status(200).json({"message":"Email sent successfully"});
+      }
+    });
+  } else if (email_type == "cancel_event"){
+    var subject = "Event Cancellation";
+    var body = "Dear Member, \n\nThe event you have registered for has been cancelled. Please visit your portal to get more information. \n\nThank you.";
+    var email_list = req.body[0].email_list;
+    let mailDetails = {
+      from: 'art.gallery.notifications@gmail.com',
+      to: email_list,
+      subject: subject,
+      text: body
+    };
+    mailTransporter.sendMail(mailDetails, function(err, data) {
+      if(err) {
+          return res.status(400).json({"message":"Email sending failed"});
+      } else {
+          return res.status(200).json({"message":"Email sent successfully"});
+      }
+    });
+  }
+});
 //==================================================================================================
