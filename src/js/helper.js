@@ -257,6 +257,29 @@ async function donateAmount(){
     var email = document.getElementById("email").value;
     var phone = document.getElementById("phone").value;
     var total_amount = document.getElementById("total_amount").value;
+
+    // validate the fields to be non-empty, null or undefined and send alert if empty
+    if (first_name == "" || first_name == null || first_name == undefined){
+        alert("First name cannot be empty");
+        return;
+    }
+    if (last_name == "" || last_name == null || last_name == undefined){
+        alert("Last name cannot be empty");
+        return;
+    }
+    if (email == "" || email == null || email == undefined){
+        alert("Email cannot be empty");
+        return;
+    }
+    if (phone == "" || phone == null || phone == undefined){
+        alert("Contact No cannot be empty");
+        return;
+    }
+    if (total_amount == "" || total_amount == null || total_amount == undefined){
+        alert("Amount cannot be empty");
+        return;
+    }
+
     // convert total_amount to float
     total_amount = parseFloat(total_amount);
     try{
@@ -286,10 +309,89 @@ async function donateAmount(){
             var res2 = await fetch(url2, config2);
             window.location.assign('./donate.html');
         } else{
-            console.log(res);
-            alert("Error in donation");
+            alert("Donation Transaction failed");
         }
     } catch (err) {
-        alert("Error in donating amount");
+        alert("Donation Transaction failed");
+    }
+}
+
+async function purchaseTickets(){
+    var first_name = document.getElementById("first_name").value;
+    var last_name = document.getElementById("last_name").value;
+    var email = document.getElementById("email").value;
+    var phone = document.getElementById("phone").value;
+    var ev_date = document.getElementById("ev_date").value;
+    
+    // validate the fields to be non-empty, null or undefined and send alert if empty
+    if (first_name == "" || first_name == null || first_name == undefined){
+        alert("Please enter first name");
+        return;
+    }
+    if (last_name == "" || last_name == null || last_name == undefined){
+        alert("Please enter last name");
+        return;
+    }
+    if (email == "" || email == null || email == undefined){
+        alert("Please enter email");
+        return;
+    }
+    if (phone == "" || phone == null || phone == undefined){
+        alert("Please enter phone");
+        return;
+    }
+    if (ev_date == "" || ev_date == null || ev_date == undefined){
+        alert("Please enter event date");
+        return;
+    }
+
+    // get the number of tickets
+    var adult_count = parseInt(document.getElementById("adult_count").value);
+    var child_count = parseInt(document.getElementById("child_count").value);
+    var senior_count = parseInt(document.getElementById("senior_count").value);
+    var student_count = parseInt(document.getElementById("student_count").value);
+    var other_count = parseInt(document.getElementById("other_count").value);
+
+    // get price of tickets
+    var adult_price = parseFloat(document.getElementById("adult_price").innerHTML);
+    var child_price = parseFloat(document.getElementById("child_price").innerHTML);
+    var senior_price = parseFloat(document.getElementById("senior_price").innerHTML);
+    var student_price = parseFloat(document.getElementById("student_price").innerHTML);
+    var other_price = parseFloat(document.getElementById("other_price").innerHTML);
+
+    // get ticket_total
+    var ticket_total = parseFloat(document.getElementById("ticket_total").innerHTML);
+
+    try {
+        var url1 = "http://localhost:3000/buyEntryTicket/";
+        var data1 = [{"first_name":first_name,"last_name":last_name,"email":email,"phone":phone,"ev_date":ev_date,"adult_count":adult_count,"child_count":child_count,"senior_count":senior_count,"student_count":student_count,"other_count":other_count,"adult_price":adult_price,"child_price":child_price,"senior_price":senior_price,"student_price":student_price,"other_price":other_price,"ticket_total":ticket_total}];
+        const config1 = {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify(data1)
+        };
+        var res1 = await fetch(url1, config1);
+        if (res1.status == 200){
+            alert("Tickets purchased successfully");
+            var url2 = "http://localhost:3000/sendEmails/";
+            var data2 = [{"email_type":"purchase_ticket","email_list":email}];
+            const config2 = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(data2)
+            };
+            var res2 = await fetch(url2, config2);
+            window.location.assign('./buy-tickets.html');
+        } else{
+            alert("Ticket purchase failed");
+        }
+    } catch (err) {
+        alert("Ticket purchase failed");
     }
 }

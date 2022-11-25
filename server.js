@@ -1009,30 +1009,6 @@ app.get("/getCredentials/", async (req,res) => {
 
 // make a donation
 app.post("/makeDonation/", async (req,res) => {
-  let missed_fields = [];
-  // check if first name is empty, undefined or null
-  if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == ""){
-    missed_fields.push("Enter first name");
-  }
-  // check if last name is empty, undefined or null
-  if (req.body[0].last_name == null || req.body[0].last_name == undefined || req.body[0].last_name == ""){
-    missed_fields.push("Enter last name");
-  }
-  // check if email is empty, undefined or null
-  if (req.body[0].email == null || req.body[0].email == undefined || req.body[0].email == ""){
-    missed_fields.push("Enter email");
-  }
-  // check if phone is empty, undefined or null
-  if (req.body[0].phone == null || req.body[0].phone == undefined || req.body[0].phone == ""){
-    missed_fields.push("Enter phone");
-  }
-  // check if amount is empty, undefined or null
-  if (req.body[0].amount == null || req.body[0].amount == undefined || req.body[0].amount == ""){
-    missed_fields.push("Enter amount");
-  }
-  if (missed_fields.length > 0){
-    return res.status(400).json({message: missed_fields});
-  }
   try{
     const memberExist = await checkMemberExist(req.body[0].first_name,req.body[0].last_name,req.body[0].email);
     //extract member id from the result
@@ -1060,61 +1036,33 @@ app.post("/makeDonation/", async (req,res) => {
 });
 
 // buy entry ticket
-app.post("/buyEntryTicket/",(req,res) => {
-  let missed_fields = [];
-  // check if first name is empty, undefined or null
-  if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == ""){
-    missed_fields.push("Enter first name");
-  }
-  // check if last name is empty, undefined or null
-  if (req.body[0].last_name == null || req.body[0].last_name == undefined || req.body[0].last_name == ""){
-    missed_fields.push("Enter last name");
-  }
-  // check if email is empty, undefined or null
-  if (req.body[0].email == null || req.body[0].email == undefined || req.body[0].email == ""){
-    missed_fields.push("Enter email");
-  }
-  // check if phone is empty, undefined or null
-  if (req.body[0].phone == null || req.body[0].phone == undefined || req.body[0].phone == ""){
-    missed_fields.push("Enter phone");
-  }
+app.post("/buyEntryTicket/", async (req,res) => {
+  var first_name = req.body[0].first_name;
+  var last_name = req.body[0].last_name;
+  var email = req.body[0].email;
+  
+  var phone = req.body[0].phone;
+  var ev_date = req.body[0].ev_date;
+  
+  var adult_count = req.body[0].adult_count;
+  var child_count = req.body[0].child_count;
+  var senior_count = req.body[0].senior_count;
+  var student_count = req.body[0].student_count;
+  var other_count = req.body[0].other_count;
 
-  if (missed_fields.length > 0){
-    return res.status(400).json({message: missed_fields});
-  }
-  // check if child_count is empty, undefined or null
-  if (req.body[0].child_count == null || req.body[0].child_count == undefined || req.body[0].child_count == ""){
-    req.body[0].child_count = 0;
-  }
-  // check if adult_count is empty, undefined or null
-  if (req.body[0].adult_count == null || req.body[0].adult_count == undefined || req.body[0].adult_count == ""){
-    req.body[0].adult_count = 0;
-  }
-  // check if senior_count is empty, undefined or null
-  if (req.body[0].senior_count == null || req.body[0].senior_count == undefined || req.body[0].senior_count == ""){
-    req.body[0].senior_count = 0;
-  }
-  // check if child_price is empty, undefined or null
-  if (req.body[0].child_price == null || req.body[0].child_price == undefined || req.body[0].child_price == ""){
-    req.body[0].child_price = 0;
-  }
-  // check if adult_price is empty, undefined or null
-  if (req.body[0].adult_price == null || req.body[0].adult_price == undefined || req.body[0].adult_price == ""){
-    req.body[0].adult_price = 0;
-  }
-  // check if senior_price is empty, undefined or null
-  if (req.body[0].senior_price == null || req.body[0].senior_price == undefined || req.body[0].senior_price == ""){
-    req.body[0].senior_price = 0;
-  }
-
-  // calculate total amount
-  var total_amount = req.body[0].child_count*req.body[0].child_price + req.body[0].adult_count*req.body[0].adult_price+req.body[0].senior_count*req.body[0].senior_price;
+  var adult_price = req.body[0].adult_price;
+  var senior_price = req.body[0].senior_price;
+  var student_price = req.body[0].student_price;
+  var other_price = req.body[0].other_price;
+  
+  var ticket_total = req.body[0].ticket_total;
   var ticket_type = "entry";
-  // check if user exists as a member
-  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [req.body[0].first_name, req.body[0].last_name, "Y"], (err, data) => {
-    // if user is a member, insert ticket into tickets table
-    if (data.length > 0){
-      pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, child_price, adult_price, senior_price, total_amount, user_id, user_type) VALUES (?,?,?,?,?,?,?,?,?,?)", [ ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, total_amount, data[0].mem_id, "M"], (err, data) => {
+  
+  try{
+    const memberExist = await checkMemberExist(first_name,last_name,email);
+    //extract member id from the result
+    if (memberExist){
+      pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, memberExist.member_id, "M", ev_date], (err, data) => {
         if (err){
             return res.status(400).json({"message": "Ticket purchase failed"});
         }
@@ -1127,18 +1075,23 @@ app.post("/buyEntryTicket/",(req,res) => {
       var visitor_id = 0;
       pool.query("INSERT INTO `visitors` (first_name, last_name, email, phone_no) VALUES (?,?,?,?)", [req.body[0].first_name, req.body[0].last_name, req.body[0].email, req.body[0].phone], (err, data) => {
         if (err){
+            console.log(err);
             return res.status(400).json({"message":"Ticket purchase failed"});
         }
         visitor_id = data.insertId;
-        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, child_price, adult_price, senior_price, total_amount, user_id, user_type) VALUES (?,?,?,?,?,?,?,?,?,?)", [ ticket_type, req.body[0].child_count, req.body[0].adult_count, req.body[0].senior_count, req.body[0].child_price, req.body[0].adult_price, req.body[0].senior_price, total_amount, visitor_id, "V"], (err, data) => {
+        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, visitor_id, "V", ev_date], (err, data) => {
           if (err){
+              console.log(err);
               return res.status(400).json({"message":"Ticket purchase failed"});
           }
           return res.status(200).json({"message":"Ticket purchase successful"});
         });
       });
     }
-  });
+  } catch(err){
+    console.log(err);
+    return res.status(400).json({"message":"Ticket purchase failed"});
+  }
 });
 
 // buy show ticket

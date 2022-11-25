@@ -223,3 +223,15 @@ begin
 	update members set is_active = 'N' where renewed_date+interval 1 year<curdate();
 end$$
 DELIMITER ;
+
+-- dropping child_price coulmn from ticket_transactions table
+alter table ticket_transactions
+drop column child_price;
+
+-- adding new columns to ticket_transactions table
+alter table db_se_567.ticket_transactions
+add student_count int default 0,
+add other_count int default 0,
+add student_price double,
+add other_price double,
+add event_date date;
