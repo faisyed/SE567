@@ -67,7 +67,7 @@ const getArts = (filter, filter_value) => {
                   					<img src=${fruit.url} class="img-fluid d-block" alt="image description">
                   				</a>
                   			</div>
-                  			<h2 class="mb-1"><a href="javascript:void(0);">${fruit.title}</a></h2>
+                  			<h2 class="mb-1"><a href="single-works.html?id=${fruit.id}">${fruit.title}</a></h2>
                   			<h3 class="fontAlter text-gray777 mb-0">${fruit.author}</h3>
                   		</article>
                   	</div>`
@@ -185,4 +185,30 @@ const getArt = () => {
     }
 
     getPage();
+}
+
+const payment = async () => {
+  console.log("rtyuikm cfghuil");
+  try {
+        await fetch('http://localhost:3000/loadPayPal')
+        .then(res => {
+              if (res.status == 200) {
+                  return res.json();
+              } else {
+                throw new Error(res.status);
+              }
+        })
+        .then(json => {
+          sessionStorage.setItem("access_token", json.access_token);
+          sessionStorage.setItem("client_token", json.client_token);
+          sessionStorage.setItem("client_id", json.client_id);
+        })
+
+  } catch(error) {
+    console.log(error)
+  }
+  
+  const price = document.getElementById("price").innerHTML;
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  window.location.assign(`./payment.html?id=${urlSearchParams.get("id")}&pay=${price}`);
 }
