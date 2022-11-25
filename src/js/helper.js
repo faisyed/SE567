@@ -52,7 +52,6 @@ async function eventDetails(){
     // get event id from url
     var entries = window.location.search.substring(1).split("&");
     var event_id = entries[0].split("=")[1];
-    console.log(event_id);
     var url = "http://localhost:3000/eventdetails/" + event_id;
     try{
         const res = await fetch(url);
