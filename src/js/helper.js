@@ -572,6 +572,10 @@ async function getMemberPortalDetails() {
         document.getElementById("zip").value = data1.personal.zipcode;
         document.getElementById("username").value = data1.login.username;
         document.getElementById("pass").value = data1.login.password;
+        let renew_date = data1.personal.renewed_date;
+        renew_date = renew_date.split("T")[0];
+        document.getElementById("renew_date").value = renew_date;
+        document.getElementById("member_id").innerText = data1.personal.mem_id;
 
         // get total donations
         let url2 = "http://localhost:3000/getDonations/" + member_id;
@@ -635,7 +639,7 @@ async function getMemberPortalDetails() {
 }
 
 async function updatePersonalDetails(user_type) {
-    var member_id = 27;
+    var member_id = parseInt(document.getElementById("member_id").innerText);
 
     var email = document.getElementById("email").value;
     var phone = document.getElementById("phone").value;
@@ -655,10 +659,6 @@ async function updatePersonalDetails(user_type) {
     }
     if (address1 == "" || address1 == null || address1 == undefined){
         alert("Please enter address1");
-        return;
-    }
-    if (address2 == "" || address2 == null || address2 == undefined){
-        alert("Please enter address2");
         return;
     }
     if (city == "" || city == null || city == undefined){
@@ -718,7 +718,7 @@ async function updatePersonalDetails(user_type) {
 }
 
 async function updateLoginDetails(user_type) {
-    var member_id = 27;
+    var member_id = parseInt(document.getElementById("member_id").innerText);
 
     var username = document.getElementById("username").value;
     var pass = document.getElementById("pass").value;

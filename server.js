@@ -1294,11 +1294,7 @@ app.post('/updatememberdetails/:id', (req, res) => {
     update_details["address1"]=req.body[0].address1;
   }
   // check if address2 is empty, undefined or null
-  if (req.body[0].address2 == null || req.body[0].address2 == undefined || req.body[0].address2 == ""){
-    update_details["address2"]=old_details.address2;
-  }else{
-    update_details["address2"]=req.body[0].address2;
-  }
+  update_details["address2"]=req.body[0].address2;
   // check if city is empty, undefined or null
   if (req.body[0].city == null || req.body[0].city == undefined || req.body[0].city == ""){
     update_details["city"]=old_details.city;
