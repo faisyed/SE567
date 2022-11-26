@@ -818,6 +818,7 @@ app.get('/getupcomingemployeeevents/:id', async (req, res) => {
 // get upcoming events for member
 app.get('/getupcomingevents/:id', async (req, res) => {
   try{
+    console.log("id",req.params.id);
     const events = await getUpComingMemberEvents(parseInt(req.params.id));
     if (events){
       return res.status(200).json(events);
@@ -960,7 +961,7 @@ app.get("/getDonations/:id", async (req,res) => {
   try{
     const donations = await getTotalDonations(parseInt(req.params.id));
     if (donations){
-      return res.status(200).json({"Total_Donations":donations});
+      return res.status(200).json({"total_donations":donations});
     }
     return res.status(200).json({"message":"No donations found"});
   }catch(err){

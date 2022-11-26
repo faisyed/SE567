@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- set the encoding of your site -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- set the page title -->
+	<title>Art Gallery</title>
+	<!-- inlcude google archivo & lora font cdn link -->
+	<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Muli:ital@0;1&family=Merriweather&display=swap" rel="stylesheet">
+	<!-- include the site bootstrap stylesheet -->
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<!-- include the site stylesheet -->
+	<link rel="stylesheet" href="style.css">
+	<!-- include the site responsive stylesheet -->
+	<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body onload="getMemberPortalDetails()">
+	<!-- pageWrapper -->
+	<div id="pageWrapper">
+		<div class="phStickyWrap phVii w-100">
+			<!-- pageHeader -->
+			<header id="pageHeader" class="position-absolute w-100 bg-white">
+				<!-- hdHolder -->
+				<div class="hdHolder headerFixer">
+					<div class="container">
+						<!-- navbar -->
+						<nav class="navbar navbar-expand-md navbar-light d-block px-0 pt-2 pb-2 pt-md-2 pb-md-2 pt-lg-4 pb-lg-5">
+							<div class="row">
+								<div class="col-5 col-sm-3 col-lg-2">
+									<div class="logo logoVii mt-lg-1">
+										<a href="home.html">
+											<img src="images/art-gallery.png" class="img-fluid" alt="Art Gallery">
+										</a>
+									</div>
+								</div>
+								<div class="col-7 col-sm-9 col-lg-10 position-static d-flex justify-content-end pt-lg-1">
+									<!-- navbar collapse -->
+									<div class="collapse navbar-collapse pageNavigationCollapse pageNavigationCollapseVii justify-content-md-end" id="pageNavigationCollapse">
+										<!-- mainNavigation -->
+										<ul class="navbar-nav mainNavigation mainNavigationVii text-capitalize">
+											<li class="nav-item dropdown">
+												<a class="nav-link" href="home.html" aria-haspopup="true" aria-expanded="false">Home</a>
+											</li>
+											<li class="nav-item active dropdown">
+												<a class="nav-link" href="javascript:void(0);" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Visit</a>
+												<!-- dropdown menu -->
+												<div class="dropdown-menu mndDropMenu p-0">
+													<!-- mnDropList -->
+													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
+														<li><a  href="visit-us-block.html">Plan Your Visit</a></li>
+														<li><a  href="visit-us-block.html">Hours &amp; Admission</a></li>
+														<li><a  href="visit-us-block.html">Accessibility</a></li>
+														<li><a  href="visit-us-block.html">Other Facilities</a></li>
+														<li><a  href="buy-tickets.html">Purchase Tickets</a></li>
+													</ul>
+													<!-- mndAdress -->
+													<address class="mndAdress position-absolute text-gray888 mb-0">
+														<strong class="d-block mb-1 mndaTitle font-weight-normal fontSerif text-graydfdfdf">Hours</strong>
+														<p class="mb-5"><time datetime="2011-01-12">Daily 9.30 am–6.00 pm</time></p>
+														<strong class="d-block mndaTitle font-weight-normal mb-1 fontSerif text-graydfdfdf">Location</strong>
+														<p class="mb-5">160 Frelinghuysen Rd, Piscataway, NJ, 08854</p>
+													</address>
+												</div>
+											</li>
+											<li class="nav-item dropdown">
+												<a class="nav-link" href="javascript:void(0);" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">What’s On</a>
+												<!-- dropdown menu -->
+												<div class="dropdown-menu mndDropMenu dropdownMenu mndDropMenuSmall p-0">
+													<!-- mnDropList -->
+													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
+														<li>
+															<a href="show-list.html">Show</a>
+														</li>
+														<li>
+															<a href="exhibition-list.html">Exhibition</a>
+														</li>
+														<li>
+															<a href="auction-list.html">Auction</a>
+														</li>
+														<li>
+															<a href="collection.html">Collection</a>
+														</li>
+														<li>
+															<a href="gallery-list.html">Image Gallery</a>
+														</li>
+													</ul>
+												</div>
+											</li>
+											<li class="nav-item dropdown">
+												<a class="nav-link" href="javascript:void(0);" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">About</a>
+												<!-- dropdown menu -->
+												<div class="dropdown-menu mndDropMenu mndDropMenuSmall p-0">
+													<!-- mnDropList -->
+													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
+														<li><a  href="contact-us.html">Contact Us</a></li>
+														<li><a  href="membership.html">Membership</a></li>
+														<li><a  href="donate.html">Donate</a></li>
+													</ul>
+												</div>
+											</li>
+											<li class="nav-item">
+												<a class="nav-link" href="my-account.html" aria-haspopup="true" aria-expanded="false">My Account</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</nav>
+					</div>
+				</div>
+			</header>
+		</div>
+		<main>
+			<!-- scrollToNav -->
+			<nav class="scrollToNav text-gray777 pt-2 pb-2 pt-lg-4 pb-lg-4">
+				<div class="container">
+					<ul class="list-unstyled mb-0 d-flex justify-content-start">
+						<li class="active"><a href="#personal_details">Personal Details</a></li>
+						<li><a href="#login_details">Login Details</a></li>
+						<li><a href="#upcoming_events">Upcoming Events</a></li>
+                        <li><a href="#ticket_transactions">Ticket Transactions</a></li>
+                        <li><a href="#art_transactions">Art Transactions</a></li>
+					</ul>
+				</div>
+			</nav>
+			<div class="container pt-7 pb-7 pt-lg-13 pb-lg-10 pt-xl-20 pb-xl-14">
+				<!-- vistiTwoColumn -->
+				<section id="personal_details" class="vistiTwoColumn">
+					<div class="row">
+						<div class="col-12 col-md-6">
+							<div class="pr-md-5 pr-lg-10 pr-xl-17">
+								<h2 class="h2Medium mb-4 mb-md-7 mb-lg-10">Personal Details</h2>
+							</div>
+						</div>
+                        <div class="donationBoxWrap border px-3 pb-4 px-md-6 pb-md-9 pt-4">
+                            <div class="form-row mx-n2">
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">First Name</strong>
+                                            <input type="text" id="first_name" class="form-control formControlMedium" readonly>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">Last Name</strong>
+                                            <input type="text" id="last_name" class="form-control formControlMedium" readonly>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">Email Address <span class="text-brown">*</span></strong>
+                                            <input type="email" id="email" class="form-control formControlMedium">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">Contact No <span class="text-brown">*</span></strong>
+                                            <input type="text" id="phone" class="form-control formControlMedium">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">Street Address 1 <span class="text-brown">*</span></strong>
+                                            <input type="text" id="address1" class="form-control formControlMedium">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">Street Address 2</strong>
+                                            <input type="text" id="address2" class="form-control formControlMedium">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">City <span class="text-brown">*</span></strong>
+                                            <input type="text" id="city" class="form-control formControlMedium">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">State <span class="text-brown">*</span></strong>
+                                            <input type="text" id="state" class="form-control formControlMedium">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">Zip Code <span class="text-brown">*</span></strong>
+                                            <input type="text" id="zip" class="form-control formControlMedium">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">Total Donations</strong>
+                                            <input type="text" id="donations" class="form-control formControlMedium" readonly>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row mx-n1">
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <input type="submit" onclick="updatePersonalDetails()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Update Personal Details">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+					</div>
+				</section>
+				<hr class="my-8 my-lg-14">
+				<!-- vistiTwoColumn -->
+				<section id="login_details" class="vistiTwoColumn">
+					<div class="row">
+						<div class="col-12 col-md-6">
+							<div class="pr-md-5 pr-lg-10 pr-xl-17">
+								<h2 class="h2Medium mb-4 mb-md-7 mb-lg-10">Login Details</h2>
+							</div>
+						</div>
+						<div class="col-12 col-md-6 pt-md-2">
+                            <div class="form-row mx-n1">
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">Username <span class="text-brown">*</span></strong>
+                                            <input type="text" id="username" class="form-control formControlMedium" readonly>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row mx-n1">
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <strong class="d-block font-weight-normal mb-1">Password <span class="text-brown">*</span></strong>
+                                            <input type="text" id="pass" class="form-control formControlMedium">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row mx-n1">
+                                <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                    <div class="form-group position-relative mb-2">
+                                        <label class="d-block">
+                                            <input type="submit" onclick="updateLoginDetails()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Update Login Details">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+						</div>
+					</div>
+				</section>
+				<hr class="my-8 my-lg-14">
+				<!-- vistiTwoColumn -->
+				<section id="upcoming_events" class="vistiTwoColumn">
+					<div class="row">
+						<div class="col-12 col-md-6">
+							<div class="pr-md-5 pr-lg-10 pr-xl-17">
+								<h2 class="h2Medium mb-4 mb-md-7 mb-lg-10">Upcoming Events</h2>
+							</div>
+						</div>
+						<div class="col-12 col-md-6 pt-md-2">
+							<table id ="event_tables" class="apDataTable w-100 mt-5 mb-9">
+								<tbody>
+                                    <tr>
+										<td style="width: 67%;"><b>Name</b></td>
+										<td style="width: 15%;"><b>Type</b></td>
+                                        <td style="width: 18%;"><b>Date</b></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</section>
+                <hr class="my-8 my-lg-14">
+                <section id="ticket_transactions" class="vistiTwoColumn">
+					<div class="row">
+						<div class="col-12 col-md-6">
+							<div class="pr-md-5 pr-lg-10 pr-xl-17">
+								<h2 class="h2Medium mb-4 mb-md-7 mb-lg-10">Ticket Transactions</h2>
+							</div>
+						</div>
+						<div class="col-12 col-md-6 pt-md-2">
+							<table id ="ticket_tables" class="apDataTable w-100 mt-5 mb-9">
+								<tbody>
+                                    <tr>
+										<td style="width: 67%;"><b>Name</b></td>
+										<td style="width: 15%;"><b>Amount</b></td>
+                                        <td style="width: 18%;"><b>Date</b></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</section>
+                <hr class="my-8 my-lg-14">
+                <section id="art_transactions" class="vistiTwoColumn">
+					<div class="row">
+						<div class="col-12 col-md-6">
+							<div class="pr-md-5 pr-lg-10 pr-xl-17">
+								<h2 class="h2Medium mb-4 mb-md-7 mb-lg-10">Art Transactions</h2>
+							</div>
+						</div>
+						<div class="col-12 col-md-6 pt-md-2">
+							<table id ="shop_tables" class="apDataTable w-100 mt-5 mb-9">
+								<tbody>
+                                    <tr>
+										<td style="width: 67%;"><b>Title</b></td>
+										<td style="width: 15%;"><b>Amount</b></td>
+                                        <td style="width: 18%;"><b>Date</b></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</section>
+			</div>
+		</main>
+		<!-- ftAreaWrap -->
+		<div class="ftAreaWrap bg-secondary text-gray888">
+			<!-- footerAside -->
+			<aside class="footerAside pt-6 text-center text-md-left">
+				<div class="container">
+					<div class="row">
+						<div class="col-12 col-md-3 mb-6">
+							<!-- ftLogo -->
+							<div class="ftLogo mt-1 mx-auto mx-md-0">
+								<a href="home.html">
+									<img src="images/art-gallery.png" class="img-fluid" alt="Art Gallery">
+								</a>
+							</div>
+						</div>
+						<div class="col-12 col-md-3 mb-6">
+							<h3 class="text-white mb-4">Address</h3>
+							<!-- ftAdr -->
+							<address class="ftAdr mb-2 mb-md-5">160 Frelinghuysen Rd, Piscataway, NJ, US, 08854</address>
+						</div>
+						<div class="col-12 col-md-3 mb-6">
+							<h3 class="text-white mb-4">Hours</h3>
+							<time datetime="2011-01-12" class="d-block mb-3">Daily 9.30 am–6.00 pm</time>
+						</div>
+						<div class="col-12 col-md-3 mb-6">
+							<h3 class="text-white mb-4">Contact Us</h3>
+							<!-- ftContactList -->
+							<ul class="list-unstyled ftContactList mb-0 mb-md-3">
+								<li>
+									<a href="tel:18483916245">1 (848) 391-6245</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</aside>
+		</div>
+	</div>
+	<script src="js/popper.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
+    <script src="js/helper.js"></script>
+</body>
+</html>

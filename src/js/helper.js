@@ -553,3 +553,83 @@ async function registerNewMember(){
         alert("Registration failed");
     }
 }
+
+async function getMemberPortalDetails() {
+    var member_id = 27;
+    // getting personal details
+    try {
+        let url1 = "http://localhost:3000/getmemberdetails/" + member_id;
+        let res1 = await fetch(url1);
+        let data1 = await res1.json();
+        document.getElementById("first_name").value = data1.personal.first_name;
+        document.getElementById("last_name").value = data1.personal.last_name;
+        document.getElementById("email").value = data1.personal.email;
+        document.getElementById("phone").value = data1.personal.phone;
+        document.getElementById("address1").value = data1.personal.address1;
+        document.getElementById("address2").value = data1.personal.address2;
+        document.getElementById("city").value = data1.personal.city;
+        document.getElementById("state").value = data1.personal.state;
+        document.getElementById("zip").value = data1.personal.zip;
+        document.getElementById("username").value = data1.login.username;
+        document.getElementById("pass").value = data1.login.password;
+
+        // get total donations
+        let url2 = "http://localhost:3000/getDonations/" + member_id;
+        let res2 = await fetch(url2);
+        let data2 = await res2.json();
+        document.getElementById("donations").value = data2.total_donations.total_donations;
+
+        // get upcoming events
+        let url3 = "http://localhost:3000/getupcomingevents/" + member_id;
+        let res3 = await fetch(url3);
+        let data3 = await res3.json();
+        let table1 = document.getElementById("event_tables");
+        for (let i = 0; i < data3.length; i++) {
+            let row = table1.insertRow(i + 1);
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let ev_date = data3[i].event_date;
+            ev_date = ev_date.split("T")[0];
+            cell1.innerHTML = data3[i].name;
+            cell2.innerHTML = data3[i].type;
+            cell3.innerHTML = ev_date;
+        }
+
+        // get past transactions
+        let url4 = "http://localhost:3000/getlastpurchasedtickets/" + member_id;
+        let res4 = await fetch(url4);
+        let data4 = await res4.json();
+        let table2 = document.getElementById("ticket_tables");
+        for (let i = 0; i < data4.length; i++) {
+            let row = table2.insertRow(i + 1);
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let ev_date = data4[i].purchase_date;
+            ev_date = ev_date.split("T")[0];
+            cell1.innerHTML = data4[i].ticket_for;
+            cell2.innerHTML = data4[i].amount;
+            cell3.innerHTML = ev_date;
+        }
+
+        // get last shoped arts
+        let url5 = "http://localhost:3000/getlastpurchasedarts/" + member_id;
+        let res5 = await fetch(url5);
+        let data5 = await res5.json();
+        let table3 = document.getElementById("shop_tables");
+        for (let i = 0; i < data5.length; i++) {
+            let row = table3.insertRow(i + 1);
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let ev_date = data5[i].purchase_date;
+            ev_date = ev_date.split("T")[0];
+            cell1.innerHTML = data5[i].title;
+            cell2.innerHTML = data5[i].amount;
+            cell3.innerHTML = ev_date;
+        }
+    } catch (err) {
+        alert("Error in loading portal page. Please try again later");
+    }
+}
