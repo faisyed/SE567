@@ -564,12 +564,12 @@ async function getMemberPortalDetails() {
         document.getElementById("first_name").value = data1.personal.first_name;
         document.getElementById("last_name").value = data1.personal.last_name;
         document.getElementById("email").value = data1.personal.email;
-        document.getElementById("phone").value = data1.personal.phone;
+        document.getElementById("phone").value = data1.personal.phone_no;
         document.getElementById("address1").value = data1.personal.address1;
         document.getElementById("address2").value = data1.personal.address2;
         document.getElementById("city").value = data1.personal.city;
         document.getElementById("state").value = data1.personal.state;
-        document.getElementById("zip").value = data1.personal.zip;
+        document.getElementById("zip").value = data1.personal.zipcode;
         document.getElementById("username").value = data1.login.username;
         document.getElementById("pass").value = data1.login.password;
 
@@ -631,5 +631,140 @@ async function getMemberPortalDetails() {
         }
     } catch (err) {
         alert("Error in loading portal page. Please try again later");
+    }
+}
+
+async function updatePersonalDetails(user_type) {
+    var member_id = 27;
+
+    var email = document.getElementById("email").value;
+    var phone = document.getElementById("phone").value;
+    var address1 = document.getElementById("address1").value;
+    var address2 = document.getElementById("address2").value;
+    var city = document.getElementById("city").value;
+    var state = document.getElementById("state").value;
+    var zip = document.getElementById("zip").value;
+
+    if (email == "" || email == null || email == undefined){
+        alert("Please enter email");
+        return;
+    }
+    if (phone == "" || phone == null || phone == undefined){
+        alert("Please enter phone");
+        return;
+    }
+    if (address1 == "" || address1 == null || address1 == undefined){
+        alert("Please enter address1");
+        return;
+    }
+    if (address2 == "" || address2 == null || address2 == undefined){
+        alert("Please enter address2");
+        return;
+    }
+    if (city == "" || city == null || city == undefined){
+        alert("Please enter city");
+        return;
+    }
+    if (state == "" || state == null || state == undefined){
+        alert("Please enter state");
+        return;
+    }
+    if (zip == "" || zip == null || zip == undefined){
+        alert("Please enter zip");
+        return;
+    }
+    
+    let data1 = [{
+        email: email,
+        phone: phone,
+        address1: address1,
+        address2: address2,
+        city: city,
+        state: state,
+        zip: zip
+    }]
+
+    let config1 = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+        },
+        body: JSON.stringify(data1)
+    }
+    try {
+        let url1 = "http://localhost:3000/updatememberdetails/" + member_id;
+        let res1 = await fetch(url1, config1);
+        if (res1.status == 200) {
+            alert("Personal details updated successfully");
+            // send update details mail
+            let url2 = "http://localhost:3000/sendEmails/";
+            var data3 = [{"email_type":"update_details","email_list":email}];
+            const config2 = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(data3)
+            };
+            var res2 = await fetch(url2, config2);
+        } else {
+            alert("Personal details update failed. Please try again later");
+        }
+    } catch (err) {
+        alert("Personal details update failed. Please try again later");
+    }
+}
+
+async function updateLoginDetails(user_type) {
+    var member_id = 27;
+
+    var username = document.getElementById("username").value;
+    var pass = document.getElementById("pass").value;
+
+    var email = document.getElementById("email").value;
+
+    if (pass == "" || pass == null || pass == undefined){
+        alert("Please enter password");
+        return;
+    }
+
+    let data1 = [{
+        username: username,
+        password: pass,
+        user_type: user_type
+    }]
+
+    let config1 = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+        },
+        body: JSON.stringify(data1)
+    }
+    try {
+        let url1 = "http://localhost:3000/updatelogindetails/" + member_id;
+        let res1 = await fetch(url1, config1);
+        if (res1.status == 200) {
+            alert("Login details updated successfully");
+            // send update details mail
+            let url2 = "http://localhost:3000/sendEmails/";
+            var data3 = [{"email_type":"update_details","email_list":email}];
+            const config2 = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(data3)
+            };
+            var res2 = await fetch(url2, config2);
+        } else {
+            alert("Login details update failed. Please try again later");
+        }
+    } catch (err) {
+        alert("Login details update failed. Please try again later");
     }
 }

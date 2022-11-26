@@ -1274,20 +1274,12 @@ app.post('/updatememberdetails/:id', (req, res) => {
     }
     old_details=data[0];
   });
-  // get old login details
-  var old_login = null;
-  pool.query("SELECT username, password from login where user_id = ? and user_type = ?",[req.params.id, "M"], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Member details retrieval failed"});
-    }
-    old_login=data[0];
-  });
   var update_details = {};
   // check if phone_no is empty, undefined or null
-  if (req.body[0].phone_no == null || req.body[0].phone_no == undefined || req.body[0].phone_no == ""){
+  if (req.body[0].phone == null || req.body[0].phone == undefined || req.body[0].phone == ""){
     update_details["phone_no"]=old_details.phone_no;
   }else{
-    update_details["phone_no"]=req.body[0].phone_no;
+    update_details["phone_no"]=req.body[0].phone;
   }
   // check if email is empty, undefined or null
   if (req.body[0].email == null || req.body[0].email == undefined || req.body[0].email == ""){
@@ -1320,36 +1312,36 @@ app.post('/updatememberdetails/:id', (req, res) => {
     update_details["state"]=req.body[0].state;
   }
   // check if zipcode is empty, undefined or null
-  if (req.body[0].zipcode == null || req.body[0].zipcode == undefined || req.body[0].zipcode == ""){
+  if (req.body[0].zip == null || req.body[0].zip == undefined || req.body[0].zip == ""){
     update_details["zipcode"]=old_details.zipcode;
   }else{
-    update_details["zipcode"]=req.body[0].zipcode;
-  }
-  // check if username is empty, undefined or null
-  if (req.body[0].username == null || req.body[0].username == undefined || req.body[0].username == ""){
-    update_details["username"]=old_login.username;
-  }else{
-    update_details["username"]=req.body[0].username;
-  }
-  // check if password is empty, undefined or null
-  if (req.body[0].password == null || req.body[0].password == undefined || req.body[0].password == ""){
-    update_details["password"]=old_login.password;
-  }else{
-    update_details["password"]=req.body[0].password;
+    update_details["zipcode"]=req.body[0].zip;
   }
   // update member personal details
   pool.query("UPDATE `members` SET phone_no = ?, email = ?, address1 = ?, address2 = ?, city = ?, state = ?, zipcode = ? WHERE mem_id = ?", [update_details["phone_no"], update_details["email"], update_details["address1"], update_details["address2"], update_details["city"], update_details["state"], update_details["zipcode"], req.params.id], (err, data) => {
     if (err){
         return res.status(400).json({"message":"Member details update failed"});
     }
+    return res.status(200).json({"message":"Member details updated successfully"});
   });
-  // update member login details
-  pool.query("UPDATE `login` SET username = ?, password = ? WHERE user_id = ? and user_type = ?", [update_details["username"], update_details["password"], req.params.id, "M"], (err, data) => {
+});
+
+// update member login details by id
+app.post('/updatelogindetails/:id', (req, res) => {
+  var update_details = {};
+  update_details["username"]=req.body[0].username;
+  update_details["password"]=req.body[0].password;
+  let user_type = req.body[0].user_type;
+  let type = "M";
+  if (user_type == "employee"){
+    type = "E";
+  }
+  pool.query("UPDATE `login` SET username = ?, password = ? WHERE user_id = ? and user_type = ?", [update_details["username"], update_details["password"], req.params.id, type], (err, data) => {
     if (err){
         return res.status(400).json({"message":"Member details update failed"});
     }
+    return res.status(200).json({"message":"Member details updated successfully"});
   });
-  return res.status(200).json({"message":"Member details updated successfully"});
 });
 
 // register a new member
@@ -1718,6 +1710,23 @@ app.post("/sendEmails" , async (req, res) => {
           return res.status(200).json({"message":"Email sent successfully"});
       }
     });
-  }
+  } else if(email_type == "update_details"){
+    var subject = "Update Details Confirmation";
+    var body = "Dear Member, \n\nYour details have been successfully updated. \n\nThank you.";
+    var email_list = req.body[0].email_list;
+    let mailDetails = {
+      from: 'art.gallery.notifications@gmail.com',
+      to: email_list,
+      subject: subject,
+      text: body
+    };
+    mailTransporter.sendMail(mailDetails, function(err, data) {
+      if(err) {
+          return res.status(400).json({"message":"Email sending failed"});
+      } else {
+          return res.status(200).json({"message":"Email sent successfully"});
+      }
+    });
+  } 
 });
 //==================================================================================================
