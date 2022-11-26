@@ -638,8 +638,99 @@ async function getMemberPortalDetails() {
     }
 }
 
+async function getEmployeePortalDetails() {
+    var emp_id = 30;
+    // getting personal details
+    try {
+        let url1 = "http://localhost:3000/getemployeedetails/" + emp_id;
+        let res1 = await fetch(url1);
+        let data1 = await res1.json();
+        document.getElementById("first_name").value = data1.personal.first_name;
+        document.getElementById("last_name").value = data1.personal.last_name;
+        document.getElementById("email").value = data1.personal.email_id;
+        document.getElementById("phone").value = data1.personal.phone_no;
+        document.getElementById("address1").value = data1.personal.address1;
+        document.getElementById("address2").value = data1.personal.address2;
+        document.getElementById("city").value = data1.personal.city;
+        document.getElementById("state").value = data1.personal.state;
+        document.getElementById("zip").value = data1.personal.zipcode;
+        document.getElementById("username").value = data1.login.username;
+        document.getElementById("pass").value = data1.login.password;
+        document.getElementById("employee_id").innerText = data1.personal.emp_id;
+        document.getElementById("role").value = data1.personal.role;
+        let hire_date = data1.personal.hire_date;
+        hire_date = hire_date.split("T")[0];
+        document.getElementById("hire_date").value = hire_date;
+        let is_active = data1.personal.is_active;
+        if (is_active == 'Y') {
+            document.getElementById("act_emp").value = 'Yes';
+        } else {
+            document.getElementById("act_emp").value = 'No';
+        }
+
+        // get employee upcoming events
+        let url2 = "http://localhost:3000/getupcomingemployeeevents/" + emp_id;
+        let res2 = await fetch(url2);
+        let data2 = await res2.json();
+        let table1 = document.getElementById("event_tables");
+        for (let i = 0; i < data2.length; i++) {
+            let row = table1.insertRow(i + 1);
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let ev_date = data2[i].event_date;
+            ev_date = ev_date.split("T")[0];
+            cell1.innerHTML = data2[i].name;
+            cell2.innerHTML = data2[i].type;
+            cell3.innerHTML = ev_date;
+        }
+
+        // get past transactions
+        let url4 = "http://localhost:3000/getlastpurchasedticketsemployees/" + emp_id;
+        let res4 = await fetch(url4);
+        let data4 = await res4.json();
+        let table2 = document.getElementById("ticket_tables");
+        for (let i = 0; i < data4.length; i++) {
+            let row = table2.insertRow(i + 1);
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let ev_date = data4[i].purchase_date;
+            ev_date = ev_date.split("T")[0];
+            cell1.innerHTML = data4[i].ticket_for;
+            cell2.innerHTML = data4[i].amount;
+            cell3.innerHTML = ev_date;
+        }
+
+        // get last shoped arts
+        let url5 = "http://localhost:3000/getlastpurchasedartsemployees/" + emp_id;
+        let res5 = await fetch(url5);
+        let data5 = await res5.json();
+        let table3 = document.getElementById("shop_tables");
+        for (let i = 0; i < data5.length; i++) {
+            let row = table3.insertRow(i + 1);
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let ev_date = data5[i].purchase_date;
+            ev_date = ev_date.split("T")[0];
+            cell1.innerHTML = data5[i].title;
+            cell2.innerHTML = data5[i].amount;
+            cell3.innerHTML = ev_date;
+        }
+        
+    } catch (err) {
+        alert("Error in loading portal page. Please try again later");
+    }
+}
+
 async function updatePersonalDetails(user_type) {
-    var member_id = parseInt(document.getElementById("member_id").innerText);
+    let user_id = 0;
+    if (user_type == 'member') {
+        user_id = parseInt(document.getElementById("member_id").innerText);
+    } else {
+        user_id = parseInt(document.getElementById("employee_id").innerText);
+    }
 
     var email = document.getElementById("email").value;
     var phone = document.getElementById("phone").value;
@@ -681,7 +772,8 @@ async function updatePersonalDetails(user_type) {
         address2: address2,
         city: city,
         state: state,
-        zip: zip
+        zip: zip,
+        user_type: user_type,
     }]
 
     let config1 = {
@@ -693,7 +785,7 @@ async function updatePersonalDetails(user_type) {
         body: JSON.stringify(data1)
     }
     try {
-        let url1 = "http://localhost:3000/updatememberdetails/" + member_id;
+        let url1 = "http://localhost:3000/updatememberdetails/" + user_id;
         let res1 = await fetch(url1, config1);
         if (res1.status == 200) {
             alert("Personal details updated successfully");
@@ -718,7 +810,12 @@ async function updatePersonalDetails(user_type) {
 }
 
 async function updateLoginDetails(user_type) {
-    var member_id = parseInt(document.getElementById("member_id").innerText);
+    let user_id = 0;
+    if (user_type == 'member') {
+        user_id = parseInt(document.getElementById("member_id").innerText);
+    } else {
+        user_id = parseInt(document.getElementById("employee_id").innerText);
+    }
 
     var username = document.getElementById("username").value;
     var pass = document.getElementById("pass").value;
@@ -745,7 +842,7 @@ async function updateLoginDetails(user_type) {
         body: JSON.stringify(data1)
     }
     try {
-        let url1 = "http://localhost:3000/updatelogindetails/" + member_id;
+        let url1 = "http://localhost:3000/updatelogindetails/" + user_id;
         let res1 = await fetch(url1, config1);
         if (res1.status == 200) {
             alert("Login details updated successfully");

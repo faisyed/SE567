@@ -535,7 +535,7 @@ getEmployeePersonalDetails = (emp_id) => {
 
 getUpComingEmployeeEvents = (emp_id) => {
   return new Promise((resolve, reject) => {
-    pool.query("select e.ev_name as name, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.event_employee_map em on e.ev_id = em.ev_id where em.ev_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[emp_id], (err, data) => {
+    pool.query("select e.ev_name as name, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from events e join event_employee_map em on e.ev_id = em.ev_id where em.ev_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[emp_id], (err, data) => {
       if (err){
         reject(err);
       }
@@ -546,7 +546,7 @@ getUpComingEmployeeEvents = (emp_id) => {
 
 getUpComingMemberEvents = (mem_id) => {
   return new Promise((resolve, reject) => {
-    pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from db_se_567.events e join db_se_567.ticket_transactions t on e.ev_id = t.ev_id where t.user_type=? and t.user_id=? and e.ev_type in (?,?,?) and e.ev_date>=curdate() order by e.ev_date limit 5", ["M", mem_id, "show", "exhibition", "auction"], (err, data) => {
+    pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from events e join ticket_transactions t on e.ev_id = t.ev_id where t.user_type=? and t.user_id=? and e.ev_type in (?,?,?) and e.ev_date>=curdate() order by e.ev_date limit 5", ["M", mem_id, "show", "exhibition", "auction"], (err, data) => {
       if (err){
         reject(err);
       }
@@ -555,9 +555,9 @@ getUpComingMemberEvents = (mem_id) => {
   });
 }
 
-getLastPurchasedTickets = (mem_id) => {
+getLastPurchasedTickets = (user_id,user_type) => {
   return new Promise((resolve, reject) => {
-    pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from db_se_567.ticket_transactions t join db_se_567.events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit 5",[mem_id,"M"], (err, data) => {
+    pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from ticket_transactions t join events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit 5",[user_id,user_type], (err, data) => {
       if (err){
         reject(err);
       }
@@ -566,9 +566,9 @@ getLastPurchasedTickets = (mem_id) => {
   });
 }
 
-getLastPurchasedArts = (mem_id) => {
+getLastPurchasedArts = (user_id, user_type) => {
   return new Promise((resolve, reject) => {
-    pool.query("SELECT o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from db_se_567.shop_transactions s join db_se_567.sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit 5",[mem_id,"M"], (err, data) => {
+    pool.query("SELECT o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from shop_transactions s join sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit 5",[user_id,user_type], (err, data) => {
       if (err){
         reject(err);
       }
@@ -833,7 +833,20 @@ app.get('/getupcomingevents/:id', async (req, res) => {
 // get last 5 purchased tickets
 app.get('/getlastpurchasedtickets/:id', async (req, res) => {
   try{
-    const tickets = await getLastPurchasedTickets(parseInt(req.params.id));
+    const tickets = await getLastPurchasedTickets(parseInt(req.params.id), 'M');
+    if (tickets){
+      return res.status(200).json(tickets);
+    }
+    return res.status(200).json({"message":"No tickets purchased"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Tickets not found"});
+  }
+});
+
+app.get('/getlastpurchasedticketsemployees/:id', async (req, res) => {
+  try{
+    const tickets = await getLastPurchasedTickets(parseInt(req.params.id), 'E');
     if (tickets){
       return res.status(200).json(tickets);
     }
@@ -847,7 +860,20 @@ app.get('/getlastpurchasedtickets/:id', async (req, res) => {
 // get last 5 purchased arts
 app.get('/getlastpurchasedarts/:id', async (req, res) => {
   try{
-    const arts = await getLastPurchasedArts(parseInt(req.params.id));
+    const arts = await getLastPurchasedArts(parseInt(req.params.id), 'M');
+    if (arts){
+      return res.status(200).json(arts);
+    }
+    return res.status(200).json({"message":"No arts purchased"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Arts not found"});
+  }
+});
+
+app.get('/getlastpurchasedartsemployees/:id', async (req, res) => {
+  try{
+    const arts = await getLastPurchasedArts(parseInt(req.params.id), 'E');
     if (arts){
       return res.status(200).json(arts);
     }
@@ -1268,12 +1294,22 @@ app.post('/createauction', async (req, res) => {
 app.post('/updatememberdetails/:id', (req, res) => {
   // get old member details
   var old_details = null;
-  pool.query("SELECT * FROM `members` WHERE mem_id = ?", [req.params.id], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Member details retrieval failed"});
-    }
-    old_details=data[0];
-  });
+  var user_type = req.body[0].user_type;
+  if (user_type == "member"){
+    pool.query("SELECT * FROM `members` WHERE mem_id = ?", [req.params.id], (err, data) => {
+      if (err){
+          return res.status(400).json({"message":"Member details retrieval failed"});
+      }
+      old_details=data[0];
+    });
+  }else if (user_type == "employee"){
+    pool.query("SELECT * FROM `employees` WHERE emp_id = ?", [req.params.id], (err, data) => {
+      if (err){
+          return res.status(400).json({"message":"Employee details retrieval failed"});
+      }
+      old_details=data[0];
+    });
+  }
   var update_details = {};
   // check if phone_no is empty, undefined or null
   if (req.body[0].phone == null || req.body[0].phone == undefined || req.body[0].phone == ""){
@@ -1283,7 +1319,11 @@ app.post('/updatememberdetails/:id', (req, res) => {
   }
   // check if email is empty, undefined or null
   if (req.body[0].email == null || req.body[0].email == undefined || req.body[0].email == ""){
-    update_details["email"]=old_details.email;
+    if(user_type == "member"){
+      update_details["email"]=old_details.email;
+    } else if (user_type == "employee"){
+      update_details["email"]=old_details.email_id;
+    }
   }else{
     update_details["email"]=req.body[0].email;
   }
@@ -1313,13 +1353,24 @@ app.post('/updatememberdetails/:id', (req, res) => {
   }else{
     update_details["zipcode"]=req.body[0].zip;
   }
-  // update member personal details
-  pool.query("UPDATE `members` SET phone_no = ?, email = ?, address1 = ?, address2 = ?, city = ?, state = ?, zipcode = ? WHERE mem_id = ?", [update_details["phone_no"], update_details["email"], update_details["address1"], update_details["address2"], update_details["city"], update_details["state"], update_details["zipcode"], req.params.id], (err, data) => {
-    if (err){
-        return res.status(400).json({"message":"Member details update failed"});
-    }
-    return res.status(200).json({"message":"Member details updated successfully"});
-  });
+
+  if (user_type == "member"){
+    // update member personal details
+    pool.query("UPDATE `members` SET phone_no = ?, email = ?, address1 = ?, address2 = ?, city = ?, state = ?, zipcode = ? WHERE mem_id = ?", [update_details["phone_no"], update_details["email"], update_details["address1"], update_details["address2"], update_details["city"], update_details["state"], update_details["zipcode"], req.params.id], (err, data) => {
+      if (err){
+          return res.status(400).json({"message":"Member details update failed"});
+      }
+      return res.status(200).json({"message":"Member details updated successfully"});
+    });
+  } else if(user_type == "employee"){
+    // update employee personal details
+    pool.query("UPDATE `employees` SET phone_no = ?, email_id = ?, address1 = ?, address2 = ?, city = ?, state = ?, zipcode = ? WHERE emp_id = ?", [update_details["phone_no"], update_details["email"], update_details["address1"], update_details["address2"], update_details["city"], update_details["state"], update_details["zipcode"], req.params.id], (err, data) => {
+      if (err){
+          return res.status(400).json({"message":"Employee details update failed"});
+      }
+      return res.status(200).json({"message":"Employee details updated successfully"});
+    });
+  }
 });
 
 // update member login details by id
@@ -1334,6 +1385,7 @@ app.post('/updatelogindetails/:id', (req, res) => {
   }
   pool.query("UPDATE `login` SET username = ?, password = ? WHERE user_id = ? and user_type = ?", [update_details["username"], update_details["password"], req.params.id, type], (err, data) => {
     if (err){
+      console.log(err);
         return res.status(400).json({"message":"Member details update failed"});
     }
     return res.status(200).json({"message":"Member details updated successfully"});
