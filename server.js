@@ -10,6 +10,7 @@ const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
 var MySQLStore = require('express-mysql-session')(sessions);
 const multer = require('multer');
+var session = {};
 
 
 var storage = multer.diskStorage({   
@@ -62,8 +63,6 @@ var mailTransporter = nodemailer.createTransport({
 const pool = mysql.createPool(config);
 var sessionStore = new MySQLStore({}, pool);
 
-session = {}
-
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`);
@@ -95,100 +94,18 @@ app.use(cookieParser());
 
 
 app.get('/', (req, res) => {
-  if (session.loggedin) {
-    // Output username
-    res.sendFile('./src/home_loggedIn.html', {root: __dirname});
-  } else {
-    // Not logged in
-    res.sendFile('./src/home.html', {root: __dirname});
-  }
+  res.sendFile('./src/home.html', {root: __dirname});
 });
 
 app.get('/logout',(req,res) => {
   req.session.destroy();
   req.sessionStore.close();
   session.loggedin = false;
-  console.log(session, 'session---------')
-  res.clearCookie('connect.sid', { path: '/logout' })
-  console.log('./src/home.html', {root: __dirname})
-  return res.sendFile('./src/home.html', {root: __dirname})
+  session.user_id = null;
+  session.user_type = null;
+  
+res.sendFile('./src/home.html', {root: __dirname});
 });
-
-
-
-//CREATE USER
-app.post("/createUser", async (req,res) => {
-  res.sendFile('./src/my-account.html', {root: __dirname});
-  console.log(req.body)
-  const user = req.body.name;
-  const pass = req.body.password;
-  pool.getConnection( async (err, connection) => {
-      if (err) throw (err)
-      const sqlSearch = "SELECT * FROM users WHERE username = ?"
-      const search_query = mysql.format(sqlSearch,[user])
-      const sqlInsert = "INSERT INTO users VALUES (0,?,?)"
-      const insert_query = mysql.format(sqlInsert,[user, pass])
-      await connection.query (search_query, async (err, result) => {
-          if (err) throw (err)
-          console.log("------> Search Results")
-          console.log(result.length)
-          if (result.length != 0) {
-              connection.release()
-              console.log("------> User already exists")
-              res.sendStatus(409) 
-          } 
-          else {
-              await connection.query (insert_query, (err, result)=> {
-                  connection.release()
-                  if (err) throw (err)
-                  console.log ("--------> Created new User")
-                  console.log(result.insertId)
-                  res.sendStatus(201)
-              })
-          }
-      }) 
-  }) 
-}) 
-
-
-//LOGIN (AUTHENTICATE USER)
-app.post("/login", (req, res)=> {
-  res.sendFile('./src/my-account.html', {root: __dirname});
-  const user = req.body.name
-  const password = req.body.password
-  pool.getConnection ( async (err, connection)=> {
-      if (err) throw (err)
-      const sqlSearch = "Select * from login where username = ?"
-      const search_query = mysql.format(sqlSearch,[user])
-      await connection.query (search_query, async (err, result) => {
-      connection.release()
-
-      if (err) throw (err)
-      if (result.length == 0) {
-          console.log("--------> User does not exist")
-          res.sendStatus(404)
-      } 
-      else {
-          const pass = result[0].password
-          console.log(password, pass)
-      
-          if (password == pass) {
-              console.log("---------> Login Successful")
-              // res.send(`${user} is logged in!`)
-              session.loggedin = true;
-              session.username = user;
-          } 
-          else {
-              console.log("---------> Password Incorrect")
-              res.send("Password incorrect!")
-          }
-      }
-      }) 
-  }) 
-})
-
-
-
 
 
 /*************Group 4 start *************/
@@ -513,7 +430,7 @@ getEmployeePersonalDetails = (emp_id) => {
 
 getUpComingEmployeeEvents = (emp_id) => {
   return new Promise((resolve, reject) => {
-    pool.query("select e.ev_name as name, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from events e join event_employee_map em on e.ev_id = em.ev_id where em.ev_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[emp_id], (err, data) => {
+    pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from events e join event_employee_map em on e.ev_id = em.ev_id where em.emp_id = ? and e.ev_date>=curdate() order by e.ev_date limit 5",[emp_id], (err, data) => {
       if (err){
         reject(err);
       }
@@ -848,6 +765,24 @@ app.get("/getemployeedetails/:id", async (req, res) => {
   try {
     const personal = await getEmployeePersonalDetails(parseInt(req.params.id));
     const login = await getMemLoginDetails(parseInt(req.params.id), 'E');
+    if (personal && login) {
+      const details = {
+        "personal": personal,
+        "login": login
+      }
+      return res.status(200).json(details);
+    }
+    return res.status(200).json({"message":"Employee details not found"});
+  }catch(err){
+    console.error(err);
+    return res.status(400).json({"message":"Employee details not found with an error"});
+  }
+});
+
+app.get("/getmanagerdetails/:id", async (req, res) => {
+  try {
+    const personal = await getEmployeePersonalDetails(parseInt(req.params.id));
+    const login = await getMemLoginDetails(parseInt(req.params.id), 'C');
     if (personal && login) {
       const details = {
         "personal": personal,
@@ -1350,10 +1285,6 @@ app.post('/registermember', async (req, res) => {
     const newMember = await insertMember(req.body[0]);
     const newLogin = await pool.query("INSERT INTO `login` (username, password, user_id, user_type) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, newMember.insertId, "M"]);
     const master_transaction = await pool.query("INSERT INTO `master_transactions` (tran_type, user_id, user_type, purchase_date, amount) VALUES (?, ?, ?, ?, ?)",["registration", newMember.insertId, "M", new Date(), 100]);
-    session.loggedin = true;
-		session.user_id = req.body.user_id;
-		session.user_type = req.body.user_type;
-    res.sendFile('./src/home_loggedIn.html', {root: __dirname});
     return res.status(200);
   }catch(err){
     console.log(err);
@@ -1482,6 +1413,8 @@ app.post('/updateemployee/:id', (req, res) => {
 
 // check login validation
 app.post('/checklogin', (req, res) => {
+  let user_id = 0;
+  let user_type = '';
   pool.query("select * from login where username = ? and password = ?",[req.body.username, req.body.password] , (err, data) => {
     if (err){
       return res.status(400).json({"message":"Login failed"});
@@ -1489,29 +1422,21 @@ app.post('/checklogin', (req, res) => {
     if (data.length == 0){
       return res.status(400).json({"message":"invalid username or password"});
     }
-    if (data[0].user_type == "E"){
-      pool.query("select * from employees where emp_id = ? and is_active = ?",[data[0].user_id, "Y"], (err, data) => {
-        if (err){
-          return res.status(400).json({"message":"Login failed"});
-        }
-        if (data.length == 0){
-          return res.status(400).json({"message":"account not active"});
-        }
-        res.sendFile('./src/home_loggedIn.html', {root: __dirname});
-        return res.status(200).json(data);
-      });
-    } else {
-      pool.query("select * from members where mem_id = ? and is_active = ?",[data[0].user_id, "Y"], (err, data) => {
-        if (err){
-          return res.status(400).json({"message":"Login failed"});
-        }
-        if (data.length == 0){
-          return res.status(400).json({"message":"account not active"});
-        }
-        return res.sendFile('./src/home_loggedIn.html', {root: __dirname});
-      });
-    }
+    user_id = data[0].user_id;
+    user_type = data[0].user_type;
+    session.user_id = user_id;
+    session.user_type = user_type;
+    session.loggedin = true;
+    res.sendFile('./src/home.html', {root: __dirname});
   });
+});
+
+app.get("/getSessionInfo", (req, res) => {
+  if (session.loggedin){
+    return res.status(200).json({"user_id":session.user_id, "user_type":session.user_type, "loggedin":session.loggedin});
+  } else {
+    return res.status(200).json({"loggedin":false});
+  }
 });
 
 app.post("/updateEmailStatus" , async (req, res) => {

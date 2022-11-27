@@ -50,6 +50,8 @@ async function submitQuery(){
 
 async function eventDetails(){
     // get event id from url
+    let session_info = await getSessionInfo();
+    handle_tabs(session_info);
     var entries = window.location.search.substring(1).split("&");
     var event_id = entries[0].split("=")[1];
     var show_purchase = entries[1].split("=")[1];
@@ -80,6 +82,8 @@ async function eventDetails(){
 }
 
 async function fillTicketDetails() {
+    let session_info = await getSessionInfo();
+    handle_tabs(session_info);
     let entries = window.location.search;
     if (entries != "") {
         entries = entries.substring(1).split("&");
@@ -91,18 +95,46 @@ async function fillTicketDetails() {
         console.log(event_date);
         
         document.getElementById("adult_price").innerHTML = event_price;
-        document.getElementById("adult_subtotal").innerHTML = event_price/2;
+        document.getElementById("adult_subtotal").innerHTML = event_price;
         document.getElementById("senior_price").innerHTML = event_price/2;
         document.getElementById("other_price").innerHTML = event_price/2;
         document.getElementById("student_price").innerHTML = (event_price*3)/4;
+        document.getElementById("ticket_total").innerHTML = event_price;
 
         document.getElementById("event_id").innerHTML = event_id;
         document.getElementById("event_type").innerHTML = event_type;
         document.getElementById("ev_date").value = event_date;
     }
+    if (session_info.loggedin == true){
+        let user_id = session_info.user_id;
+        let user_type = session_info.user_type;
+        try{
+            if (user_type == "M"){
+                let url1 = "http://localhost:3000/getmemberdetails/"+user_id;
+                let res1 = await fetch(url1);
+                let data1 = await res1.json();
+                document.getElementById("first_name").value = data1.personal.first_name;
+                document.getElementById("last_name").value = data1.personal.last_name;
+                document.getElementById("email").value = data1.personal.email;
+                document.getElementById("phone").value = data1.personal.phone_no;
+            } else {
+                let url1 = "http://localhost:3000/getemployeedetails/"+user_id;
+                let res1 = await fetch(url1);
+                let data1 = await res1.json();
+                document.getElementById("first_name").value = data1.personal.first_name;
+                document.getElementById("last_name").value = data1.personal.last_name;
+                document.getElementById("email").value = data1.personal.email_id;
+                document.getElementById("phone").value = data1.personal.phone_no;
+            }
+        } catch (err){
+            alert("Error in loading donation details. Please try again later");
+        }
+    }
 }
 
 async function setEventList(event_type){
+    let session_info = await getSessionInfo();
+    handle_tabs(session_info);
     getCurrentEvents(event_type);
 }
 
@@ -690,6 +722,7 @@ async function addEmployee(){
             document.getElementById("emp_conf_pass").value = "";
             // hide the div
             document.getElementById("newEmployeeDiv").style.display = "none";
+            window.location.assign('./manager-portal.html');
         } else if(res1.status == 300){
             alert("username already exists");
         } else{
@@ -780,6 +813,7 @@ async function addEvent() {
             document.getElementById("ev_employees").value = "";
             // hide the div
             document.getElementById("newEventDiv").style.display = "none";
+            window.location.assign('./manager-portal.html');
         } else{
             alert("Event creation failed");
         }
@@ -913,6 +947,7 @@ async function addArt() {
             document.getElementById("img_src").value = "";
             // hide the div
             document.getElementById("newArtDiv").style.display = "none";
+            window.location.assign('./manager-portal.html');
         } else{
             alert("Artwork addition failed");
         }
@@ -922,7 +957,9 @@ async function addArt() {
 }
 
 async function getMemberPortalDetails() {
-    var member_id = 27;
+    let session_info = await getSessionInfo();
+    handle_tabs(session_info);
+    var member_id = session_info.user_id;
     // getting personal details
     try {
         let url1 = "http://localhost:3000/getmemberdetails/" + member_id;
@@ -1006,10 +1043,17 @@ async function getMemberPortalDetails() {
 }
 
 async function getEmployeePortalDetails(role) {
-    var emp_id = 2;
+    let session_info = await getSessionInfo();
+    handle_tabs(session_info);
+    let emp_id = session_info.user_id;
+    let type = session_info.user_type;
+
     // getting personal details
     try {
         let url1 = "http://localhost:3000/getemployeedetails/" + emp_id;
+        if (type == "C"){
+            url1 = "http://localhost:3000/getmanagerdetails/" + emp_id;
+        }
         let res1 = await fetch(url1);
         let data1 = await res1.json();
         document.getElementById("first_name").value = data1.personal.first_name;
@@ -1035,55 +1079,58 @@ async function getEmployeePortalDetails(role) {
             document.getElementById("act_emp").value = 'No';
         }
 
-        // get employee upcoming events
-        let url2 = "http://localhost:3000/getupcomingemployeeevents/" + emp_id;
-        let res2 = await fetch(url2);
-        let data2 = await res2.json();
-        let table1 = document.getElementById("event_tables");
-        for (let i = 0; i < data2.length; i++) {
-            let row = table1.insertRow(i + 1);
-            let cell1 = row.insertCell(0);
-            let cell2 = row.insertCell(1);
-            let cell3 = row.insertCell(2);
-            let ev_date = data2[i].event_date;
-            ev_date = ev_date.split("T")[0];
-            cell1.innerHTML = data2[i].name;
-            cell2.innerHTML = data2[i].type;
-            cell3.innerHTML = ev_date;
-        }
+        if (role == "worker") {
+            // get employee upcoming events
+            let url2 = "http://localhost:3000/getupcomingemployeeevents/" + emp_id;
+            let res2 = await fetch(url2);
+            let data2 = await res2.json();
+            let table1 = document.getElementById("event_tables");
+            for (let i = 0; i < data2.length; i++) {
+                let row = table1.insertRow(i + 1);
+                let cell1 = row.insertCell(0);
+                let cell2 = row.insertCell(1);
+                let cell3 = row.insertCell(2);
+                let ev_date = data2[i].event_date;
+                ev_date = ev_date.split("T")[0];
+                cell1.innerHTML = data2[i].name;
+                cell2.innerHTML = data2[i].type;
+                cell3.innerHTML = ev_date;
+            }
 
-        // get past transactions
-        let url4 = "http://localhost:3000/getlastpurchasedticketsemployees/" + emp_id;
-        let res4 = await fetch(url4);
-        let data4 = await res4.json();
-        let table2 = document.getElementById("ticket_tables");
-        for (let i = 0; i < data4.length; i++) {
-            let row = table2.insertRow(i + 1);
-            let cell1 = row.insertCell(0);
-            let cell2 = row.insertCell(1);
-            let cell3 = row.insertCell(2);
-            let ev_date = data4[i].purchase_date;
-            ev_date = ev_date.split("T")[0];
-            cell1.innerHTML = data4[i].ticket_for;
-            cell2.innerHTML = data4[i].amount;
-            cell3.innerHTML = ev_date;
-        }
+            // get past transactions
+            let url4 = "http://localhost:3000/getlastpurchasedticketsemployees/" + emp_id;
+            let res4 = await fetch(url4);
+            let data4 = await res4.json();
+            let table2 = document.getElementById("ticket_tables");
+            for (let i = 0; i < data4.length; i++) {
+                let row = table2.insertRow(i + 1);
+                let cell1 = row.insertCell(0);
+                let cell2 = row.insertCell(1);
+                let cell3 = row.insertCell(2);
+                let ev_date = data4[i].purchase_date;
+                ev_date = ev_date.split("T")[0];
+                cell1.innerHTML = data4[i].ticket_for;
+                cell2.innerHTML = data4[i].amount;
+                cell3.innerHTML = ev_date;
+            }
 
-        // get last shoped arts
-        let url5 = "http://localhost:3000/getlastpurchasedartsemployees/" + emp_id;
-        let res5 = await fetch(url5);
-        let data5 = await res5.json();
-        let table3 = document.getElementById("shop_tables");
-        for (let i = 0; i < data5.length; i++) {
-            let row = table3.insertRow(i + 1);
-            let cell1 = row.insertCell(0);
-            let cell2 = row.insertCell(1);
-            let cell3 = row.insertCell(2);
-            let ev_date = data5[i].purchase_date;
-            ev_date = ev_date.split("T")[0];
-            cell1.innerHTML = data5[i].title;
-            cell2.innerHTML = data5[i].amount;
-            cell3.innerHTML = ev_date;
+            // get last shoped arts
+            let url5 = "http://localhost:3000/getlastpurchasedartsemployees/" + emp_id;
+            let res5 = await fetch(url5);
+            let data5 = await res5.json();
+            let table3 = document.getElementById("shop_tables");
+            for (let i = 0; i < data5.length; i++) {
+                let row = table3.insertRow(i + 1);
+                let cell1 = row.insertCell(0);
+                let cell2 = row.insertCell(1);
+                let cell3 = row.insertCell(2);
+                let ev_date = data5[i].purchase_date;
+                ev_date = ev_date.split("T")[0];
+                cell1.innerHTML = data5[i].title;
+                cell2.innerHTML = data5[i].amount;
+                cell3.innerHTML = ev_date;
+            }
+
         }
 
         if (role == "manager"){
@@ -1299,4 +1346,84 @@ async function updateLoginDetails(user_type) {
     } catch (err) {
         alert("Login details update failed. Please try again later");
     }
+}
+
+async function getSessionInfo() {
+    let url1 = "http://localhost:3000/getSessionInfo/";
+    let res1 = await fetch(url1);
+    let data1 = await res1.json();
+    return {"user_type":data1.user_type,"user_id":data1.user_id,"loggedin":data1.loggedin};
+}
+
+async function logout(){
+    let url1 = "http://localhost:3000/logout/";
+    let res1 = await fetch(url1);
+    if (res1.status == 200){
+        window.location.href = "http://localhost:3000/";
+    }
+}
+
+function handle_tabs(session){
+    console.log(session);
+    if (session.loggedin == false || session.loggedin == undefined || session.loggedin == null){
+        document.getElementById("drop_account").style.display = "block";
+        document.getElementById("drop_portal").style.display = "none";
+        document.getElementById("drop_logout").style.display = "none";
+    } else {
+        document.getElementById("drop_account").style.display = "none";
+        document.getElementById("drop_portal").style.display = "block";
+        document.getElementById("drop_logout").style.display = "block";
+        document.getElementById("drop_auction").style.display = "block";
+        if (session.user_type == "M"){
+            document.getElementById("portal_page").href = "member-portal.html";
+        } else if(session.user_type == "E") {
+            document.getElementById("portal_page").href = "employee-portal.html";
+        } else if(session.user_type == "C") {
+            document.getElementById("portal_page").href = "manager-portal.html";
+        }
+    }
+}
+
+async function homeload(){
+    let session_info = await getSessionInfo();
+    handle_tabs(session_info);
+}
+
+async function contactload(){
+    let session_info = await getSessionInfo();
+    handle_tabs(session_info);
+}
+
+async function donateload(){
+    let session_info = await getSessionInfo();
+    handle_tabs(session_info);
+    if (session_info.loggedin == true){
+        let user_id = session_info.user_id;
+        try{
+            let url1 = "http://localhost:3000/getmemberdetails/"+user_id;
+            let res1 = await fetch(url1);
+            let data1 = await res1.json();
+            document.getElementById("first_name").value = data1.personal.first_name;
+            document.getElementById("last_name").value = data1.personal.last_name;
+            document.getElementById("email").value = data1.personal.email;
+            document.getElementById("phone").value = data1.personal.phone_no;
+        } catch (err){
+            alert("Error in loading donation details. Please try again later");
+        }  
+    }
+}
+
+async function forgotload(){
+    let session_info = await getSessionInfo();
+    handle_tabs(session_info);
+}
+
+async function membershipload(){
+    let session_info = await getSessionInfo();
+    handle_tabs(session_info);
+}
+
+async function visitload(){
+    let session_info = await getSessionInfo();
+    handle_tabs(session_info);
 }
