@@ -206,9 +206,11 @@ DELIMITER ;
 
 -- create trigger to delete data from event_employee_map table before data is deleted from event table
 DELIMITER $$
-CREATE TRIGGER event_employee_map_trigger BEFORE DELETE ON events FOR EACH ROW
+CREATE TRIGGER event_cancel_trigger BEFORE DELETE ON events FOR EACH ROW
 BEGIN
     DELETE FROM event_employee_map WHERE ev_id = OLD.ev_id;
+    DELETE FROM master_transactions WHERE child_tran_id in (select tick_id from ticket_transactions where ev_id = OLD.ev_id);
+    DELETE FROM ticket_transactions WHERE ev_id = OLD.ev_id;
 END$$
 DELIMITER ;
 
@@ -239,3 +241,5 @@ add event_date date;
 -- adding event price columng to events table
 alter table events
 add ev_price double;
+
+alter table ticket_transactions add column email text;

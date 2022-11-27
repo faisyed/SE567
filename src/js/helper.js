@@ -499,6 +499,15 @@ async function addEventBlock(){
     }
 }
 
+async function cancelEventBlock(){
+    let eventBlockStyle = document.getElementById("oldCancelEventDiv").style.display;
+    if (eventBlockStyle == "none"){
+        document.getElementById("oldCancelEventDiv").style.display = "block";
+    } else{
+        document.getElementById("oldCancelEventDiv").style.display = "none";
+    }
+}
+
 async function addArtBlock(){
     let artBlockStyle = document.getElementById("newArtDiv").style.display;
     if (artBlockStyle == "none"){
@@ -696,6 +705,7 @@ async function addEmployee(){
         var res1 = await fetch(url1, config1);
         if (res1.status == 200){
             alert("Employee enrolled successfully");
+            window.location.assign('./manager-portal.html');
             var url2 = "http://localhost:3000/sendEmails/";
             var data2 = [{"email_type":"enrolled","email_list":email,'username':username,'password':pass}];
             const config2 = {
@@ -722,7 +732,6 @@ async function addEmployee(){
             document.getElementById("emp_conf_pass").value = "";
             // hide the div
             document.getElementById("newEmployeeDiv").style.display = "none";
-            window.location.assign('./manager-portal.html');
         } else if(res1.status == 300){
             alert("username already exists");
         } else{
@@ -803,6 +812,7 @@ async function addEvent() {
         var res = await fetch(url, config);
         if (res.status == 200){
             alert("Event created successfully");
+            window.location.assign('./manager-portal.html');
             // clear the fields
             document.getElementById("ev_name").value = "";
             document.getElementById("ev_desc").value = "";
@@ -813,7 +823,6 @@ async function addEvent() {
             document.getElementById("ev_employees").value = "";
             // hide the div
             document.getElementById("newEventDiv").style.display = "none";
-            window.location.assign('./manager-portal.html');
         } else{
             alert("Event creation failed");
         }
@@ -821,6 +830,54 @@ async function addEvent() {
         alert("Event Creation failed");
     }
 
+}
+
+async function cancelEvent(){
+    let ev_id = document.getElementById("ev_name_del").value;
+    try {
+        var url = "http://localhost:3000/cancelevent/";
+        var data = [{"ev_id":ev_id}];
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify(data)
+        };
+        var res = await fetch(url, config);
+        if (res.status == 200){
+            alert("Event cancelled successfully");
+            // clear the fields
+            document.getElementById("cancelEventDiv").style.display = "none";
+            window.location.assign('./manager-portal.html');
+            let url3 = "http://localhost:3000/getCancelEmails/" + ev_id;
+            let res3 = await fetch(url3);
+            let data4 = await res3.json();
+            let email = "";
+            for (let i = 0; i < data4.length; i++) {
+                email = email + data4[i].email + ",";
+            }
+            email = email.substring(0, email.length - 1);
+            // send update details mail
+            let url2 = "http://localhost:3000/sendEmails/";
+            var data3 = [{"email_type":"cancel_event","email_list":email}];
+            const config2 = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(data3)
+            };
+            var res2 = await fetch(url2, config2);
+            // hide the div
+        } else{
+            alert("Event cancellation failed");
+        }
+    }   catch (err) {
+        alert("Event Cancellation failed");
+    }
 }
 
 async function addArt() {
@@ -932,6 +989,7 @@ async function addArt() {
         if (res2.status == 200){
             alert("Artwork added successfully");
             // clear the fields
+            window.location.assign('./manager-portal.html');
             document.getElementById("art_title").value = "";
             document.getElementById("art_beg").value = "";
             document.getElementById("art_end").value = "";
@@ -947,7 +1005,6 @@ async function addArt() {
             document.getElementById("img_src").value = "";
             // hide the div
             document.getElementById("newArtDiv").style.display = "none";
-            window.location.assign('./manager-portal.html');
         } else{
             alert("Artwork addition failed");
         }
@@ -1214,6 +1271,7 @@ async function getEmployeePortalDetails(role) {
                 el.value = opt;
                 art_select3.appendChild(el);
             }
+            populateEventNames('show');
         }
 
     } catch (err) {
@@ -1442,4 +1500,22 @@ async function membershipload(){
 async function visitload(){
     let session_info = await getSessionInfo();
     handle_tabs(session_info);
+}
+
+async function populateEventNames(type){
+    try{
+        let url1 = "http://localhost:3000/getallevents/"+type;
+        let res1 = await fetch(url1);
+        let data1 = await res1.json();
+        let select = document.getElementById("ev_name_del");
+        for (let i = 0; i < data1.length; i++) {
+            let opt = data1[i].ev_name;
+            let el = document.createElement("option");
+            el.textContent = opt;
+            el.value = data1[i].ev_id;
+            select.appendChild(el);
+        }
+    } catch (err){
+        alert("Error in loading event names. Please try again later");
+    }
 }

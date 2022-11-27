@@ -383,6 +383,11 @@
                                         <input type="submit" onclick="addArtBlock()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Add Art">
                                     </label>
                                 </div>
+								<div class="form-group position-relative mb-2">
+                                    <label class="d-block">
+                                        <input type="submit" onclick="cancelEventBlock()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Cancel Event">
+                                    </label>
+                                </div>
                             </div>
                         </div>
 					</div>
@@ -674,6 +679,36 @@
 						</div>
                     </div>
                 </section>
+				<section id="cancelEventSection" class="vistiTwoColumn">
+                    <div class="row" id="cancelEventDiv">
+                        <div class="col-18 offset-lg-2 col-md-8" id="oldCancelEventDiv" style="display: none;">
+							<!-- donationBoxWrap -->
+                            <div class="bg-brown py-3 px-lg-5">
+                                <h3 class="text-white mb-0 ml-50">Event Details</h3>
+                            </div>
+							<div class="donationBoxWrap border px-3 pb-4 px-md-6 pb-md-9 mt-2 pt-4">
+								<div class="form-row mx-n2">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Type <span class="text-brown">*</span></strong>
+												<select id="ev_type_del" class="form-control formControlMedium">
+													<option value="show">Show</option>
+													<option value="exhibition">Exhibition</option>
+													<option value="auction">Auction</option>
+												</select>
+											</label>
+										</div>
+									</div>
+								</div>
+								<strong class="d-block font-weight-normal mb-1">Name <span class="text-brown">*</span></strong>
+								<select id="ev_name_del" class="form-control formControlMedium">
+								</select>
+								<input type="submit" onclick="cancelEvent()" class="btn btn-secondary text-uppercase d-block w-100 mt-6" value="Cancel Event">
+							</div>
+						</div>
+                    </div>
+                </section>
 			</div>
 		</main>
 		<!-- ftAreaWrap -->
@@ -717,5 +752,13 @@
 	<script src="js/bootstrap.min.js"></script>
 	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
     <script src="js/helper.js"></script>
+	<script>
+		let event_element = document.getElementById("ev_type_del");
+		event_element.addEventListener('click', function(){
+			let options = event_element.querySelectorAll('option');
+			let selected = event_element.value;
+			populateEventNames(selected);
+		});
+	</script>
 </body>
 </html>

@@ -697,6 +697,39 @@ getObjClass = () => {
   });
 }
 
+getEvents = (type) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select ev_id, ev_name from `events` where ev_type=?",[type],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+getCancelEmails = (ev_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select email from `events` where ev_id=?",[ev_id],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+cancelEvent = (ev_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("delete from `events` where ev_id=?",[ev_id],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -738,6 +771,24 @@ app.get("/getWorkers", async (req, res) => {
   try{
     const workers = await getWorkers();
     res.status(200).json(workers);
+  } catch (err){
+    res.status(400);
+  }
+});
+
+app.get("/getallevents/:type", async (req, res) => {
+  try{
+    const events = await getEvents(req.params.type);
+    res.status(200).json(events);
+  } catch (err){
+    res.status(400);
+  }
+});
+
+app.get("/getCancelEmails/:id", async (req, res) => {
+  try{
+    const emails = await getCancelEmails(req.params.id);
+    res.status(200).json(emails);
   } catch (err){
     res.status(400);
   }
@@ -1098,7 +1149,7 @@ app.post("/buyTickets/", async (req,res) => {
         if (temp_user_type == "C"){
           temp_user_type = "E";
         }
-        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date, ev_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, session.user_id, temp_user_type, ev_date, event_id], (err, data) => {
+        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date, ev_id, email) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, session.user_id, temp_user_type, ev_date, event_id, req.body[0].email], (err, data) => {
           if (err){
               return res.status(400).json({"message": "Ticket purchase failed"});
           }
@@ -1114,7 +1165,7 @@ app.post("/buyTickets/", async (req,res) => {
             return res.status(400).json({"message":"Ticket purchase failed"});
         }
         visitor_id = data.insertId;
-        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date, ev_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, visitor_id, "V", ev_date, event_id], (err, data) => {
+        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date, ev_id, email) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, visitor_id, "V", ev_date, event_id, req.body[0].email], (err, data) => {
           if (err){
               console.log(err);
               return res.status(400).json({"message":"Ticket purchase failed"});
@@ -1531,7 +1582,7 @@ app.post("/sendEmails" , async (req, res) => {
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
-      to: email_list,
+      bcc: email_list,
       subject: subject,
       text: body
     };
@@ -1668,5 +1719,15 @@ app.post("/add_art",  async (req, res) => {
     res.status(400).json({"message":"Artwork addition failed"});
   }
 
+});
+
+app.post("/cancelevent",  async (req, res) => {
+  let ev_id = req.body[0].ev_id;
+  try {
+    let resp = await cancelEvent(parseInt(ev_id));
+    res.status(200).json({"message":"Event cancelled successfully"});
+  } catch (err) {
+    res.status(400).json({"message":"Event cancellation failed"});
+  }
 });
 //==================================================================================================
