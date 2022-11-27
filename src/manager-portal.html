@@ -562,14 +562,112 @@
 											</label>
 										</div>
 									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Event Price <span class="text-brown">*</span></strong>
+												<input type="number" id="ev_price" class="select form-control formControlMedium">
+											</label>
+										</div>
+									</div>
 								</div>
 								<input type="submit" onclick="addEvent()" class="btn btn-secondary text-uppercase d-block w-100 mt-6" value="Confirm Event">
-								
 							</div>
 						</div>
                     </div>
                 </section>
-				
+				<section id="addArtSection" class="vistiTwoColumn">
+                    <div class="row" id="addArtDiv">
+                        <div class="col-18 offset-lg-2 col-md-8" id="newArtDiv" style="display: none;">
+							<!-- donationBoxWrap -->
+                            <div class="bg-brown py-3 px-lg-5">
+                                <h3 class="text-white mb-0 ml-50">Add New Art</h3>
+                            </div>
+							<div class="donationBoxWrap border px-3 pb-4 px-md-6 pb-md-9 mt-2 pt-4">
+								<div class="form-row mx-n2">
+									<strong class="d-block font-weight-normal mb-1">Title <span class="text-brown">*</span></strong>
+									<input type="text" id="art_title" class="form-control formControlMedium">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Start Year <span class="text-brown">*</span></strong>
+												<input type="number" id="art_beg" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">End Year <span class="text-brown">*</span></strong>
+												<input type="number" id="art_end" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<strong class="d-block font-weight-normal mb-1 mt-1">Medium <span class="text-brown">*</span></strong>
+									<input type="text" id="art_medium" class="form-control formControlMedium">
+									<strong class="d-block font-weight-normal mb-1 mt-1">Dimensions <span class="text-brown">*</span></strong>
+									<input type="text" id="art_dim" class="form-control formControlMedium">
+									<strong class="d-block font-weight-normal mb-1 mt-1">Inscriptions <span class="text-brown">*</span></strong>
+									<input type="text" id="art_ins" class="form-control formControlMedium">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Artist <span class="text-brown">*</span></strong>
+												<input type="text" id="art_artist" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Type <span class="text-brown">*</span></strong>
+												<select id="art_type" class="form-control formControlMedium">
+												</select>
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Location/Site <span class="text-brown">*</span></strong>
+												<select id="art_site" class="form-control formControlMedium">
+												</select>
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Room <span class="text-brown">*</span></strong>
+												<select id="art_room" class="form-control formControlMedium">
+												</select>
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Location Description <span class="text-brown">*</span></strong>
+												<input type="text" id="art_loc_desc" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Price <span class="text-brown">*</span></strong>
+												<input type="number" id="art_price" class="select form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+								</div>
+								<strong class="d-block font-weight-normal mb-1 mt-1">Add Image <span class="text-brown">*</span></strong>
+								<input type="file" id="img_src" name="img_src" accept="image/*">
+								<input type="submit" onclick="addArt()" class="btn btn-secondary text-uppercase d-block w-100 mt-6" value="Add Art">
+							</div>
+						</div>
+                    </div>
+                </section>
 			</div>
 		</main>
 		<!-- ftAreaWrap -->

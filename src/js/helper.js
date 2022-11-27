@@ -719,6 +719,7 @@ async function addEvent() {
     let ev_type = document.getElementById("ev_type").value;
     let ev_site = document.getElementById("ev_site").value;
     let ev_room = document.getElementById("ev_room").value;
+    let ev_price = document.getElementById("ev_price").value;
     let ev_employees = getSelectedEmployees();
 
     // validate the fields to be non-empty, null or undefined and send alert if empty
@@ -750,10 +751,14 @@ async function addEvent() {
         alert("Please enter event employees");
         return;
     }
+    if (ev_price == 0 || ev_price == null || ev_price == undefined){
+        alert("Please enter event price");
+        return;
+    }
 
     try {
         var url = "http://localhost:3000/createevent/";
-        var data = [{"ev_name":ev_name,"ev_description":ev_desc,"ev_date":ev_date,"ev_type":ev_type,"ev_site":ev_site,"ev_room":ev_room,"assigned_employees":ev_employees}];
+        var data = [{"ev_name":ev_name,"ev_description":ev_desc,"ev_date":ev_date,"ev_type":ev_type,"ev_site":ev_site,"ev_room_no":ev_room,"assigned_employees":ev_employees,"ev_price":ev_price}];
         const config = {
             headers: {
                 'Content-Type': 'application/json',
@@ -782,6 +787,138 @@ async function addEvent() {
         alert("Event Creation failed");
     }
 
+}
+
+async function addArt() {
+    let art_title = document.getElementById("art_title").value;
+    let art_beg = document.getElementById("art_beg").value;
+    let art_end = document.getElementById("art_end").value;
+    let art_medium = document.getElementById("art_medium").value;
+    let art_dim = document.getElementById("art_dim").value;
+    let art_ins = document.getElementById("art_ins").value;
+    let art_artist = document.getElementById("art_artist").value;
+    let art_type = document.getElementById("art_type").value;
+    let art_site = document.getElementById("art_site").value;
+    let art_room = document.getElementById("art_room").value;
+    let art_loc_desc = document.getElementById("art_loc_desc").value;
+    let art_price = document.getElementById("art_price").value;
+
+    // validate the fields to be non-empty, null or undefined and send alert if empty
+    if (art_title == "" || art_title == null || art_title == undefined){
+        alert("Please enter artwork title");
+        return;
+    }
+    if (art_beg == 0 || art_beg == null || art_beg == undefined){
+        alert("Please enter artwork beginning year");
+        return;
+    }
+    if (art_end == 0 || art_end == null || art_end == undefined){
+        alert("Please enter artwork ending year");
+        return;
+    }
+    if (art_medium == "" || art_medium == null || art_medium == undefined){
+        alert("Please enter artwork medium");
+        return;
+    }
+    if (art_dim == "" || art_dim == null || art_dim == undefined){
+        alert("Please enter artwork dimensions");
+        return;
+    }
+    if (art_ins == "" || art_ins == null || art_ins == undefined){
+        alert("Please enter artwork inscription");
+        return;
+    }
+    if (art_artist == "" || art_artist == null || art_artist == undefined){
+        alert("Please enter artwork artist");
+        return;
+    }
+    if (art_type == "" || art_type == null || art_type == undefined){
+        alert("Please enter artwork type");
+        return;
+    }
+    if (art_site == "" || art_site == null || art_site == undefined){
+        alert("Please enter artwork site");
+        return;
+    }
+    if (art_room == "" || art_room == null || art_room == undefined){
+        alert("Please enter artwork room");
+        return;
+    }
+    if (art_loc_desc == "" || art_loc_desc == null || art_loc_desc == undefined){
+        alert("Please enter artwork location description");
+        return;
+    }
+    if (art_price == 0 || art_price == null || art_price == undefined){
+        alert("Please enter artwork price");
+        return;
+    }
+    let img_src = document.querySelector("#img_src").files[0];
+    if (img_src == "" || img_src == null || img_src == undefined){
+        alert("Please select artwork image");
+        return;
+    }
+
+    // post request with image file as multipart/form-data
+
+    try{
+        let url1 = "http://localhost:3000/art_upload/";
+        let data1 = new FormData();
+        data1.append("art_image", img_src);
+        let config1 = {
+            headers: {
+                'enctype': 'multipart/form-data',
+                Accept: 'application/json'
+            },
+            method: 'POST',
+            body: data1
+        };
+        let res1 = await fetch(url1, config1);
+        let img_data = await res1.json();
+        let img_url = "";
+        if (res1.status == 200){
+            img_url = img_data["destination"].substring(6);
+            img_url+= img_data["originalname"];
+        } else{
+            alert("Issue with image. Please try with another image");
+            return;
+        }
+
+        // post request with artwork details
+        let url2 = "http://localhost:3000/add_art/";
+        let data2 = [{"art_title":art_title,"art_beg":art_beg,"art_end":art_end,"art_medium":art_medium,"art_dim":art_dim,"art_ins":art_ins,"art_artist":art_artist,"art_type":art_type,"art_site":art_site,"art_room":art_room,"art_loc_desc":art_loc_desc,"art_price":art_price,"art_image":img_url}];
+        const config2 = {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify(data2)
+        };
+        var res2 = await fetch(url2, config2);
+        if (res2.status == 200){
+            alert("Artwork added successfully");
+            // clear the fields
+            document.getElementById("art_title").value = "";
+            document.getElementById("art_beg").value = "";
+            document.getElementById("art_end").value = "";
+            document.getElementById("art_medium").value = "";
+            document.getElementById("art_dim").value = "";
+            document.getElementById("art_ins").value = "";
+            document.getElementById("art_artist").value = "";
+            document.getElementById("art_type").value = "";
+            document.getElementById("art_site").value = "";
+            document.getElementById("art_room").value = "";
+            document.getElementById("art_loc_desc").value = "";
+            document.getElementById("art_price").value = "";
+            document.getElementById("img_src").value = "";
+            // hide the div
+            document.getElementById("newArtDiv").style.display = "none";
+        } else{
+            alert("Artwork addition failed");
+        }
+    } catch (err) {
+        alert("Artwork addition failed");
+    }
 }
 
 async function getMemberPortalDetails() {
@@ -964,12 +1101,14 @@ async function getEmployeePortalDetails(role) {
             let data6 = await res6.json();
             // set options for select ev_site
             let select = document.getElementById("ev_site");
+            let art_select1 = document.getElementById("art_site");
             for (let i = 0; i < data6.length; i++) {
                 let opt = data6[i].loc_site;
                 let el = document.createElement("option");
                 el.textContent = opt;
                 el.value = opt;
                 select.appendChild(el);
+                art_select1.appendChild(el.cloneNode(true));
             }
 
             let url7 = "http://localhost:3000/getRoomNumbers/";
@@ -977,12 +1116,14 @@ async function getEmployeePortalDetails(role) {
             let data7 = await res7.json();
             // set options for select ev_room
             let select1 = document.getElementById("ev_room");
+            let art_select2 = document.getElementById("art_room");
             for (let i = 0; i < data7.length; i++) {
                 let opt = data7[i].loc_room;
                 let el = document.createElement("option");
                 el.textContent = opt;
                 el.value = opt;
                 select1.appendChild(el);
+                art_select2.appendChild(el.cloneNode(true));
             }
 
             let url8 = "http://localhost:3000/getWorkers/";
@@ -996,6 +1137,19 @@ async function getEmployeePortalDetails(role) {
                 el.textContent = opt;
                 el.value = data8[i].emp_id;
                 select2.appendChild(el);
+            }
+
+            let url9 = "http://localhost:3000/getObjClass/";
+            let res9 = await fetch(url9);
+            let data9 = await res9.json();
+            // set options for select art_class
+            let art_select3 = document.getElementById("art_type");
+            for (let i = 0; i < data9.length; i++) {
+                let opt = data9[i].obj_class;
+                let el = document.createElement("option");
+                el.textContent = opt;
+                el.value = opt;
+                art_select3.appendChild(el);
             }
         }
 

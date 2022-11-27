@@ -9,6 +9,29 @@ const nodemailer = require('nodemailer');
 const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
 var MySQLStore = require('express-mysql-session')(sessions);
+const multer = require('multer');
+
+
+var storage = multer.diskStorage({   
+  destination: function(req, file, cb) { 
+     cb(null, './src/images/new_art/');    
+  }, 
+  filename: function (req, file, cb) { 
+     cb(null , file.originalname);   
+  }
+});
+var upload = multer({ storage: storage, limits : {fileSize : 10000000}, fileFilter:fileFilter }).single('art_image');
+
+async function fileFilter (req, file, cb) {    
+  const filetypes = /jpeg|jpg|png/;
+  const extname =  filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+  if(mimetype && extname){
+    return cb(null,true);
+  } else {
+    cb('Error: Images Only!');
+  }
+}
 
 
 const app = express();
@@ -401,52 +424,6 @@ app.get("/searchPrice/",(req,res) => {
 
 });
 
-//add a new art
-app.post("/addArt/",(req,res) => {
-  console.log(req.body);
-
-  //validation
-  let missed = [];
-
-  if (req.body.obj_title == null || req.body.obj_title == undefined || req.body.obj_title == "") {
-      missed.push("Title(obj_title) is required");
-  }
-  if (req.body.obj_beginyear == null || req.body.obj_beginyear == undefined || req.body.obj_beginyear == "") {
-    missed.push("obj_beginyear is required");
-  }
-  if (req.body.obj_endyear == null || req.body.obj_endyear == undefined || req.body.obj_endyear == "") {
-    missed.push("obj_endyear is required");
-  }
-  if (req.body.obj_dimensions == null || req.body.obj_dimensions == undefined || req.body.obj_dimensions == "") {
-    missed.push("Art dimensions(obj_dimensions) are required");
-  }
-  if (req.body.obj_class == null || req.body.obj_class == undefined || req.body.obj_class == "") {
-    missed.push("Art type/class (obj_class) is required");
-  }
-  if (req.body.loc_site == null || req.body.loc_site == undefined || req.body.loc_site == "") {
-    missed.push("Location site (loc_site) is required");
-  }
-  if (req.body.img_url == null || req.body.img_url == undefined || req.body.img_url == "") {
-    missed.push("Image url(img_url) is required");
-  }
-  if (req.body.price == null || req.body.price == undefined || req.body.price == "" || !Number.isFinite(parseFloat(req.body.price))) {
-    missed.push("Price is missing or should be a valid integer");
-  }
-
-  if (missed.length > 0) {
-      res.status(400).send(missed);
-      return;
-  }
-
-  pool.query("insert into `objects` (`obj_title`, `obj_beginyear`, `obj_endyear`, `obj_medium`, `obj_dimensions`, `obj_inscription`, `obj_attribution`, `obj_class`, `loc_site`, `loc_room`, `loc_description`, `img_url`, `price`) values (?,?,?,?,?,?,?,?,?,?,?,?,?)", [req.body.obj_title, req.body.obj_beginyear, req.body.obj_endyear, req.body.obj_medium, req.body.obj_dimensions,req.body.obj_inscription,req.body.obj_attribution,req.body.obj_class,req.body.loc_site,req.body.loc_room,req.body.loc_description,req.body.img_url,parseFloat(req.body.price)], (err, data) => {
-    if (err){
-        console.log(err);
-        res.status(400).send("Failed adding new Art");
-    }
-    res.status(200).send(data);
-  });
-
-} );
 
 //Buy Art
 app.post("/buyArt/", async (req,res) => {
@@ -668,7 +645,7 @@ getTotalDonations = (mem_id) => {
 
 insertEvent = (details, type) => {
   return new Promise((resolve, reject) => {
-    pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type) VALUES (?,?,?,?,?,?)", [details.ev_name, details.ev_date, details.ev_description, details.ev_site, details.ev_room_no, type], (err, data) => {
+    pool.query("INSERT INTO `events` (ev_name, ev_date, ev_description, ev_site, ev_room_no, ev_type, ev_price) VALUES (?,?,?,?,?,?,?)", [details.ev_name, details.ev_date, details.ev_description, details.ev_site, details.ev_room_no, type, details.ev_price], (err, data) => {
       if (err){
         reject(err);
       }
@@ -792,6 +769,17 @@ getWorkers = () => {
   });
 }
 
+getObjClass = () => {
+  return new Promise((resolve, reject) => {
+    pool.query("select distinct obj_class from objects",(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -812,6 +800,17 @@ app.get("/getRoomNumbers", async (req, res) => {
   try{
     const roomNumbers = await getRoomNumbers();
     res.status(200).json(roomNumbers);
+  } catch (err){
+    res.status(400);
+  }
+});
+
+
+// get obj_class from objects table
+app.get("/getObjClass", async (req, res) => {
+  try{
+    const objClass = await getObjClass();
+    res.status(200).json(objClass);
   } catch (err){
     res.status(400);
   }
@@ -1700,5 +1699,45 @@ app.post("/sendEmails" , async (req, res) => {
       }
     });
   }
+});
+
+app.post("/art_upload", (req, res) => {
+  upload(req, res, (err) => {
+   if(err) {
+    console.log(err)
+    res.status(400).send("Something went wrong!");
+   }
+   res.status(200).json(res.req.file);
+ });
+});
+
+app.post("/add_art",  async (req, res) => {
+  let art_title = req.body[0].art_title;
+  let art_beg = req.body[0].art_beg;
+  let art_end = req.body[0].art_end;
+  let art_medium = req.body[0].art_medium;
+  let art_dim = req.body[0].art_dim;
+  let art_ins = req.body[0].art_ins;
+  let art_artist = req.body[0].art_artist;
+  let art_type = req.body[0].art_type;
+  let art_site = req.body[0].art_site;
+  let art_room = req.body[0].art_room;
+  let art_loc_desc = req.body[0].art_loc_desc;
+  let art_img = req.body[0].art_image;
+  let art_price = req.body[0].art_price;
+
+  try {
+    pool.query("insert into objects (obj_title,obj_beginyear,obj_endyear,obj_medium,obj_dimensions,obj_inscription,obj_attribution,obj_class,loc_site,loc_room,loc_description,img_url,price) values(?,?,?,?,?,?,?,?,?,?,?,?,?)", [art_title,art_beg,art_end,art_medium,art_dim,art_ins,art_artist,art_type,art_site,art_room,art_loc_desc,art_img,art_price], (err, result) => {
+      if (err) {
+        res.status(400).json({"message":"Artwork addition failed"});
+      } else {
+        res.status(200).json({"message":"Art added successfully"});
+      }
+    }
+    );
+  } catch (err) {
+    res.status(400).json({"message":"Artwork addition failed"});
+  }
+
 });
 //==================================================================================================
