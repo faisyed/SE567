@@ -223,14 +223,19 @@
 			<input type="number" id="user_phone_no" name="user_phone_no" value=""><br/>
 			<label for="user_type">User Type:</label>
 			<select id="user_type" name="user_type">
-				<option value="member">Member</option>
-				<option value="visitor">Visitor</option>
-				<option value="employee">Employee</option>
+				<option value="M">Member</option>
+				<option value="V">Visitor</option>
+				<option value="E">Employee</option>
 			</select>
 		</form>
 	</div>
 
-   <div class="payment-container">
+   <div class="payment-container" id="payment-container-id">
+
+	<div id = "paymentDetails" style="display: none;">
+		<h3>Order details:</h3>
+		Price: <h6 id="paymentPrice"></h6></div><br/>
+	</div>
 
      <!-- Buttons container -->
      <div id="paypal-button-container"></div>
@@ -252,7 +257,7 @@
 
          <br><br>
          <div class="button-container">
-           <input type="submit" class="button button--small button--green" value="Pay" id="submit"/>
+           <input type="submit" id="credit-card-payment-buttom" class="button button--small button--green" value="Pay" id="submit"/>
          </div>
        </form>
      </div>

@@ -3,10 +3,9 @@ const mysql = require("mysql");
 const path = require('path');
 var cors = require('cors')
 const bodyParser = require('body-parser');
-const { response, application } = require("express");
+const { response } = require("express");
 const { resolve } = require("path");
 const axios = require('axios');
-
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -123,7 +122,7 @@ API to get all art collections from database to display on UI
 app.get("/getArts/",(req,res) => {
   pool.query("SELECT * FROM `objects`", (err, data) => {
     if (err){ 
-        console.log(err);
+        console.error(err);
         res.status(400).send("Backend Issue. Please reload the page");
     }
     var result = [];
@@ -164,7 +163,7 @@ app.get("/getArt/",(req,res) => {
   
   pool.query("SELECT * FROM `objects` where `obj_id` = ?", [parseInt(req.query.id)], (err, data) => {
     if (err){ 
-        console.log(err);
+        console.error(err);
         res.status(400).send("Failed fetching the Art details");
     };
 
@@ -196,7 +195,7 @@ app.post("/getArtsCol/",(req,res) => {
 
   pool.query("SELECT * FROM `objects` where `obj_class` = ?", [req.body.type], (err, data) => {
     if (err){ 
-        console.log(err);
+        console.error(err);
         res.status(400).send("Fetching Arts by type failed");
     };
       var result = [];
@@ -238,7 +237,7 @@ app.get("/searchKey/",(req,res) => {
   }
   pool.query("select * from objects where obj_title like ? or obj_medium like ? or obj_inscription like ?", [`%${req.query.key}%`,`%${req.query.key}%`,`%${req.query.key}%`], (err, data) => {
     if (err){
-        console.log(err);
+        console.error(err);
         res.status(400).send("Fetching arts by keyword failed");
     };
     var result = [];
@@ -277,7 +276,7 @@ app.get("/searchName/",(req,res) => {
   }
   pool.query("select * from objects where obj_attribution = ?", [req.query.name], (err, data) => {
     if (err){
-        console.log(err);
+        console.error(err);
         res.status(400).send("Fetching arts by Author name failed");
     };
     var result = [];
@@ -326,7 +325,7 @@ app.get("/searchPrice/",(req,res) => {
 
   pool.query("select * from `objects` where `price` between ? and ?", [parseInt(req.query.from),parseInt(req.query.to)], (err, data) => {
     if (err){
-        console.log(err);
+        console.error(err);
         res.status(400).send("Fetching arts by price failed");
     };
 
@@ -351,7 +350,6 @@ app.get("/searchPrice/",(req,res) => {
 
 //add a new art
 app.post("/addArt/",(req,res) => {
-  console.log(req.body);
 
   //validation
   let missed = [];
@@ -388,7 +386,7 @@ app.post("/addArt/",(req,res) => {
 
   pool.query("insert into `objects` (`obj_title`, `obj_beginyear`, `obj_endyear`, `obj_medium`, `obj_dimensions`, `obj_inscription`, `obj_attribution`, `obj_class`, `loc_site`, `loc_room`, `loc_description`, `img_url`, `price`) values (?,?,?,?,?,?,?,?,?,?,?,?,?)", [req.body.obj_title, req.body.obj_beginyear, req.body.obj_endyear, req.body.obj_medium, req.body.obj_dimensions,req.body.obj_inscription,req.body.obj_attribution,req.body.obj_class,req.body.loc_site,req.body.loc_room,req.body.loc_description,req.body.img_url,parseFloat(req.body.price)], (err, data) => {
     if (err){
-        console.log(err);
+        console.error(err);
         res.status(400).send("Failed adding new Art");
     }
     res.status(200).send(data);
@@ -420,17 +418,17 @@ app.post("/buyArt/", async (req,res) => {
 
   pool.query("SELECT obj_id, price FROM `objects` where `obj_id` = ?", [parseInt(req.query.id)], (err,data) => {
     if(err){
-      console.log(err);
+      console.error(err);
       missed.push("id does not exist in the database");
       res.status(400).send(missed);
 
     }
-    console.log("searched in database",data);
+    
 
     if(data.length > 0 && data[0].obj_id > 0){
       pool.query("insert into `shop_transactions` (`obj_oid`, `total_amount`, `user_id`, `user_type`, `purchase_date`) values (?,?,?,?,?)", [data[0].obj_id, data[0].price, req.body[0].user_id, req.body[0].user_type, new Date()], (err, data) => {
         if (err){
-            console.log(err);
+            console.error(err);
             res.status(400).send(missed);
         }
         res.status(200).send(data);
@@ -568,7 +566,7 @@ app.post("/capture-order/:orderId", async (req, res) => {
 });
 
 
-app.post("/getMemberId/", async (req, res) => {
+app.get("/getMemberId/", async (req, res) => {
   
   let missed = [];
 
@@ -584,18 +582,25 @@ app.post("/getMemberId/", async (req, res) => {
       res.status(400).send(missed);
       return;
   }
-
-  const memberExist = await checkMemberExist(req.query.first_name,req.query.last_name);
-  if (memberExist){
-    res.status(200).send({id: memberExist.member_id});
-  }
-  else{
-    res.status(400).send(null);
-  }
+  
+  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [req.query.first_name,req.query.last_name, "Y"], (err, data) => {
+    if (err){
+      console.error(err);
+      res.status(400).send(err);
+    }
+    
+    if (data.length > 0){
+      res.status(200).send({id: data[0].mem_id});
+    }
+    else{
+      console.error(err);
+      res.status(400).send("Error obtaining member details");
+    }
+  });
 
 });
 
-app.post("/getEmployeeId/", async (req, res) => {
+app.get("/getEmployeeId/", async (req, res) => {
   
   let missed = [];
 
@@ -612,18 +617,24 @@ app.post("/getEmployeeId/", async (req, res) => {
       return;
   }
 
-  const empExist = await checkEmployeeExist(req.query.first_name,req.query.last_name);
-  if (empExist){
-    res.status(200).send({id: empExist.emp_id});
-  }
-  else{
-    res.status(400).send(null);
-  }
+  pool.query("select emp_id from `employees` where first_name=? and last_name=? and is_active=?", [req.query.first_name,req.query.last_name, "Y"], (err, data) => {
+    if (err){
+      console.error(err);
+      res.status(400).send(err);
+    }
 
+    if (data.length > 0){
+      res.status(200).send({id: data[0].emp_id});
+    }
+    else{
+      console.error(err);
+      res.status(400).send("Error obtaining employee details");
+    }
+  });
+  
 });
 
 app.post("/addVisitor/", async (req, res) => {
-  console.log("request to add visitor",req.body);
   let missed = [];
 
   if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == "") {
@@ -920,7 +931,7 @@ app.get("/getemployeedetails/:id", async (req, res) => {
   try {
     const personal = await getEmployeePersonalDetails(parseInt(req.params.id));
     const login = await getMemLoginDetails(parseInt(req.params.id), 'E');
-    console.log("persona",personal,login);
+    
     if (personal && login) {
       const details = {
         "personal": personal,
