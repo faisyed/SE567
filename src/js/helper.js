@@ -449,6 +449,33 @@ async function showRegistrationForm(){
     document.getElementById("registerDiv").style.display = "block";
 }
 
+async function addEmployeeBlock(){
+    let empBlockStyle = document.getElementById("newEmployeeDiv").style.display;
+    if (empBlockStyle == "none"){
+        document.getElementById("newEmployeeDiv").style.display = "block";
+    } else{
+        document.getElementById("newEmployeeDiv").style.display = "none";
+    }
+}
+
+async function addEventBlock(){
+    let eventBlockStyle = document.getElementById("newEventDiv").style.display;
+    if (eventBlockStyle == "none"){
+        document.getElementById("newEventDiv").style.display = "block";
+    } else{
+        document.getElementById("newEventDiv").style.display = "none";
+    }
+}
+
+async function addArtBlock(){
+    let artBlockStyle = document.getElementById("newArtDiv").style.display;
+    if (artBlockStyle == "none"){
+        document.getElementById("newArtDiv").style.display = "block";
+    } else{
+        document.getElementById("newArtDiv").style.display = "none";
+    }
+}
+
 async function registerNewMember(){
     var first_name = document.getElementById("first_name").value;
     var last_name = document.getElementById("last_name").value;
@@ -554,6 +581,209 @@ async function registerNewMember(){
     }
 }
 
+async function addEmployee(){
+    var first_name = document.getElementById("emp_first_name").value;
+    var last_name = document.getElementById("emp_last_name").value;
+    var email = document.getElementById("emp_email").value;
+    var phone_no = document.getElementById("emp_phone").value;
+    var address1 = document.getElementById("emp_address1").value;
+    var address2 = document.getElementById("emp_address2").value;
+    var city = document.getElementById("emp_city").value;
+    var state = document.getElementById("emp_state").value;
+    var zipcode = document.getElementById("emp_zip").value;
+
+    // validate the fields to be non-empty, null or undefined and send alert if empty
+    if (first_name == "" || first_name == null || first_name == undefined){
+        alert("Please enter first name");
+        return;
+    }
+    if (last_name == "" || last_name == null || last_name == undefined){
+        alert("Please enter last name");
+        return;
+    }
+    if (email == "" || email == null || email == undefined){
+        alert("Please enter email");
+        return;
+    }
+    if (phone_no == "" || phone_no == null || phone_no == undefined){
+        alert("Please enter phone");
+        return;
+    }
+    if (address1 == "" || address1 == null || address1 == undefined){
+        alert("Please enter address1");
+        return;
+    }
+    if (city == "" || city == null || city == undefined){
+        alert("Please enter city");
+        return;
+    }
+    if (state == "" || state == null || state == undefined){
+        alert("Please enter state");
+        return;
+    }
+    if (zipcode == "" || zipcode == null || zipcode == undefined){
+        alert("Please enter zip");
+        return;
+    }
+
+    var username = document.getElementById("emp_username").value;
+    var pass = document.getElementById("emp_pass").value;
+    var conf_pass = document.getElementById("emp_conf_pass").value;
+
+    // validate the fields to be non-empty, null or undefined and send alert if empty
+    if (username == "" || username == null || username == undefined){
+        alert("Please enter username");
+        return;
+    }
+    if (pass == "" || pass == null || pass == undefined){
+        alert("Please enter password");
+        return;
+    }
+    if (conf_pass == "" || conf_pass == null || conf_pass == undefined){
+        alert("Please enter confirm password");
+        return;
+    }
+
+    // validate the password and confirm password fields to be same
+    if (pass != conf_pass){
+        alert("Password and confirm password fields do not match");
+        return;
+    }
+
+    try {
+        var url1 = "http://localhost:3000/createemployee/";
+        var data1 = [{"first_name":first_name,"last_name":last_name,"email":email,"phone_no":phone_no,"address1":address1,"address2":address2,"city":city,"state":state,"zipcode":zipcode,"username":username,"password":pass}];
+        const config1 = {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify(data1)
+        };
+        var res1 = await fetch(url1, config1);
+        if (res1.status == 200){
+            alert("Employee enrolled successfully");
+            var url2 = "http://localhost:3000/sendEmails/";
+            var data2 = [{"email_type":"enrolled","email_list":email,'username':username,'password':pass}];
+            const config2 = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(data2)
+            };
+            var res2 = await fetch(url2, config2);
+            // clear the fields
+            document.getElementById("emp_first_name").value = "";
+            document.getElementById("emp_last_name").value = "";
+            document.getElementById("emp_email").value = "";
+            document.getElementById("emp_phone").value = "";
+            document.getElementById("emp_address1").value = "";
+            document.getElementById("emp_address2").value = "";
+            document.getElementById("emp_city").value = "";
+            document.getElementById("emp_state").value = "";
+            document.getElementById("emp_zip").value = "";
+            document.getElementById("emp_username").value = "";
+            document.getElementById("emp_pass").value = "";
+            document.getElementById("emp_conf_pass").value = "";
+            // hide the div
+            document.getElementById("newEmployeeDiv").style.display = "none";
+        } else if(res1.status == 300){
+            alert("username already exists");
+        } else{
+            alert("Employee registration failed");
+        }
+    } catch (err) {
+        alert("Employee Registration failed");
+    }
+}
+
+// get selected employees from multiselect dropdown ev_employees
+function getSelectedEmployees(){
+    var selectedEmployees = [];
+    var employees = document.getElementById("ev_employees");
+    for (var i = 0; i < employees.options.length; i++) {
+        if (employees.options[i].selected) {
+            selectedEmployees.push(parseInt(employees.options[i].value));
+        }
+    }
+    return selectedEmployees;
+}
+
+async function addEvent() {
+    let ev_name = document.getElementById("ev_name").value;
+    let ev_desc = document.getElementById("ev_desc").value;
+    let ev_date = document.getElementById("ev_date").value;
+    let ev_type = document.getElementById("ev_type").value;
+    let ev_site = document.getElementById("ev_site").value;
+    let ev_room = document.getElementById("ev_room").value;
+    let ev_employees = getSelectedEmployees();
+
+    // validate the fields to be non-empty, null or undefined and send alert if empty
+    if (ev_name == "" || ev_name == null || ev_name == undefined){
+        alert("Please enter event name");
+        return;
+    }
+    if (ev_desc == "" || ev_desc == null || ev_desc == undefined){
+        alert("Please enter event description");
+        return;
+    }
+    if (ev_date == "" || ev_date == null || ev_date == undefined){
+        alert("Please enter event date");
+        return;
+    }
+    if (ev_type == "" || ev_type == null || ev_type == undefined){
+        alert("Please enter event type");
+        return;
+    }
+    if (ev_site == "" || ev_site == null || ev_site == undefined){
+        alert("Please enter event site");
+        return;
+    }
+    if (ev_room == "" || ev_room == null || ev_room == undefined){
+        alert("Please enter event room");
+        return;
+    }
+    if (ev_employees.length==0 || ev_employees == null || ev_employees == undefined){
+        alert("Please enter event employees");
+        return;
+    }
+
+    try {
+        var url = "http://localhost:3000/createevent/";
+        var data = [{"ev_name":ev_name,"ev_description":ev_desc,"ev_date":ev_date,"ev_type":ev_type,"ev_site":ev_site,"ev_room":ev_room,"assigned_employees":ev_employees}];
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify(data)
+        };
+        var res = await fetch(url, config);
+        if (res.status == 200){
+            alert("Event created successfully");
+            // clear the fields
+            document.getElementById("ev_name").value = "";
+            document.getElementById("ev_desc").value = "";
+            document.getElementById("ev_date").value = "";
+            document.getElementById("ev_type").value = "";
+            document.getElementById("ev_site").value = "";
+            document.getElementById("ev_room").value = "";
+            document.getElementById("ev_employees").value = "";
+            // hide the div
+            document.getElementById("newEventDiv").style.display = "none";
+        } else{
+            alert("Event creation failed");
+        }
+    } catch (err) {
+        alert("Event Creation failed");
+    }
+
+}
+
 async function getMemberPortalDetails() {
     var member_id = 27;
     // getting personal details
@@ -638,8 +868,8 @@ async function getMemberPortalDetails() {
     }
 }
 
-async function getEmployeePortalDetails() {
-    var emp_id = 30;
+async function getEmployeePortalDetails(role) {
+    var emp_id = 2;
     // getting personal details
     try {
         let url1 = "http://localhost:3000/getemployeedetails/" + emp_id;
@@ -718,8 +948,59 @@ async function getEmployeePortalDetails() {
             cell2.innerHTML = data5[i].amount;
             cell3.innerHTML = ev_date;
         }
-        
+
+        if (role == "manager"){
+            let ev_date = document.getElementById("ev_date").value;
+            // set ev_date min value to today
+            let today = new Date();
+            let dd = String(today.getDate()).padStart(2, '0');
+            let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+            let yyyy = today.getFullYear();
+            today = yyyy + '-' + mm + '-' + dd;
+            document.getElementById("ev_date").setAttribute("min", today);
+
+            let url6 = "http://localhost:3000/getSiteLocations/";
+            let res6 = await fetch(url6);
+            let data6 = await res6.json();
+            // set options for select ev_site
+            let select = document.getElementById("ev_site");
+            for (let i = 0; i < data6.length; i++) {
+                let opt = data6[i].loc_site;
+                let el = document.createElement("option");
+                el.textContent = opt;
+                el.value = opt;
+                select.appendChild(el);
+            }
+
+            let url7 = "http://localhost:3000/getRoomNumbers/";
+            let res7 = await fetch(url7);
+            let data7 = await res7.json();
+            // set options for select ev_room
+            let select1 = document.getElementById("ev_room");
+            for (let i = 0; i < data7.length; i++) {
+                let opt = data7[i].loc_room;
+                let el = document.createElement("option");
+                el.textContent = opt;
+                el.value = opt;
+                select1.appendChild(el);
+            }
+
+            let url8 = "http://localhost:3000/getWorkers/";
+            let res8 = await fetch(url8);
+            let data8 = await res8.json();
+            // set options for select ev_employees
+            let select2 = document.getElementById("ev_employees");
+            for (let i = 0; i < data8.length; i++) {
+                let opt = data8[i].first_name + " " + data8[i].last_name;
+                let el = document.createElement("option");
+                el.textContent = opt;
+                el.value = data8[i].emp_id;
+                select2.appendChild(el);
+            }
+        }
+
     } catch (err) {
+        console.log(err);
         alert("Error in loading portal page. Please try again later");
     }
 }

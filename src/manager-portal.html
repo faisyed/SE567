@@ -15,7 +15,7 @@
 	<!-- include the site responsive stylesheet -->
 	<link rel="stylesheet" href="css/responsive.css">
 </head>
-<body onload="getEmployeePortalDetails('worker')">
+<body onload="getEmployeePortalDetails('manager')">
 	<!-- pageWrapper -->
 	<div id="pageWrapper">
 		<div class="phStickyWrap phVii w-100">
@@ -121,6 +121,7 @@
 						<li><a href="#upcoming_events">Upcoming Events</a></li>
                         <li><a href="#ticket_transactions">Ticket Transactions</a></li>
                         <li><a href="#art_transactions">Art Transactions</a></li>
+                        <li><a href="#operations">Operations</a></li>
 					</ul>
 				</div>
 			</nav>
@@ -351,6 +352,224 @@
 						</div>
 					</div>
 				</section>
+                <hr class="my-8 my-lg-14">
+                <section id="operations" class="vistiTwoColumn">
+					<div class="row">
+						<div class="col-12 col-md-6">
+							<div class="pr-md-5 pr-lg-10 pr-xl-17">
+								<h2 class="h2Medium mb-4 mb-md-7 mb-lg-10">Operations</h2>
+							</div>
+						</div>
+						<div class="form-row mx-n1">
+                            <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+                                <div class="form-group position-relative mb-2">
+                                    <label class="d-block">
+                                        <input type="submit" onclick="addEmployeeBlock()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Enroll Employee">
+                                    </label>
+                                </div>
+                                <div class="form-group position-relative mb-2">
+                                    <label class="d-block">
+                                        <input type="submit" onclick="addEventBlock()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Add Event">
+                                    </label>
+                                </div>
+                                <div class="form-group position-relative mb-2">
+                                    <label class="d-block">
+                                        <input type="submit" onclick="addArtBlock()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Add Art">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+					</div>
+				</section>
+                <hr class="my-8 my-lg-14">
+                <section id="addEmployeeSection" class="vistiTwoColumn">
+                    <div class="row" id="addEmployeeDiv">
+                        <div class="col-18 offset-lg-2 col-md-8" id="newEmployeeDiv" style="display: none;">
+							<!-- donationBoxWrap -->
+                            <div class="bg-brown py-3 px-lg-5">
+                                <h3 class="text-white mb-0 ml-50">Employee Details</h3>
+                            </div>
+							<div class="donationBoxWrap border px-3 pb-4 px-md-6 pb-md-9 mt-2 pt-4">
+								<strong class="font-weight-normal d-block h4 fontBase mb-4"><b>Personal Information:</b></strong>
+								<div class="form-row mx-n2">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">First Name <span class="text-brown">*</span></strong>
+												<input type="text" id="emp_first_name" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Last Name <span class="text-brown">*</span></strong>
+												<input type="text" id="emp_last_name" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Email Address <span class="text-brown">*</span></strong>
+												<input type="email" id="emp_email" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Contact No <span class="text-brown">*</span></strong>
+												<input type="text" id="emp_phone" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+                                    <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Street Address 1 <span class="text-brown">*</span></strong>
+												<input type="text" id="emp_address1" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Street Address 2</strong>
+												<input type="text" id="emp_address2" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">City <span class="text-brown">*</span></strong>
+												<input type="text" id="emp_city" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">State <span class="text-brown">*</span></strong>
+												<input type="text" id="emp_state" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Zip Code <span class="text-brown">*</span></strong>
+												<input type="text" id="emp_zip" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									
+								</div>
+								<strong class="font-weight-normal d-block h4 fontBase mb-4 pt-5"><b>Login Information:</b></strong>
+								<div class="form-row mx-n1">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Username <span class="text-brown">*</span></strong>
+												<input type="text" id="emp_username" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-row mx-n1">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Password <span class="text-brown">*</span></strong>
+												<input type="password" id="emp_pass" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+								</div>
+								<div class="form-row mx-n1">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Confirm Password <span class="text-brown">*</span></strong>
+												<input type="text" id="emp_conf_pass" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+								</div>
+								<input type="submit" onclick="addEmployee()" class="btn btn-secondary text-uppercase d-block w-100 mt-6" value="Confirm enrollment">
+							</div>
+						</div>
+                    </div>
+                </section>
+				<section id="addEventSection" class="vistiTwoColumn">
+                    <div class="row" id="addEventDiv">
+                        <div class="col-18 offset-lg-2 col-md-8" id="newEventDiv" style="display: none;">
+							<!-- donationBoxWrap -->
+                            <div class="bg-brown py-3 px-lg-5">
+                                <h3 class="text-white mb-0 ml-50">Event Details</h3>
+                            </div>
+							<div class="donationBoxWrap border px-3 pb-4 px-md-6 pb-md-9 mt-2 pt-4">
+								<strong class="d-block font-weight-normal mb-1">Name <span class="text-brown">*</span></strong>
+								<input type="text" id="ev_name" class="form-control formControlMedium">
+								<strong class="d-block font-weight-normal mb-1 mt-1">Description <span class="text-brown">*</span></strong>
+								<textarea id="ev_desc" class="form-control formControlMedium" row="5" col="100"></textarea>
+								<div class="form-row mx-n2">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Date <span class="text-brown">*</span></strong>
+												<input type="date" id="ev_date" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Type <span class="text-brown">*</span></strong>
+												<select id="ev_type" class="form-control formControlMedium">
+													<option value="show">Show</option>
+													<option value="exhibition">Exhibition</option>
+													<option value="auction">Auction</option>
+												</select>
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Location/Site <span class="text-brown">*</span></strong>
+												<select id="ev_site" class="form-control formControlMedium">
+												</select>
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Room <span class="text-brown">*</span></strong>
+												<select id="ev_room" class="form-control formControlMedium">
+												</select>
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Assign Employees <span class="text-brown">*</span></strong>
+												<select id="ev_employees" class="select form-control formControlMedium" multiple size="10">
+												</select>
+											</label>
+										</div>
+									</div>
+								</div>
+								<input type="submit" onclick="addEvent()" class="btn btn-secondary text-uppercase d-block w-100 mt-6" value="Confirm Event">
+								
+							</div>
+						</div>
+                    </div>
+                </section>
+				
 			</div>
 		</main>
 		<!-- ftAreaWrap -->
