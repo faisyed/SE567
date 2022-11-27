@@ -1079,6 +1079,22 @@ async function getEmployeePortalDetails(role) {
             document.getElementById("act_emp").value = 'No';
         }
 
+        let url10 = "http://localhost:3000/getupcomingevents/" + emp_id;
+        let res10 = await fetch(url10);
+        let data10 = await res10.json();
+        let table10 = document.getElementById("event_vis_tables");
+        for (let i = 0; i < data10.length; i++) {
+            let row = table10.insertRow(i + 1);
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let ev_date = data10[i].event_date;
+            ev_date = ev_date.split("T")[0];
+            cell1.innerHTML = data10[i].name;
+            cell2.innerHTML = data10[i].type;
+            cell3.innerHTML = ev_date;
+        }
+
         if (role == "worker") {
             // get employee upcoming events
             let url2 = "http://localhost:3000/getupcomingemployeeevents/" + emp_id;

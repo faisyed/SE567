@@ -439,9 +439,9 @@ getUpComingEmployeeEvents = (emp_id) => {
   });
 }
 
-getUpComingMemberEvents = (mem_id) => {
+getUpComingMemberEvents = (mem_id, type) => {
   return new Promise((resolve, reject) => {
-    pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from events e join ticket_transactions t on e.ev_id = t.ev_id where t.user_type=? and t.user_id=? and e.ev_type in (?,?,?) and e.ev_date>=curdate() order by e.ev_date limit 5", ["M", mem_id, "show", "exhibition", "auction"], (err, data) => {
+    pool.query("select e.ev_name as name, upper(e.ev_type) as type, e.ev_date as event_date, e.ev_site as site, e.ev_room_no as room_no from events e join ticket_transactions t on e.ev_id = t.ev_id where t.user_type=? and t.user_id=? and e.ev_type in (?,?,?) and e.ev_date>=curdate() order by e.ev_date limit 5", [type, mem_id, "show", "exhibition", "auction"], (err, data) => {
       if (err){
         reject(err);
       }
@@ -814,8 +814,11 @@ app.get('/getupcomingemployeeevents/:id', async (req, res) => {
 // get upcoming events for member
 app.get('/getupcomingevents/:id', async (req, res) => {
   try{
-    console.log("id",req.params.id);
-    const events = await getUpComingMemberEvents(parseInt(req.params.id));
+    let temp_user_type = session.user_type;
+    if (temp_user_type == 'C'){
+      temp_user_type = 'E';
+    }
+    const events = await getUpComingMemberEvents(parseInt(req.params.id), temp_user_type);
     if (events){
       return res.status(200).json(events);
     }
@@ -1090,17 +1093,18 @@ app.post("/buyTickets/", async (req,res) => {
   }
   
   try{
-    const memberExist = await checkMemberExist(first_name,last_name,email);
-    //extract member id from the result
-    if (memberExist){
-      pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date, ev_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, memberExist.member_id, "M", ev_date, event_id], (err, data) => {
-        if (err){
-            return res.status(400).json({"message": "Ticket purchase failed"});
+    if (session.loggedin == true){
+        let temp_user_type = session.user_type;
+        if (temp_user_type == "C"){
+          temp_user_type = "E";
         }
-        return res.status(200).json({"message":"Ticket purchase successful"});
-      });
+        pool.query("INSERT INTO `ticket_transactions` (ticket_class, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, other_price, total_amount, user_id, user_type, event_date, ev_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [ ticket_type, child_count, adult_count, senior_count, student_count, other_count, adult_price, senior_price, student_price, adult_price, ticket_total, session.user_id, temp_user_type, ev_date, event_id], (err, data) => {
+          if (err){
+              return res.status(400).json({"message": "Ticket purchase failed"});
+          }
+          return res.status(200).json({"message":"Ticket purchase successful"});
+        });
     }
-    // if user is not a member, insert ticket into tickets table
     else{
       // create entry in visitors table
       var visitor_id = 0;
