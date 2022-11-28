@@ -213,6 +213,7 @@ const addUserToDatabase = async () => {
         .then(json => {
           let user = {};
           user["id"] = json.id;
+          console.log("fghjkl",user,json);
           return user;
         })
     }

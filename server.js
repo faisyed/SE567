@@ -609,7 +609,7 @@ app.post("/addVisitor/", async (req, res) => {
 
   const visitor = await addVisitor(req.body[0].first_name, req.body[0].last_name, req.body[0].email, req.body[0].phoneNo);
   if (visitor){
-    res.status(200).send({'id': visitor.insertId});
+    res.status(200).send({'id': visitor.visitor_id});
   }
   else{
     res.status(400).send(null);

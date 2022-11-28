@@ -106,7 +106,6 @@
    <script>
 	document.addEventListener('DOMContentLoaded', function() {
 		var s = document.createElement('script');
-		console.log("window",sessionStorage);
 		s.setAttribute('src', 'https://www.paypal.com/sdk/js?components=hosted-fields,buttons&client-id='+sessionStorage.getItem("client_id"));
 		s.setAttribute('data-client-token',sessionStorage.getItem("client_token"));
 		document.body.appendChild(s); 

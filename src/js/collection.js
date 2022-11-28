@@ -188,7 +188,6 @@ const getArt = () => {
 }
 
 const payment = async () => {
-  console.log("rtyuikm cfghuil");
   try {
         await fetch('http://localhost:3000/loadPayPal')
         .then(res => {
