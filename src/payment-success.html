@@ -14,8 +14,19 @@
 	<link rel="stylesheet" href="style.css">
 	<!-- include the site responsive stylesheet -->
 	<link rel="stylesheet" href="css/responsive.css">
-</head>
-<body onload="getArt()">
+    
+    <title>Transaction approved</title>
+    <meta charset="UTF-8" />
+    <link
+       href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap"
+       rel="stylesheet"
+       />
+    <link
+       href="src/styles.css"
+       rel="stylesheet"
+       />
+ </head>
+<body>
 	<!-- pageWrapper -->
 	<div id="pageWrapper">
 		<div class="phStickyWrap phVii w-100">
@@ -53,7 +64,7 @@
 														<li><a  href="visit-us-block.html">Hours &amp; Admission</a></li>
 														<li><a  href="visit-us-block.html">Accessibility</a></li>
 														<li><a  href="visit-us-block.html">Other Facilities</a></li>
-														<li><a  href="buy-tickets.html">Purchase Tickets</a></li>
+														<li><a  href="buy-tickets.html">Purchase Tickers</a></li>
 													</ul>
 													<!-- mndAdress -->
 													<address class="mndAdress position-absolute text-gray888 mb-0">
@@ -71,7 +82,7 @@
 													<!-- mnDropList -->
 													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
 														<li>
-															<a href="show-list.html">Show</a>
+															<a href="event-list.html">Event</a>
 														</li>
 														<li>
 															<a href="exhibition-list.html">Exhibition</a>
@@ -112,70 +123,16 @@
 				</div>
 			</header>
 		</div>
-		<main>
-			<!-- artworkContentBlock -->
-			<section class="artworkContentBlock pt-8 pt-lg-12 pb-10 pb-lg-14 pb-xl-22">
-				<div class="container">
-					<div class="row">
-						<div class="col-12 col-md-10 offset-md-1 col-xl-8 offset-xl-2">
-							<!-- acbFig -->
-							<figure class="acbFig text-gray888 text-center mb-6 mb-md-10">
-								<div class="imgHolder mb-3">
-									<img id="art_image" class="img-fluid" alt="image description">
-								</div>
-								<figcaption id="image_caption"></figcaption>
-							</figure>
-						</div>
-					</div>
-				</div>
-				<hr class="mt-8 mb-8 mb-lg-13 mb-xl-19">
-				<div class="container">
-					<div class="px-xl-6">
-						<div class="row">
-							<div class="col-12 col-md-10 offset-md-1 col-xl-8 offset-xl-2">
-								<h2 class="mb-1" id="image_title"></h2>
-								<strong class="d-block acbSubtitle font-weight-normal text-gray777" id="author_desc"></strong>
-								<hr class="mt-5 mt-md-8 mb-4">
-								<p class="mb-7" id="description"></p>
-								<!-- apDataTable -->
-								<table class="apDataTable apDataTableII text-gray777 w-100 mt-5 mb-9 mb-lg-14">
-									<tbody>
-										<tr>
-											<td class="text-secondary">Artist</td>
-											<td id="artist"></td>
-										</tr>
-										<tr>
-											<td class="text-secondary">Year</td>
-											<td id="year"></td>
-										</tr>
-										<tr>
-											<td class="text-secondary">Location</td>
-											<td id="location"></td>
-										</tr>
-										<tr>
-											<td class="text-secondary">Type</td>
-											<td id="class"></td>
-										</tr>
-										<tr>
-											<td class="text-secondary">Material</td>
-											<td id="material"></td>
-										</tr>
-										<tr>
-											<td class="text-secondary">Dimensions</td>
-											<td id="dimensions"></td>
-										</tr>
-										<tr>
-											<td class="text-secondary">Price</td>
-											<td id="price"></td>
-										</tr>
-										<button type="button" onclick="payment()" class="btn btn-success btn-block">Buy</button>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
+		<main> 
+            <div id="app">
+            <h1>Woohoo! Your order is complete 🎉</h1>
+            <img
+               class="item small"
+               src="src/img/celebrate.jpeg"
+               alt="order complete"
+               />
+            <span class="caption">Photo by <a href="https://unsplash.com/@jdent?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Jason Dent</a> on <a href="https://unsplash.com/s/photos/celebrate?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Unsplash</a></span>
+         </div>
 		</main>
 		<!-- ftAreaWrap -->
 		<div class="ftAreaWrap bg-secondary text-gray888">
@@ -217,6 +174,6 @@
 	<script src="js/popper.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
-	<script src="js/collection.js"></script>
+	<script src="js/payment.js"></script>
 </body>
 </html>

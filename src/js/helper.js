@@ -357,9 +357,103 @@ async function donateAmount(){
         alert("Amount cannot be empty");
         return;
     }
-
+    
     // convert total_amount to float
     total_amount = parseFloat(total_amount);
+
+    document.getElementById('payment-container-id').style.display = "initial";
+    paypal.Buttons({
+        style: {
+          layout: 'horizontal'
+        },
+         createOrder: async function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                  amount: {
+                    value: total_amount
+                  }
+                }]
+            });
+          },
+          onApprove: function(data, actions) {
+            return actions.order.capture().then(async function(details) {
+                console.log("donation succcess");
+                return addDonation(first_name, last_name, email, phone, total_amount);
+            });
+          }
+      }).render("#paypal-button-container");
+    
+      // Eligibility check for advanced credit and debit card payments
+      if (paypal.HostedFields.isEligible()) {
+        let orderId;
+    
+        paypal.HostedFields.render({
+          styles: {
+           // Styling element state
+           '.valid': {
+             'color': 'green'
+           },
+           '.invalid': {
+             'color': 'red'
+           }
+          },
+          fields: {
+            number: {
+              selector: "#card-number",
+              placeholder: "4111 1111 1111 1111"
+            },
+            cvv: {
+              selector: "#cvv",
+              placeholder: "123"
+            },
+            expirationDate: {
+              selector: "#expiration-date",
+              placeholder: "MM/YY"
+            }
+          },
+          createOrder: async function () {
+            document.getElementById('credit-card-payment-buttom').value = "Processing...";
+            const user = await addUserToDatabase();
+            if(user){
+              userId = user.id;
+              const res = await fetch(`/create-order?pay=${paymentPrice}`, { method: 'POST' });
+              const { id } = await res.json();
+              orderId = id;
+              return id;
+            }
+            else{
+              userId = undefined;
+              alert("Error with the user details");
+              document.getElementById('credit-card-payment-buttom').value = "Pay";
+            }
+          }
+        }).then(function (hostedFields) {
+          document.querySelector("#card-form").addEventListener('submit', (event) => {
+             event.preventDefault();
+    
+             hostedFields.submit().then( async () => {
+               const res = await fetch(`/capture-order/${orderId}`, { method: 'POST' });
+               const { status } = await res.json();
+                if (status === 'COMPLETED') {
+                    console.log("credit card donation success");
+                    return addDonation(first_name, last_name, email, phone, total_amount);
+                } else {
+                 alert('Payment unsuccessful. Please try again!');
+               }
+             }).catch((err) => {
+               console.error(JSON.stringify(err));
+             });
+           });
+         });
+       } else {
+         // hides the advanced credit and debit card payments fields, if merchant isn't eligible
+         document.querySelector("#card-form").style = 'display: none';
+       }
+
+    
+}
+
+const addDonation = async (first_name, last_name, email, phone, total_amount) => {
     try{
         var url1 = "http://localhost:3000/makeDonation/";
         var data1 = [{"first_name":first_name,"last_name":last_name,"email":email,"phone":phone,"amount":total_amount}];
@@ -393,7 +487,7 @@ async function donateAmount(){
         alert("Donation Transaction failed");
     }
 }
-
+ 
 async function purchaseTickets(){
     var first_name = document.getElementById("first_name").value;
     var last_name = document.getElementById("last_name").value;
@@ -585,8 +679,102 @@ async function registerNewMember(){
         alert("Password and confirm password fields do not match");
         return;
     }
+    
+    const paymentPrice = 100;
 
+    document.getElementById('payment-container-id').style.display = "initial";
+    paypal.Buttons({
+        style: {
+          layout: 'horizontal'
+        },
+         createOrder: async function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                  amount: {
+                    value: paymentPrice
+                  }
+                }]
+            });
+          },
+          onApprove: function(data, actions) {
+            return actions.order.capture().then(async function(details) {
+                return addMemberToDatabase(first_name, last_name, email, phone, address1, address2, city, state, zip, username, pass);
+            });
+          }
+      }).render("#paypal-button-container");
+    
+      // Eligibility check for advanced credit and debit card payments
+      if (paypal.HostedFields.isEligible()) {
+        let orderId;
+    
+        paypal.HostedFields.render({
+          styles: {
+           // Styling element state
+           '.valid': {
+             'color': 'green'
+           },
+           '.invalid': {
+             'color': 'red'
+           }
+          },
+          fields: {
+            number: {
+              selector: "#card-number",
+              placeholder: "4111 1111 1111 1111"
+            },
+            cvv: {
+              selector: "#cvv",
+              placeholder: "123"
+            },
+            expirationDate: {
+              selector: "#expiration-date",
+              placeholder: "MM/YY"
+            }
+          },
+          createOrder: async function () {
+            document.getElementById('credit-card-payment-buttom').value = "Processing...";
+            const user = await addUserToDatabase();
+            if(user){
+              userId = user.id;
+              const res = await fetch(`/create-order?pay=${paymentPrice}`, { method: 'POST' });
+              const { id } = await res.json();
+              orderId = id;
+              return id;
+            }
+            else{
+              userId = undefined;
+              alert("Error with the user details");
+              document.getElementById('credit-card-payment-buttom').value = "Pay";
+            }
+          }
+        }).then(function (hostedFields) {
+          document.querySelector("#card-form").addEventListener('submit', (event) => {
+             event.preventDefault();
+    
+             hostedFields.submit().then( async () => {
+               const res = await fetch(`/capture-order/${orderId}`, { method: 'POST' });
+               const { status } = await res.json();
+                if (status === 'COMPLETED') {
+                    console.log("credit card success");
+                    return addMemberToDatabase(first_name, last_name, email, phone, address1, address2, city, state, zip, username, pass);
+                } else {
+                 alert('Payment unsuccessful. Please try again!');
+               }
+             }).catch((err) => {
+               console.error(JSON.stringify(err));
+             });
+           });
+         });
+       } else {
+         // hides the advanced credit and debit card payments fields, if merchant isn't eligible
+         document.querySelector("#card-form").style = 'display: none';
+       }
+        
+}
+
+async function addMemberToDatabase(first_name, last_name, email, phone, address1, address2, city, state, zip, username, pass){
     try {
+        console.log("Registereing member",first_name, last_name, email, phone, address1, address2, city, state, zip, username, pass);
         var url1 = "http://localhost:3000/registermember/";
         var data1 = [{"first_name":first_name,"last_name":last_name,"email":email,"phone":phone,"address1":address1,"address2":address2,"city":city,"state":state,"zip":zip,"username":username,"password":pass}];
         const config1 = {
@@ -1468,7 +1656,28 @@ async function contactload(){
     handle_tabs(session_info);
 }
 
+async function activatePayPal(){
+    try {
+        await fetch('http://localhost:3000/loadPayPal')
+        .then(res => {
+              if (res.status == 200) {
+                  return res.json();
+              } else {
+                throw new Error(res.status);
+              }
+        })
+        .then(json => {
+          sessionStorage.setItem("access_token", json.access_token);
+          sessionStorage.setItem("client_token", json.client_token);
+          sessionStorage.setItem("client_id", json.client_id);
+        });
+    } catch(error) {
+        console.log(error)
+    }
+}
+
 async function donateload(){
+    await activatePayPal();
     let session_info = await getSessionInfo();
     handle_tabs(session_info);
     if (session_info.loggedin == true){
@@ -1493,6 +1702,7 @@ async function forgotload(){
 }
 
 async function membershipload(){
+    await activatePayPal();
     let session_info = await getSessionInfo();
     handle_tabs(session_info);
 }

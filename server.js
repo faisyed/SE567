@@ -5,6 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { response } = require("express");
 const { resolve } = require("path");
+const axios = require('axios');
 const nodemailer = require('nodemailer');
 const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
@@ -13,17 +14,17 @@ const multer = require('multer');
 var session = {};
 
 
-var storage = multer.diskStorage({   
-  destination: function(req, file, cb) { 
-     cb(null, './src/images/new_art/');    
-  }, 
-  filename: function (req, file, cb) { 
-     cb(null , file.originalname);   
+var storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+     cb(null, './src/images/new_art/');
+  },
+  filename: function (req, file, cb) {
+     cb(null , file.originalname);
   }
 });
 var upload = multer({ storage: storage, limits : {fileSize : 10000000}, fileFilter:fileFilter }).single('art_image');
 
-async function fileFilter (req, file, cb) {    
+async function fileFilter (req, file, cb) {
   const filetypes = /jpeg|jpg|png/;
   const extname =  filetypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = filetypes.test(file.mimetype);
@@ -103,7 +104,7 @@ app.get('/logout',(req,res) => {
   session.loggedin = false;
   session.user_id = null;
   session.user_type = null;
-  
+
 res.sendFile('./src/home.html', {root: __dirname});
 });
 
@@ -115,7 +116,7 @@ API to get all art collections from database to display on UI
 app.get("/getArts/",(req,res) => {
   pool.query("SELECT * FROM `objects`", (err, data) => {
     if (err){ 
-        console.log(err);
+        console.error(err);
         res.status(400).send("Backend Issue. Please reload the page");
     }
     var result = [];
@@ -156,7 +157,7 @@ app.get("/getArt/",(req,res) => {
   
   pool.query("SELECT * FROM `objects` where `obj_id` = ?", [parseInt(req.query.id)], (err, data) => {
     if (err){ 
-        console.log(err);
+        console.error(err);
         res.status(400).send("Failed fetching the Art details");
     };
 
@@ -188,7 +189,7 @@ app.post("/getArtsCol/",(req,res) => {
 
   pool.query("SELECT * FROM `objects` where `obj_class` = ?", [req.body.type], (err, data) => {
     if (err){ 
-        console.log(err);
+        console.error(err);
         res.status(400).send("Fetching Arts by type failed");
     };
       var result = [];
@@ -230,7 +231,7 @@ app.get("/searchKey/",(req,res) => {
   }
   pool.query("select * from objects where obj_title like ? or obj_medium like ? or obj_inscription like ?", [`%${req.query.key}%`,`%${req.query.key}%`,`%${req.query.key}%`], (err, data) => {
     if (err){
-        console.log(err);
+        console.error(err);
         res.status(400).send("Fetching arts by keyword failed");
     };
     var result = [];
@@ -269,7 +270,7 @@ app.get("/searchName/",(req,res) => {
   }
   pool.query("select * from objects where obj_attribution = ?", [req.query.name], (err, data) => {
     if (err){
-        console.log(err);
+        console.error(err);
         res.status(400).send("Fetching arts by Author name failed");
     };
     var result = [];
@@ -318,7 +319,7 @@ app.get("/searchPrice/",(req,res) => {
 
   pool.query("select * from `objects` where `price` between ? and ?", [parseInt(req.query.from),parseInt(req.query.to)], (err, data) => {
     if (err){
-        console.log(err);
+        console.error(err);
         res.status(400).send("Fetching arts by price failed");
     };
 
@@ -351,11 +352,11 @@ app.post("/buyArt/", async (req,res) => {
       missed.push("id is required");
   }
 
-  if (req.body.user_id == null || req.body.user_id == undefined || req.body.user_id == "") {
+  if (req.body[0].user_id == null || req.body[0].user_id == undefined || req.body[0].user_id == "") {
     missed.push("user_id is required");
   }
 
-  if (req.body.user_type == null || req.body.user_type == undefined || req.body.user_type == "") {
+  if (req.body[0].user_type == null || req.body[0].user_type == undefined || req.body[0].user_type == "") {
     missed.push("user_type is required");
   }
 
@@ -366,20 +367,25 @@ app.post("/buyArt/", async (req,res) => {
 
   pool.query("SELECT obj_id, price FROM `objects` where `obj_id` = ?", [parseInt(req.query.id)], (err,data) => {
     if(err){
-      console.log(err);
+      console.error(err);
       missed.push("id does not exist in the database");
       res.status(400).send(missed);
 
     }
 
+
     if(data.length > 0 && data[0].obj_id > 0){
-      pool.query("insert into `shop_transactions` (`obj_oid`, `total_amount`, `user_id`, `user_type`, `purchase_date`) values (?,?,?,?,?)", [data[0].obj_id, data[0].price, req.body.user_id, req.body.user_type, new Date()], (err, data) => {
+      pool.query("insert into `shop_transactions` (`obj_oid`, `total_amount`, `user_id`, `user_type`, `purchase_date`) values (?,?,?,?,?)", [data[0].obj_id, data[0].price, req.body[0].user_id, req.body[0].user_type, new Date()], (err, data) => {
         if (err){
-            console.log(err);
+            console.error(err);
             res.status(400).send(missed);
         }
         res.status(200).send(data);
       });
+
+
+      //delete objects from object table
+
     }
     else{
       missed.push("id does not exist in the database");
@@ -388,6 +394,231 @@ app.post("/buyArt/", async (req,res) => {
   });
 
 });
+
+
+// @TODO Login to developer.paypal.com, create (or select an existing)
+// developer application, and copy your client ID and secret here
+const CLIENT_ID = "ATy14m-vcLvezTn1bLO9YDJtTe2dW-iGWntKl2rV9FGFcAB7G3OxoTBpihbH0cysw85Sqj8LOWppf4Mp";
+const SECRET = "EOSvD1275Wx_TmJ382pp96U0dKrK1q9lhVwSK0TyiFOrOXTOpRjQ7HsxAfy0_WNQxZQgAsqX1URuLEzi";
+
+
+async function getAccessToken() {
+  const token = Buffer.from(`${CLIENT_ID}:${SECRET}`).toString("base64");
+
+  const { data } = await axios({
+    url: "https://api.sandbox.paypal.com/v1/oauth2/token",
+    method: "post",
+    headers: {
+      Accept: "application/json",
+      Authorization: `Basic ${token}`,
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    data: "grant_type=client_credentials"
+  });
+
+  return data;
+}
+
+async function getClientToken(accessToken) {
+  const token = Buffer.from(accessToken).toString("base64");
+
+  const { data } = await axios({
+    url: "https://api.sandbox.paypal.com/v1/identity/generate-token",
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+      "Accept-Language": "en_US"
+    }
+  });
+
+  return data;
+}
+
+app.get("/loadPayPal", async (req, res) => {
+  const { access_token } = await getAccessToken();
+  const { client_token } = await getClientToken(access_token);
+
+  let json = {
+    "access_token": access_token,
+    "client_token": client_token,
+    "client_id": CLIENT_ID
+  };
+
+  res.status(200).send(json);
+});
+
+
+app.post("/create-order", async (req, res) => {
+  if (req.query.pay == null || req.query.pay == undefined || req.query.pay == "") {
+    res.status(400).send("Error");
+  }
+
+
+  try {
+    const { access_token } = await getAccessToken();
+    const { client_token } = await getClientToken(access_token);
+
+    // For more details on /v2/checkout/orders,
+    // see https://developer.paypal.com/docs/api/orders/v2/#orders_create
+    const { data } = await axios({
+      url: "https://api.sandbox.paypal.com/v2/checkout/orders",
+      method: "post",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${access_token}`
+      },
+      data: {
+        intent: "CAPTURE",
+        purchase_units: [
+          {
+            amount: {
+              currency_code: "USD",
+              value: req.query.pay
+            }
+          }
+        ]
+      }
+    });
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+});
+
+app.post("/capture-order/:orderId", async (req, res) => {
+  try {
+    const { access_token } = await getAccessToken();
+    const { client_token } = await getClientToken(access_token);
+
+    const orderId = req.params.orderId;
+
+    // For more details on /v2/checkout/orders,
+    // see https://developer.paypal.com/docs/api/orders/v2/#orders_capture
+    const { data } = await axios({
+      url: `https://api.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`,
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${access_token}`
+      }
+    });
+
+    // https://developer.paypal.com/docs/api/orders/v2/#definition-processor_response
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+});
+
+
+app.get("/getMemberId/", async (req, res) => {
+
+  let missed = [];
+
+  if (req.query.first_name == null || req.query.first_name == undefined || req.query.first_name == "") {
+      missed.push("First Name is required");
+  }
+
+  if (req.query.last_name == null || req.query.last_name == undefined || req.query.last_name == "") {
+    missed.push("Last Name is required");
+  }
+
+  if (missed.length > 0) {
+      res.status(400).send(missed);
+      return;
+  }
+
+  pool.query("select mem_id from `members` where first_name=? and last_name=? and is_active=?", [req.query.first_name,req.query.last_name, "Y"], (err, data) => {
+    if (err){
+      console.error(err);
+      res.status(400).send(err);
+    }
+
+    if (data.length > 0){
+      res.status(200).send({id: data[0].mem_id});
+    }
+    else{
+      console.error(err);
+      res.status(400).send("Error obtaining member details");
+    }
+  });
+
+});
+
+app.get("/getEmployeeId/", async (req, res) => {
+
+  let missed = [];
+
+  if (req.query.first_name == null || req.query.first_name == undefined || req.query.first_name == "") {
+      missed.push("First Name is required");
+  }
+
+  if (req.query.last_name == null || req.query.last_name == undefined || req.query.last_name == "") {
+    missed.push("Last Name is required");
+  }
+
+  if (missed.length > 0) {
+      res.status(400).send(missed);
+      return;
+  }
+
+  pool.query("select emp_id from `employees` where first_name=? and last_name=? and is_active=?", [req.query.first_name,req.query.last_name, "Y"], (err, data) => {
+    if (err){
+      console.error(err);
+      res.status(400).send(err);
+    }
+
+    if (data.length > 0){
+      res.status(200).send({id: data[0].emp_id});
+    }
+    else{
+      console.error(err);
+      res.status(400).send("Error obtaining employee details");
+    }
+  });
+
+});
+
+app.post("/addVisitor/", async (req, res) => {
+  let missed = [];
+
+  if (req.body[0].first_name == null || req.body[0].first_name == undefined || req.body[0].first_name == "") {
+      missed.push("First Name is required");
+  }
+
+  if (req.body[0].last_name == null || req.body[0].last_name == undefined || req.body[0].last_name == "") {
+    missed.push("Last Name is required");
+  }
+
+  if (req.body[0].email == null || req.body[0].email == undefined || req.body[0].email == "") {
+    missed.push("Email is required");
+  }
+
+  if (req.body[0].phoneNo == null || req.body[0].phoneNo == undefined || req.body[0].phoneNo == "") {
+    missed.push("Phone Number is required");
+  }
+
+  if (missed.length > 0) {
+      res.status(400).send(missed);
+      return;
+  }
+
+  const visitor = await addVisitor(req.body[0].first_name, req.body[0].last_name, req.body[0].email, req.body[0].phoneNo);
+  if (visitor){
+    res.status(200).send({'id': visitor.visitor_id});
+  }
+  else{
+    res.status(400).send(null);
+  }
+
+});
+
+
+
 /*************Group 4 End *************/
 
 /*
@@ -594,6 +825,15 @@ checkMemberExist = (fname, lname, email) => {
         resolve();
       }
     });
+  });
+}
+
+checkEmployeeExist = (fname, lname) => {
+  pool.query("select emp_id from `employees` where first_name=? and last_name=? and is_active=?", [fname, lname, "Y"], (err, data) => {
+    if (err){
+      reject(err);
+    }
+    resolve({"employee_id": data[0].emp_id});
   });
 }
 
@@ -1117,10 +1357,10 @@ app.post("/buyTickets/", async (req,res) => {
   var first_name = req.body[0].first_name;
   var last_name = req.body[0].last_name;
   var email = req.body[0].email;
-  
+
   var phone = req.body[0].phone;
   var ev_date = req.body[0].ev_date;
-  
+
   var adult_count = req.body[0].adult_count;
   var child_count = req.body[0].child_count;
   var senior_count = req.body[0].senior_count;
@@ -1131,9 +1371,9 @@ app.post("/buyTickets/", async (req,res) => {
   var senior_price = req.body[0].senior_price;
   var student_price = req.body[0].student_price;
   var other_price = req.body[0].other_price;
-  
+
   var ticket_total = req.body[0].ticket_total;
-  
+
   var event_id = req.body[0].event_id;
   if (event_id == "" || event_id == null){
     event_id = null;
@@ -1142,7 +1382,7 @@ app.post("/buyTickets/", async (req,res) => {
   if (ticket_type == "" || ticket_type == null){
     ticket_type = "entry";
   }
-  
+
   try{
     if (session.loggedin == true){
         let temp_user_type = session.user_type;
@@ -1349,7 +1589,7 @@ app.post('/registermember', async (req, res) => {
 
 // create employee
 app.post('/createemployee', (req, res) => {
-  
+
   // check if username already exists
   pool.query("SELECT * FROM `login` WHERE username = ?", [req.body[0].username], (err, data) => {
     if (err){

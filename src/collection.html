@@ -15,7 +15,7 @@
 	<!-- include the site responsive stylesheet -->
 	<link rel="stylesheet" href="css/responsive.css">
 </head>
-<body>
+<body onload="getArts()">
 	<!-- pageWrapper -->
 	<div id="pageWrapper">
 		<div class="phStickyWrap phVii w-100">
@@ -116,62 +116,34 @@
 			<!-- exhibitionBlock -->
 			<section class="exhibitionBlock pt-6 pb-6 pt-md-9 pb-md-9 pt-lg-11 pb-lg-13 pt-xl-21 pb-xl-22">
 				<div class="container">
-					<!-- topHeadingHead -->
 					<header class="topHeadingHead text-center mb-4">
 						<div class="row">
 							<div class="col-12 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2">
 								<h1 class="h1Large mb-4">Collections</h1>
-								<!-- eabDescrText -->
-								<div class="fontSerif eabDescrText eabDescrTextII">
-									<p>This sub content title section you can add you real content whatever.</p>
-								</div>
 							</div>
 						</div>
 						<!-- exhiTabList -->
 						<ul class="nav nav-tabs justify-content-center exhiTabList exhiTabListIII mt-4 mt-lg-8 pb-8" role="tablist">
 							<li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" role="button" aria-haspopup="true" aria-expanded="false">Artist <i class="fas fa-angle-down icn"><span class="sr-only">icon</span></i></a>
-								<!-- fltDropdown -->
-								<div class="dropdown-menu py-0 bg-secondary fltDropdown">
-									<a class="dropdown-item" id="current-tab" data-toggle="tab" href="#current" role="tab" aria-controls="current" aria-selected="true">Ghada Amer &amp; Reza (22)</a>
-									<a class="dropdown-item" id="upcoming-tab" data-toggle="tab" href="#upcoming" role="tab" aria-selected="true">Beom Kim (13)</a>
-									<a class="dropdown-item" id="past-tab" data-toggle="tab" href="#past" role="tab" aria-selected="true">Tan Swie Hian (12)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Navin Rawanchaikul (5)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Donald Sultan (7)</a>
-								</div>
+								<select id="search_type" class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false" name="search type" id="cars">
+									<option value="none">Choose to Filter collection</option>
+									<option value="type">Type of art</option>
+									<option value="key">Keyword</option>
+									<option value="name">Author Name</option>
+<!--									<option value="price">Price</option>-->
+								</select>
+							</li>
+							<li>
+								&nbsp;&nbsp;
 							</li>
 							<li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" role="button" aria-haspopup="true" aria-expanded="false">Location <i class="fas fa-angle-down icn"><span class="sr-only">icon</span></i></a>
-								<!-- fltDropdown -->
-								<div class="dropdown-menu py-0 bg-secondary fltDropdown">
-									<a class="dropdown-item" href="javascript:void(0);">Ghada Amer &amp; Reza (22)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Beom Kim (13)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Tan Swie Hian (12)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Navin Rawanchaikul (5)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Donald Sultan (7)</a>
-								</div>
+								<input class="nav-link dropdown-toggle" type="text" id="search_key" name="searchkey" aria-haspopup="true" aria-expanded="false">
+							</li>
+							<li>
+								&nbsp;&nbsp;
 							</li>
 							<li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" role="button" aria-haspopup="true" aria-expanded="false">Period <i class="fas fa-angle-down icn"><span class="sr-only">icon</span></i></a>
-								<!-- fltDropdown -->
-								<div class="dropdown-menu py-0 dropdown-menu-right bg-secondary fltDropdown">
-									<a class="dropdown-item" href="javascript:void(0);">Ghada Amer &amp; Reza (22)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Beom Kim (13)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Tan Swie Hian (12)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Navin Rawanchaikul (5)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Donald Sultan (7)</a>
-								</div>
-							</li>
-							<li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" role="button" aria-haspopup="true" aria-expanded="false">Type <i class="fas fa-angle-down icn"><span class="sr-only">icon</span></i></a>
-								<!-- fltDropdown -->
-								<div class="dropdown-menu py-0 dropdown-menu-right bg-secondary fltDropdown">
-									<a class="dropdown-item" href="javascript:void(0);">Ghada Amer &amp; Reza (22)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Beom Kim (13)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Tan Swie Hian (12)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Navin Rawanchaikul (5)</a>
-									<a class="dropdown-item" href="javascript:void(0);">Donald Sultan (7)</a>
-								</div>
+								<button class="nav-link dropdown-toggle" onclick="getArts(document.getElementById('search_type').value, document.getElementById('search_key').value)" type="button" aria-haspopup="true" aria-expanded="false">Search</button>
 							</li>
 						</ul>
 					</header>
@@ -181,121 +153,20 @@
 							<div class="col-12 col-md-8">
 								<p class="m-2 m-md-0">Showing 12 Art Works</p>
 							</div>
-							<div class="col-12 col-md-4 text-md-right">
-								<select class="chosenSelect csSelect csSelectSmall" data-placeholder="Default Shorting">
-									<option value="1">Germany</option>
-									<option value="2">ipsum</option>
-									<option value="3">dolor</option>
-								</select>
-							</div>
 						</div>
 					</header>
 					<!-- tab-content -->
 					<div class="tab-content">
 						<!-- current-tab -->
+						<ul>
+							<div class="row makeItMasonery mx-xl-n4" id="collection_list"></div>
+						</ul>
+
+						<div id="pagination_btn" class="btnHolder clearfix">
+							<!--buttons go here-->
+						</div>
 						<div class="tab-pane fade show active" id="current" role="tabpanel" aria-labelledby="current-tab">
-							<!-- makeItMasonery -->
-							<div class="row makeItMasonery mx-xl-n4">
-								<div class="col-12 col-sm-6 col-md-4 mimItem px-xl-4">
-									<!-- collectionColumn -->
-									<article class="collectionColumn mb-6 mb-xl-8 position-relative">
-										<div class="imgHolder mb-4">
-											<a href="single-works.html">
-												<img src="http://placehold.it/365x290" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<h2 class="mb-1"><a href="javascript:void(0);">Daniel Henry Khanweiler autumn, 1930</a></h2>
-										<h3 class="fontAlter text-gray777 mb-0">Henry Merparlo</h3>
-									</article>
-								</div>
-								<div class="col-12 col-sm-6 col-md-4 mimItem px-xl-4">
-									<!-- collectionColumn -->
-									<article class="collectionColumn mb-6 mb-xl-8 position-relative">
-										<div class="imgHolder mb-4">
-											<a href="single-works.html">
-												<img src="http://placehold.it/365x480" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<h2 class="mb-1"><a href="javascript:void(0);">Daniel Henry Khanweiler autumn, 1930</a></h2>
-										<h3 class="fontAlter text-gray777 mb-0">Henry Merparlo</h3>
-									</article>
-								</div>
-								<div class="col-12 col-sm-6 col-md-4 mimItem px-xl-4">
-									<!-- collectionColumn -->
-									<article class="collectionColumn mb-6 mb-xl-8 position-relative">
-										<div class="imgHolder mb-4">
-											<a href="single-works.html">
-												<img src="http://placehold.it/365x530" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<h2 class="mb-1"><a href="javascript:void(0);">Daniel Henry Khanweiler autumn, 1930</a></h2>
-										<h3 class="fontAlter text-gray777 mb-0">Henry Merparlo</h3>
-									</article>
-								</div>
-								<div class="col-12 col-sm-6 col-md-4 mimItem px-xl-4">
-									<!-- collectionColumn -->
-									<article class="collectionColumn mb-6 mb-xl-8 position-relative">
-										<div class="imgHolder mb-4">
-											<a href="single-works.html">
-												<img src="http://placehold.it/365x340" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<h2 class="mb-1"><a href="javascript:void(0);">Daniel Henry Khanweiler autumn, 1930</a></h2>
-										<h3 class="fontAlter text-gray777 mb-0">Henry Merparlo</h3>
-									</article>
-								</div>
-								<div class="col-12 col-sm-6 col-md-4 mimItem px-xl-4">
-									<!-- collectionColumn -->
-									<article class="collectionColumn mb-6 mb-xl-8 position-relative">
-										<div class="imgHolder mb-4">
-											<a href="single-works.html">
-												<img src="http://placehold.it/365x510" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<h2 class="mb-1"><a href="javascript:void(0);">Daniel Henry Khanweiler autumn, 1930</a></h2>
-										<h3 class="fontAlter text-gray777 mb-0">Henry Merparlo</h3>
-									</article>
-								</div>
-								<div class="col-12 col-sm-6 col-md-4 mimItem px-xl-4">
-									<!-- collectionColumn -->
-									<article class="collectionColumn mb-6 mb-xl-8 position-relative">
-										<div class="imgHolder mb-4">
-											<a href="single-works.html">
-												<img src="http://placehold.it/365x320" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<h2 class="mb-1"><a href="javascript:void(0);">Daniel Henry Khanweiler autumn, 1930</a></h2>
-										<h3 class="fontAlter text-gray777 mb-0">Henry Merparlo</h3>
-									</article>
-								</div>
-								<div class="col-12 col-sm-6 col-md-4 mimItem px-xl-4">
-									<!-- collectionColumn -->
-									<article class="collectionColumn mb-6 mb-xl-8 position-relative">
-										<div class="imgHolder mb-4">
-											<a href="single-works.html">
-												<img src="http://placehold.it/365x510" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<h2 class="mb-1"><a href="javascript:void(0);">Daniel Henry Khanweiler autumn, 1930</a></h2>
-										<h3 class="fontAlter text-gray777 mb-0">Henry Merparlo</h3>
-									</article>
-								</div>
-								<div class="col-12 col-sm-6 col-md-4 mimItem px-xl-4">
-									<!-- collectionColumn -->
-									<article class="collectionColumn mb-6 mb-xl-8 position-relative">
-										<div class="imgHolder mb-4">
-											<a href="single-works.html">
-												<img src="http://placehold.it/365x290" class="img-fluid w-100 d-block" alt="image description">
-											</a>
-										</div>
-										<h2 class="mb-1"><a href="javascript:void(0);">Daniel Henry Khanweiler autumn, 1930</a></h2>
-										<h3 class="fontAlter text-gray777 mb-0">Henry Merparlo</h3>
-									</article>
-								</div>
-							</div>
-							<div class="btnHolder text-center pt-6">
-								<a href="single-works.html" class="btn laodMore btn-outline-light bdr2 btnMidMinWidth">Load More</a>
-							</div>
+
 						</div>
 					</div>
 				</div>
@@ -340,6 +211,8 @@
 	</div>
 	<script src="js/popper.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
+	<!-- include the java script file to communicate with backend -->
+	<script src="js/collection.js"></script>
 	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
 </body>
 </html>
