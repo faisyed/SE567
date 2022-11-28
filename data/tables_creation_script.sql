@@ -157,6 +157,13 @@ create table login(
     password text
 );
 
+-- below section of code is used to create table 'renewal_email_list' in database
+create table renewal_email_list(
+	email_id bigint auto_increment primary key,
+    address text,
+    sent varchar(2) default 'N'
+);
+
 -- altering objects table to add auto increment to obj_id and primary key
 ALTER TABLE objects MODIFY obj_id bigint AUTO_INCREMENT PRIMARY KEY;
 
@@ -192,16 +199,18 @@ DELIMITER $$
 CREATE TRIGGER objects_trigger AFTER DELETE ON objects FOR EACH ROW
 BEGIN
 	declare v_shop_id bigint;
-    select shop_id into v_shop_id from shop_transactions where obj_id = OLD.obj_id;
+    select shop_id into v_shop_id from shop_transactions where obj_oid = OLD.obj_id;
     INSERT INTO sold_objects(obj_id, obj_title, obj_beginyear, obj_endyear, obj_medium, obj_dimensions, obj_inscription, obj_attribution, obj_class, img_url, shop_id) VALUES(OLD.obj_id, OLD.obj_title, OLD.obj_beginyear, OLD.obj_endyear, OLD.obj_medium, OLD.obj_dimensions, OLD.obj_inscription, OLD.obj_attribution, OLD.obj_class, OLD.img_url, v_shop_id);
 END$$
 DELIMITER ;
 
 -- create trigger to delete data from event_employee_map table before data is deleted from event table
 DELIMITER $$
-CREATE TRIGGER event_employee_map_trigger BEFORE DELETE ON events FOR EACH ROW
+CREATE TRIGGER event_cancel_trigger BEFORE DELETE ON events FOR EACH ROW
 BEGIN
     DELETE FROM event_employee_map WHERE ev_id = OLD.ev_id;
+    DELETE FROM master_transactions WHERE child_tran_id in (select tick_id from ticket_transactions where ev_id = OLD.ev_id);
+    DELETE FROM ticket_transactions WHERE ev_id = OLD.ev_id;
 END$$
 DELIMITER ;
 
@@ -216,3 +225,21 @@ begin
 	update members set is_active = 'N' where renewed_date+interval 1 year<curdate();
 end$$
 DELIMITER ;
+
+-- dropping child_price coulmn from ticket_transactions table
+alter table ticket_transactions
+drop column child_price;
+
+-- adding new columns to ticket_transactions table
+alter table ticket_transactions
+add student_count int default 0,
+add other_count int default 0,
+add student_price double,
+add other_price double,
+add event_date date;
+
+-- adding event price columng to events table
+alter table events
+add ev_price double;
+
+alter table ticket_transactions add column email text;

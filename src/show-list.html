@@ -15,7 +15,7 @@
 	<!-- include the site responsive stylesheet -->
 	<link rel="stylesheet" href="css/responsive.css">
 </head>
-<body>
+<body onload="setEventList('shows')">
 	<!-- pageWrapper -->
 	<div id="pageWrapper">
 		<div class="phStickyWrap phVii w-100">
@@ -53,7 +53,7 @@
 														<li><a  href="visit-us-block.html">Hours &amp; Admission</a></li>
 														<li><a  href="visit-us-block.html">Accessibility</a></li>
 														<li><a  href="visit-us-block.html">Other Facilities</a></li>
-														<li><a  href="buy-tickets.html">Purchase Tickers</a></li>
+														<li><a  href="buy-tickets.html">Purchase Tickets</a></li>
 													</ul>
 													<!-- mndAdress -->
 													<address class="mndAdress position-absolute text-gray888 mb-0">
@@ -64,19 +64,19 @@
 													</address>
 												</div>
 											</li>
-											<li class="nav-item dropdown">
+											<li class="nav-item active dropdown">
 												<a class="nav-link" href="javascript:void(0);" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">What’s On</a>
 												<!-- dropdown menu -->
 												<div class="dropdown-menu mndDropMenu dropdownMenu mndDropMenuSmall p-0">
 													<!-- mnDropList -->
 													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
 														<li>
-															<a href="event-list.html">Event</a>
+															<a href="show-list.html">Show</a>
 														</li>
 														<li>
 															<a href="exhibition-list.html">Exhibition</a>
 														</li>
-														<li>
+														<li id="drop_auction" style="display: none;">
 															<a href="auction-list.html">Auction</a>
 														</li>
 														<li>
@@ -100,8 +100,14 @@
 													</ul>
 												</div>
 											</li>
-											<li class="nav-item">
+											<li class="nav-item" id="drop_account" style="display: block;">
 												<a class="nav-link" href="my-account.html" aria-haspopup="true" aria-expanded="false">My Account</a>
+											</li>
+											<li class="nav-item" id="drop_portal" style="display: none;">
+												<a class="nav-link" id="portal_page" href="" aria-haspopup="true" aria-expanded="false">My Portal</a>
+											</li>
+											<li class="nav-item" id="drop_logout" style="display: none;">
+												<a class="nav-link" href="javascript:logout()" aria-haspopup="true" aria-expanded="false">Logout</a>
 											</li>
 										</ul>
 									</div>
@@ -113,30 +119,40 @@
 			</header>
 		</div>
 		<main>
-			<!-- pageNotFoundBlock -->
-			<article class="pageNotFoundBlock hdIsVii d-flex w-100 text-center">
-				<div class="lbAlignWrap d-flex align-items-center w-100">
-					<div class="container py-6">
+			<!-- eventBlock -->
+			<section class="eventBlock pb-6 pt-md-9 pb-md-9 pb-lg-13 pb-xl-21">
+				<div class="container">
+					<!-- topHeadingHead -->
+					<header class="topHeadingHead text-center mb-6 mb-lg-9 mb-xl-12">
 						<div class="row">
-							<div class="col-12 col-md-8 offset-md-2 col-xl-6 offset-xl-3">
-								<div class="extraWrap px-md-12">
-									<i class="icnWrap d-block mb-5">
-										<img src="images/icn16.svg" width="72" height="73" alt="icon">
-									</i>
-									<h2 class="mb-3">Ohh! Page Not Found</h2>
-									<p class="mb-7">It looks like nothing was found at this location. Click the button below to return home.</p>
-									<a href="home.html" class="btn btn-secondary text-uppercase btnMdMinWidth">Back to home</a>
+							<div class="col-12 col-lg-10 offset-lg-1 col-xl-8 offset-xl-2">
+								<h1 class="h1Large mb-4">Shows</h1>
+								<!-- eabDescrText -->
+								<div class="fontSerif eabDescrText eabDescrTextII">
+									<p>Find out what's on at the gallery from upcoming shows.</p>
 								</div>
 							</div>
 						</div>
+						<!-- exhiTabList -->
+						<ul class="nav nav-tabs justify-content-center exhiTabList mt-4 mt-lg-8" role="tablist">
+							<li class="nav-item">
+								<a class="nav-link" id="upcoming-tab" data-toggle="tab" href="javascript:getCurrentEvents('shows');" role="tab" aria-controls="upcoming" aria-selected="true">Upcoming</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" id="past-tab" data-toggle="tab" href="javascript:getPastEvents('shows')" role="tab" aria-controls="past" aria-selected="false">Past</a>
+							</li>
+						</ul>
+					</header>
+					<!-- tab-content -->
+					<div class="tab-content" id="tab_content">
 					</div>
 				</div>
-			</article>
+			</section>
 		</main>
 		<!-- ftAreaWrap -->
 		<div class="ftAreaWrap bg-secondary text-gray888">
 			<!-- footerAside -->
-			<aside class="footerAside text-center text-md-left">
+			<aside class="footerAside pt-6 text-center text-md-left">
 				<div class="container">
 					<div class="row">
 						<div class="col-12 col-md-3 mb-6">
@@ -158,6 +174,7 @@
 						</div>
 						<div class="col-12 col-md-3 mb-6">
 							<h3 class="text-white mb-4">Contact Us</h3>
+							<!-- ftContactList -->
 							<ul class="list-unstyled ftContactList mb-0 mb-md-3">
 								<li>
 									<a href="tel:18483916245">1 (848) 391-6245</a>
@@ -172,5 +189,6 @@
 	<script src="js/popper.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
+	<script src="js/helper.js"></script>
 </body>
 </html>

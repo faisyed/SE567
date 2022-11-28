@@ -15,7 +15,7 @@
 	<!-- include the site responsive stylesheet -->
 	<link rel="stylesheet" href="css/responsive.css">
 </head>
-<body>
+<body onload="visitload()">
 	<!-- pageWrapper -->
 	<div id="pageWrapper">
 		<div class="phStickyWrap phVii w-100">
@@ -52,7 +52,7 @@
 														<li><a  href="visit-us-block.html">Hours &amp; Admission</a></li>
 														<li><a  href="visit-us-block.html">Accessibility</a></li>
 														<li><a  href="visit-us-block.html">Other Facilities</a></li>
-														<li><a  href="buy-tickets.html">Purchase Tickers</a></li>
+														<li><a  href="buy-tickets.html">Purchase Tickets</a></li>
 													</ul>
 													<!-- mndAdress -->
 													<address class="mndAdress position-absolute text-gray888 mb-0">
@@ -70,12 +70,12 @@
 													<!-- mnDropList -->
 													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
 														<li>
-															<a href="event-list.html">Event</a>
+															<a href="show-list.html">Show</a>
 														</li>
 														<li>
 															<a href="exhibition-list.html">Exhibition</a>
 														</li>
-														<li>
+														<li id="drop_auction" style="display: none;">
 															<a href="auction-list.html">Auction</a>
 														</li>
 														<li>
@@ -99,8 +99,14 @@
 													</ul>
 												</div>
 											</li>
-											<li class="nav-item">
+											<li class="nav-item" id="drop_account" style="display: block;">
 												<a class="nav-link" href="my-account.html" aria-haspopup="true" aria-expanded="false">My Account</a>
+											</li>
+											<li class="nav-item" id="drop_portal" style="display: none;">
+												<a class="nav-link" id="portal_page" href="" aria-haspopup="true" aria-expanded="false">My Portal</a>
+											</li>
+											<li class="nav-item" id="drop_logout" style="display: none;">
+												<a class="nav-link" href="javascript:logout()" aria-haspopup="true" aria-expanded="false">Logout</a>
 											</li>
 										</ul>
 									</div>
@@ -151,24 +157,24 @@
 							<table class="apDataTable w-100 mt-5 mb-9">
 								<tbody>
 									<tr>
-										<td>Adults</td>
+										<td style="width: 70%;">Adults</td>
 										<td>$20</td>
 									</tr>
 									<tr>
-										<td>Seniors (55+)</td>
+										<td>Seniors (60+)</td>
 										<td>$10</td>
 									</tr>
 									<tr>
-										<td>Members</td>
+										<td>Veteran/ First Responder/ With Disabilities</td>
+										<td>$10</td>
+									</tr>
+									<tr>
+										<td>Students</td>
+										<td>$10</td>
+									</tr>
+									<tr>
+										<td>Members and Children (12 and under)</td>
 										<td>Free</td>
-									</tr>
-									<tr>
-										<td>Children (12 and under)</td>
-										<td>$10</td>
-									</tr>
-									<tr>
-										<td>Veteran/First Responder</td>
-										<td>$10</td>
 									</tr>
 								</tbody>
 							</table>

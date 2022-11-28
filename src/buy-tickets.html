@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!-- set the encoding of your site -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- set the page title -->
+	<title>Art Gallery</title>
+	<!-- inlcude google archivo & lora font cdn link -->
+	<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Lora:ital,wght@0,400;0,700;1,400;1,700&family=Muli:ital@0;1&family=Merriweather&display=swap" rel="stylesheet">
+	<!-- include the site bootstrap stylesheet -->
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<!-- include the site stylesheet -->
+	<link rel="stylesheet" href="style.css">
+	<!-- include the site responsive stylesheet -->
+	<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body onload="fillTicketDetails()">
+	<!-- pageWrapper -->
+	<div id="pageWrapper">
+		<div class="phStickyWrap phVii w-100">
+			<!-- pageHeader -->
+			<header id="pageHeader" class="position-absolute w-100 bg-white">
+				<!-- hdHolder -->
+				<div class="hdHolder headerFixer border-bottom">
+					<div class="container">
+						<!-- navbar -->
+						<nav class="navbar navbar-expand-md navbar-light d-block px-0 pt-2 pb-2 pt-md-2 pb-md-2 pt-lg-4 pb-lg-5">
+							<div class="row">
+								<div class="col-5 col-sm-3 col-lg-2">
+									<!-- logo -->
+									<div class="logo logoVii mt-lg-1">
+										<a href="home.html">
+											<img src="images/art-gallery.png" class="img-fluid" alt="Art Gallery">
+										</a>
+									</div>
+								</div>
+								<div class="col-7 col-sm-9 col-lg-10 position-static d-flex justify-content-end pt-lg-1">
+									<!-- navbar collapse -->
+									<div class="collapse navbar-collapse pageNavigationCollapse pageNavigationCollapseVii justify-content-md-end" id="pageNavigationCollapse">
+										<!-- mainNavigation -->
+										<ul class="navbar-nav mainNavigation mainNavigationVii text-capitalize">
+											<li class="nav-item dropdown">
+												<a class="nav-link" href="home.html" aria-haspopup="true" aria-expanded="false">Home</a>
+											</li>
+											<li class="nav-item active dropdown">
+												<a class="nav-link" href="javascript:void(0);" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Visit</a>
+												<!-- dropdown menu -->
+												<div class="dropdown-menu mndDropMenu p-0">
+													<!-- mnDropList -->
+													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
+														<li><a  href="visit-us-block.html">Plan Your Visit</a></li>
+														<li><a  href="visit-us-block.html">Hours &amp; Admission</a></li>
+														<li><a  href="visit-us-block.html">Accessibility</a></li>
+														<li><a  href="visit-us-block.html">Other Facilities</a></li>
+														<li><a  href="buy-tickets.html">Purchase Tickets</a></li>
+													</ul>
+													<!-- mndAdress -->
+													<address class="mndAdress position-absolute text-gray888 mb-0">
+														<strong class="d-block mb-1 mndaTitle font-weight-normal fontSerif text-graydfdfdf">Hours</strong>
+														<p class="mb-5"><time datetime="2011-01-12">Daily 9.30 am–6.00 pm</time></p>
+														<strong class="d-block mndaTitle font-weight-normal mb-1 fontSerif text-graydfdfdf">Location</strong>
+														<p class="mb-5">160 Frelinghuysen Rd, Piscataway, NJ, 08854</p>
+													</address>
+												</div>
+											</li>
+											<li class="nav-item dropdown">
+												<a class="nav-link" href="javascript:void(0);" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">What’s On</a>
+												<!-- dropdown menu -->
+												<div class="dropdown-menu mndDropMenu dropdownMenu mndDropMenuSmall p-0">
+													<!-- mnDropList -->
+													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
+														<li>
+															<a href="show-list.html">Show</a>
+														</li>
+														<li>
+															<a href="exhibition-list.html">Exhibition</a>
+														</li>
+														<li id="drop_auction" style="display: none;">
+															<a href="auction-list.html">Auction</a>
+														</li>
+														<li>
+															<a href="collection.html">Collection</a>
+														</li>
+														<li>
+															<a href="gallery-list.html">Image Gallery</a>
+														</li>
+													</ul>
+												</div>
+											</li>
+											<li class="nav-item dropdown">
+												<a class="nav-link" href="javascript:void(0);" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">About</a>
+												<!-- dropdown menu -->
+												<div class="dropdown-menu mndDropMenu mndDropMenuSmall p-0">
+													<!-- mnDropList -->
+													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
+														<li><a  href="contact-us.html">Contact Us</a></li>
+														<li><a  href="membership.html">Membership</a></li>
+														<li><a  href="donate.html">Donate</a></li>
+													</ul>
+												</div>
+											</li>
+											<li class="nav-item" id="drop_account" style="display: block;">
+												<a class="nav-link" href="my-account.html" aria-haspopup="true" aria-expanded="false">My Account</a>
+											</li>
+											<li class="nav-item" id="drop_portal" style="display: none;">
+												<a class="nav-link" id="portal_page" href="" aria-haspopup="true" aria-expanded="false">My Portal</a>
+											</li>
+											<li class="nav-item" id="drop_logout" style="display: none;">
+												<a class="nav-link" href="javascript:logout()" aria-haspopup="true" aria-expanded="false">Logout</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</nav>
+					</div>
+				</div>
+			</header>
+		</div>
+		<main>
+			<!-- annualFundBlock -->
+			<article class="annualFundBlock pb-8 pb-md-4 pb-lg-10 pb-xl-15">
+				<div class="container">
+					<div class="row">
+						<div class="col-18 offset-lg-2 col-md-8">
+							<!-- donationBoxWrap -->
+                            <div class="bg-brown py-3 px-lg-5">
+                                <h3 class="text-white mb-0 ml-50">Order Ticket Online</h3>
+                            </div>
+							<div class="donationBoxWrap border px-3 pb-4 px-md-6 pb-md-9 mt-2 pt-4">
+								<div class="form-row mx-n2">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">First Name <span class="text-brown">*</span></strong>
+												<input type="text" id="first_name" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Last Name <span class="text-brown">*</span></strong>
+												<input type="text" id="last_name" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Email Address <span class="text-brown">*</span></strong>
+												<input type="email" id="email" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Contact No <span class="text-brown">*</span></strong>
+												<input type="text" id="phone" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+                                    <div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1">Select Date <span class="text-brown">*</span></strong>
+												<input type="date" id="ev_date" class="form-control formControlMedium">
+											</label>
+										</div>
+									</div>
+								</div>
+								<p id ="event_type" hidden></p>
+								<p id ="event_id" hidden></p>
+								<h4 class="fontBase mt-7">Choose your Ticket</h4>
+                                <div class="ttTableWrap">
+                                    <table class="w-100 ticketTable text-gray777">
+                                        <thead>
+                                            <tr>
+                                                <th>Ticket Type</th>
+                                                <th>Price</th>
+                                                <th>Quantity</th>
+                                                <th>Subtotal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Adult</td>
+                                                <td><p id="adult_price">20</p></td>
+                                                <td>
+                                                    <div class="quantity">
+                                                        <div class="quantity quantityII position-relative d-inline-block mt-1">
+                                                            <input type="number" id="adult_count" min="0" value="1">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><p id="adult_subtotal">20</p></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Senior <span class="text-gray">(age above 60)</span></td>
+                                                <td><p id="senior_price">10</p></td>
+                                                <td>
+                                                    <div class="quantity">
+                                                        <div class="quantity quantityII position-relative d-inline-block mt-1">
+                                                            <input type="number" id="senior_count" min="0" value="0">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><p id="senior_subtotal">0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Student <span class="text-gray">(University/ College/ High School)</span></td>
+                                                <td><p id="student_price">15</p></td>
+                                                <td>
+                                                    <div class="quantity">
+                                                        <div class="quantity quantityII position-relative d-inline-block mt-1">
+                                                            <input type="number" id="student_count" min="0" value="0">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><p id="student_subtotal">0</p></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Veteran/ First Responder/ With Disabilities</td>
+                                                <td><p id="other_price">10</p></td>
+                                                <td>
+                                                    <div class="quantity">
+                                                        <div class="quantity quantityII position-relative d-inline-block mt-1">
+                                                            <input type="number" id="other_count" min="0" value="0">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><p id="other_subtotal">0</p></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Child <span class="text-gray">(age 12 and under)</span></td>
+                                                <td><p id="child_price">Free</p></td>
+                                                <td>
+                                                    <div class="quantity">
+                                                        <div class="quantity quantityII position-relative d-inline-block mt-1">
+                                                            <input type="number" id="child_count" min="0" value="0">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><p id="child_subtotal"></td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="3">Total Price($)</td>
+                                                <td><p id="ticket_total">20</p></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+								<input type="submit" onclick="purchaseTickets()" class="btn btn-secondary text-uppercase d-block w-100 mt-6" value="Confirm Booking">
+							</div>
+						</div>
+					</div>
+				</div>
+			</article>
+		</main>
+		<!-- ftAreaWrap -->
+		<div class="ftAreaWrap bg-secondary text-gray888">
+			<!-- footerAside -->
+			<aside class="footerAside pt-6 text-center text-md-left">
+				<div class="container">
+					<div class="row">
+						<div class="col-12 col-md-3 mb-6">
+							<!-- ftLogo -->
+							<div class="ftLogo mt-1 mx-auto mx-md-0">
+								<a href="home.html">
+									<img src="images/art-gallery.png" class="img-fluid" alt="Art Gallery">
+								</a>
+							</div>
+						</div>
+						<div class="col-12 col-md-3 mb-6">
+							<h3 class="text-white mb-4">Address</h3>
+							<!-- ftAdr -->
+							<address class="ftAdr mb-2 mb-md-5">160 Frelinghuysen Rd, Piscataway, NJ, US, 08854</address>
+						</div>
+						<div class="col-12 col-md-3 mb-6">
+							<h3 class="text-white mb-4">Hours</h3>
+							<time datetime="2011-01-12" class="d-block mb-3">Daily 9.30 am–6.00 pm</time>
+						</div>
+						<div class="col-12 col-md-3 mb-6">
+							<h3 class="text-white mb-4">Contact Us</h3>
+							<!-- ftContactList -->
+							<ul class="list-unstyled ftContactList mb-0 mb-md-3">
+								<li>
+									<a href="tel:18483916245">1 (848) 391-6245</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</aside>
+		</div>
+	</div>
+	<script src="js/popper.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
+	<script src="js/helper.js"></script>
+    <script>
+        // convert adult_count to number
+        let adult_price = parseFloat(document.getElementById("adult_price").innerHTML);
+        let adult_count = parseInt(document.getElementById("adult_count").value);
+        let adult_subtotal = document.getElementById("adult_subtotal");
+        document.body.addEventListener('change', function(e) {
+            if (e.target.id == "adult_count") {
+				adult_price = parseFloat(document.getElementById("adult_price").innerHTML);
+                adult_count = parseInt(e.target.value);
+                adult_subtotal.innerHTML = adult_count * adult_price;
+            }
+            updateTotal();
+        });
+
+        // convert senior_count to number
+        let senior_price = parseFloat(document.getElementById("senior_price").innerHTML);
+        let senior_count = parseInt(document.getElementById("senior_count").value);
+        let senior_subtotal = document.getElementById("senior_subtotal");
+        document.body.addEventListener('change', function(e) {
+            if (e.target.id == "senior_count") {
+				senior_price = parseFloat(document.getElementById("senior_price").innerHTML);
+                senior_count = parseInt(e.target.value);
+                senior_subtotal.innerHTML = senior_count * senior_price;
+            }
+            updateTotal();
+        });
+
+        // convert student_count to number
+        let student_price = parseFloat(document.getElementById("student_price").innerHTML);
+        let student_count = parseInt(document.getElementById("student_count").value);
+        let student_subtotal = document.getElementById("student_subtotal");
+        document.body.addEventListener('change', function(e) {
+            if (e.target.id == "student_count") {
+				student_price = parseFloat(document.getElementById("student_price").innerHTML);
+                student_count = parseInt(e.target.value);
+                student_subtotal.innerHTML = student_count * student_price;
+            }
+            updateTotal();
+        });
+
+        // convert other_count to number
+        let other_price = parseFloat(document.getElementById("other_price").innerHTML);
+        let other_count = parseInt(document.getElementById("other_count").value);
+        let other_subtotal = document.getElementById("other_subtotal");
+        document.body.addEventListener('change', function(e) {
+            if (e.target.id == "other_count") {
+				other_price = parseFloat(document.getElementById("other_price").innerHTML);
+                other_count = parseInt(e.target.value);
+                other_subtotal.innerHTML = other_count * other_price;
+            }
+            updateTotal();
+        });
+
+        function updateTotal() {
+            let ticket_total = document.getElementById("ticket_total");
+            ticket_total.innerHTML = adult_count * adult_price + senior_count * senior_price + student_count * student_price + other_count * other_price;
+        }
+        
+    </script>
+</body>
+</html>
