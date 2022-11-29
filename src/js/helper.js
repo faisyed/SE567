@@ -512,6 +512,10 @@ async function purchaseTickets(){
         alert("Please enter phone");
         return;
     }
+    else if(phone.length != 10){
+        alert("Please enter a valid phone number");
+        return;
+    }
     if (ev_date == "" || ev_date == null || ev_date == undefined){
         alert("Please enter event date");
         return;
