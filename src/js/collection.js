@@ -35,6 +35,21 @@ const getArts = (filter, filter_value) => {
             url = 'http://localhost:3000/searchKey/?'+filter + '=' + filter_value;
         } else if(filter === "name"){
             url = 'http://localhost:3000/searchName/?'+filter + '=' + filter_value;
+        } else if(filter=="price"){
+             const myArray = filter_value.split("-");
+             let from=myArray[0];
+             let to=myArray[1];
+             if(parseInt(from)<=parseInt(to)) {
+              url='http://localhost:3000/searchPrice?from' +'='+ from + "&to="+to; 
+
+             }
+             else{
+              alert("Enter a valid range!");
+              location.reload();
+
+             }
+
+
         }
         try {
             return await fetch(url)
@@ -210,4 +225,16 @@ const payment = async () => {
   const price = document.getElementById("price").innerHTML;
   const urlSearchParams = new URLSearchParams(window.location.search);
   window.location.assign(`./payment.html?id=${urlSearchParams.get("id")}&pay=${price}`);
+}
+
+function showExample(){
+  console.log("function showExample")
+  let var1=document.getElementById("search_type").value;
+  console.log(var1)
+  if(var1=='price'){
+    document.getElementById("example_price").style.display="initial";
+  }
+  else{
+    document.getElementById("example_price").style.display="none";
+  }
 }
