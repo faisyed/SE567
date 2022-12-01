@@ -36,7 +36,7 @@ const buyArt = async () => {
         return actions.order.capture().then(async function(details) {
           const utype = document.getElementById("user_type").value;
           console.log("user details after approval",userId,utype,objId);
-          return onShopTransactionSuccess(objId,userId,utype);
+          return onShopTransactionSuccess(objId,userId,utype,paymentPrice);
         });
       }
   }).render("#paypal-button-container");
@@ -82,7 +82,7 @@ const buyArt = async () => {
         else{
           userId = undefined;
           alert("Error with the user details");
-          document.getElementById('credit-card-payment-buttom').value = "Pay";
+          location.reload();
         }
       }
     }).then(function (hostedFields) {
@@ -93,10 +93,12 @@ const buyArt = async () => {
            const res = await fetch(`/capture-order/${orderId}`, { method: 'POST' });
            const { status } = await res.json();
            if (status === 'COMPLETED') {
+              document.getElementById('credit-card-payment-buttom').style.display = "none";
               const utype = document.getElementById("user_type").value;
-              console.log("user details after card paymenty",userId,utype,objId);
-              return onShopTransactionSuccess(objId, userId, utype);
+              
+              return onShopTransactionSuccess(objId, userId, utype,paymentPrice);
            } else {
+             document.getElementById('credit-card-payment-buttom').value = "Pay";
              alert('Payment unsuccessful. Please try again!');
            }
          }).catch((err) => {
@@ -111,12 +113,12 @@ const buyArt = async () => {
     
 }
 
-const onShopTransactionSuccess = async (objId, userId, userType) => {
+const onShopTransactionSuccess = async (objId, userId, userType, paymentPrice) => {
   if (!!userId){        
     const completed = await addArtToDatabase(objId, userId, userType);
-    console.log("transaction status",completed);
+    console.log("transaction status",completed,paymentPrice);
     if (completed){
-      window.location.href = '/payment-success.html';
+      window.location.href = '/payment-success.html?type=1&payment='+paymentPrice;
     }
     else{
       alert('Error saving the transaction info!');

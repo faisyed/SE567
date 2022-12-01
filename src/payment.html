@@ -208,60 +208,86 @@
 				</div>
 			</header>
 		</div>
+	<div style="margin:32px">
+		<div id="user_details">
+			<table class="apDataTable apDataTableII text-gray777 w-100 mt-5 mb-9 mb-lg-14">
+				<tbody>
+					<tr>
+						<td>First Name:</td>
+						<td class="text-secondary">
+							<input type="text" id="user_first_name" name="firstname" value=""><br/>
+						</td>
+					</tr>
+					<tr>
+						<td>Last Name:</td>
+						<td class="text-secondary">
+							<input type="text" id="user_last_name" name="lastname" value=""><br/>
+						</td>
+					</tr>
+					<tr>
+						<td>Email:</td>
+						<td class="text-secondary">
+							<input type="text" id="user_email" name="user_email" value=""><br/>
+						</td>
+					</tr>
+					<tr>
+						<td>Contact:</td>
+						<td class="text-secondary">
+							<input type="number" id="user_phone_no" name="user_phone_no" value=""><br/>
+						</td>
+					</tr>
+					<tr>
+						<td>User Type:</td>
+						<td class="text-secondary">
+							<select id="user_type" name="user_type">
+								<option value="M">Member</option>
+								<option value="V">Visitor</option>
+								<option value="E">Employee</option>
+							</select>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	
-
-	<div id="user_details">
-		<form name="myform" action="" method="GET">
-			First Name: 
-			<input type="text" id="user_first_name" name="firstname" value=""><br/>
-			Last Name:
-			<input type="text" id="user_last_name" name="lastname" value=""><br/>
-			Email:
-			<input type="text" id="user_email" name="user_email" value=""><br/>
-			Contact:
-			<input type="number" id="user_phone_no" name="user_phone_no" value=""><br/>
-			<label for="user_type">User Type:</label>
-			<select id="user_type" name="user_type">
-				<option value="M">Member</option>
-				<option value="V">Visitor</option>
-				<option value="E">Employee</option>
-			</select>
-		</form>
+	   <div class="payment-container" id="payment-container-id">
+			<div id = "paymentDetails" style="display: none;">
+				<table class="apDataTable apDataTableII text-gray777 w-100 mt-5 mb-9 mb-lg-14">
+					<tbody>
+						<tr>
+							<td>Price: </td>
+							<td id="paymentPrice" class="text-secondary">
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		 <!-- Buttons container -->
+		 <div id="paypal-button-container"></div>
+	
+		 <!-- Advanced credit and debit card payments form -->
+		 <div class="card_container">
+		   <form id="card-form">
+			 <br>
+			 <div align="center"> or </div>
+	
+			  <label class="hosted-fields--label" for="card-number">Card Number</label>
+			  <div id="card-number" class="hosted-field"></div>
+	
+			  <label class="hosted-fields--label" for="expiration-date">Expiration Date</label>
+			  <div id="expiration-date" class="hosted-field"></div>
+	
+			  <label class="hosted-fields--label" for="cvv">CVV</label>
+			  <div id="cvv" class="hosted-field"></div>
+	
+			 <br><br>
+			 <div class="button-container">
+			   <input type="submit" id="credit-card-payment-buttom" class="button button--small button--green" value="Pay" id="submit"/>
+			 </div>
+		   </form>
+		 </div>
+	   </div>
 	</div>
-
-   <div class="payment-container" id="payment-container-id">
-
-	<div id = "paymentDetails" style="display: none;">
-		<h3>Order details:</h3>
-		Price: <h6 id="paymentPrice"></h6></div><br/>
-	</div>
-
-     <!-- Buttons container -->
-     <div id="paypal-button-container"></div>
-
-     <!-- Advanced credit and debit card payments form -->
-     <div class="card_container">
-       <form id="card-form">
-         <br>
-         <div align="center"> or </div>
-
-          <label class="hosted-fields--label" for="card-number">Card Number</label>
-          <div id="card-number" class="hosted-field"></div>
-
-          <label class="hosted-fields--label" for="expiration-date">Expiration Date</label>
-          <div id="expiration-date" class="hosted-field"></div>
-
-          <label class="hosted-fields--label" for="cvv">CVV</label>
-          <div id="cvv" class="hosted-field"></div>
-
-         <br><br>
-         <div class="button-container">
-           <input type="submit" id="credit-card-payment-buttom" class="button button--small button--green" value="Pay" id="submit"/>
-         </div>
-       </form>
-     </div>
-   </div>
-
    <!-- ftAreaWrap -->
 		<div class="ftAreaWrap bg-secondary text-gray888">
 			<!-- footerAside -->
@@ -298,6 +324,7 @@
 				</div>
 			</aside>
 		</div>
+	</div>
 
   <script src="js/popper.min.js"></script>
   <script src="js/bootstrap.min.js"></script>

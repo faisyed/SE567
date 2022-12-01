@@ -361,7 +361,7 @@ async function donateAmount(){
     // convert total_amount to float
     total_amount = parseFloat(total_amount);
 
-    document.getElementById('payment-container-id').style.display = "initial";
+    document.getElementById('payment-donation-id').style.display = "initial";
     paypal.Buttons({
         style: {
           layout: 'horizontal'
@@ -377,7 +377,6 @@ async function donateAmount(){
           },
           onApprove: function(data, actions) {
             return actions.order.capture().then(async function(details) {
-                console.log("donation succcess");
                 return addDonation(first_name, last_name, email, phone, total_amount);
             });
           }
@@ -412,43 +411,38 @@ async function donateAmount(){
             }
           },
           createOrder: async function () {
-            document.getElementById('credit-card-payment-buttom').value = "Processing...";
-            const user = await addUserToDatabase();
-            if(user){
-              userId = user.id;
-              const res = await fetch(`/create-order?pay=${paymentPrice}`, { method: 'POST' });
-              const { id } = await res.json();
-              orderId = id;
-              return id;
-            }
-            else{
-              userId = undefined;
-              alert("Error with the user details");
-              document.getElementById('credit-card-payment-buttom').value = "Pay";
-            }
+            document.getElementById('credit-card-payment-button').value = "Processing...";
+            const res = await fetch(`/create-order?pay=${total_amount}`, { method: 'POST' });
+            const { id } = await res.json();
+            orderId = id;
+            return id;
           }
         }).then(function (hostedFields) {
-          document.querySelector("#card-form").addEventListener('submit', (event) => {
-             event.preventDefault();
-    
-             hostedFields.submit().then( async () => {
-               const res = await fetch(`/capture-order/${orderId}`, { method: 'POST' });
-               const { status } = await res.json();
-                if (status === 'COMPLETED') {
-                    console.log("credit card donation success");
-                    return addDonation(first_name, last_name, email, phone, total_amount);
-                } else {
-                 alert('Payment unsuccessful. Please try again!');
-               }
-             }).catch((err) => {
-               console.error(JSON.stringify(err));
+            document.querySelector("#card-dontaion-form").addEventListener('submit', (event) => {
+               event.preventDefault();
+      
+               hostedFields.submit().then( async () => {
+                 const res = await fetch(`/capture-order/${orderId}`, { method: 'POST' });
+                 const { status } = await res.json();
+                  document.getElementById('credit-card-payment-button').style.display = "None";
+                  if (status === 'COMPLETED') {
+                      console.log("credit card success");
+                      return addDonation(first_name, last_name, email, phone, total_amount);
+                  } else {
+                      document.getElementById('credit-card-payment-button').value = "Pay";
+                   alert('Payment unsuccessful. Please try again!');
+                 }
+               }).catch((err) => {
+                 console.error(JSON.stringify(err));
+                 alert('Payment unsuccessful. Click OK to reload');
+                 location.reload();
+               });
              });
            });
-         });
-       } else {
-         // hides the advanced credit and debit card payments fields, if merchant isn't eligible
-         document.querySelector("#card-form").style = 'display: none';
-       }
+         } else {
+           // hides the advanced credit and debit card payments fields, if merchant isn't eligible
+           document.querySelector("#card-dontaion-form").style = 'display: none';
+         }
 
     
 }
@@ -467,7 +461,6 @@ const addDonation = async (first_name, last_name, email, phone, total_amount) =>
         };
         var res1 = await fetch(url1, config1);
         if (res1.status == 200){
-            alert("Donation successful");
             var url2 = "http://localhost:3000/sendEmails/";
             var data2 = [{"email_type":"donation","email_list":email}];
             const config2 = {
@@ -479,7 +472,7 @@ const addDonation = async (first_name, last_name, email, phone, total_amount) =>
                 body: JSON.stringify(data2)
             };
             var res2 = await fetch(url2, config2);
-            window.location.assign('./donate.html');
+            window.location.href = '/payment-success.html?type=2&payment='+total_amount;
         } else{
             alert("Donation Transaction failed");
         }
@@ -733,19 +726,10 @@ async function registerNewMember(){
           },
           createOrder: async function () {
             document.getElementById('credit-card-payment-buttom').value = "Processing...";
-            const user = await addUserToDatabase();
-            if(user){
-              userId = user.id;
-              const res = await fetch(`/create-order?pay=${paymentPrice}`, { method: 'POST' });
-              const { id } = await res.json();
-              orderId = id;
-              return id;
-            }
-            else{
-              userId = undefined;
-              alert("Error with the user details");
-              document.getElementById('credit-card-payment-buttom').value = "Pay";
-            }
+            const res = await fetch(`/create-order?pay=${paymentPrice}`, { method: 'POST' });
+            const { id } = await res.json();
+            orderId = id;
+            return id;
           }
         }).then(function (hostedFields) {
           document.querySelector("#card-form").addEventListener('submit', (event) => {
@@ -754,10 +738,12 @@ async function registerNewMember(){
              hostedFields.submit().then( async () => {
                const res = await fetch(`/capture-order/${orderId}`, { method: 'POST' });
                const { status } = await res.json();
+                document.getElementById('credit-card-payment-buttom').style.display = "None";
                 if (status === 'COMPLETED') {
                     console.log("credit card success");
                     return addMemberToDatabase(first_name, last_name, email, phone, address1, address2, city, state, zip, username, pass);
                 } else {
+                    document.getElementById('credit-card-payment-buttom').value = "Pay";
                  alert('Payment unsuccessful. Please try again!');
                }
              }).catch((err) => {
@@ -799,7 +785,7 @@ async function addMemberToDatabase(first_name, last_name, email, phone, address1
                 body: JSON.stringify(data2)
             };
             var res2 = await fetch(url2, config2);
-            window.location.assign('./membership.html');
+            window.location.href = '/payment-success.html?type=3&payment='+100;
         } else if(res1.status == 300){
             alert("username already exists");
         } else{

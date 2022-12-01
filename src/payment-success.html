@@ -21,10 +21,29 @@
        href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap"
        rel="stylesheet"
        />
-    <link
-       href="src/styles.css"
-       rel="stylesheet"
-       />
+    <link href="src/styles.css" rel="stylesheet"/>
+	
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const urlSearchParams = new URLSearchParams(window.location.search);
+			const entires = Object.fromEntries(urlSearchParams.entries());
+
+			const type = entires.type;
+			if (type === "1"){
+				const payment = !!entires.payment ? ' for $'+entires.payment : '';
+				document.getElementById('successMessage').innerHTML  = "Your purchase is complete 🎉 "+ payment;
+			}
+			else if(type === "2"){
+				const payment = !!entires.payment ? ' for '+entires.payment : '';
+				document.getElementById('successMessage').innerHTML  = "Your donation of "+ payment +"$ is complete 🎉";
+			}
+			else{
+				const payment = !!entires.payment ? ' for '+entires.payment : '';
+				document.getElementById('successMessage').innerHTML  = "Successfully registered for a membership 🎉";
+			}
+			
+	})     
+	</script>
  </head>
 <body>
 	<!-- pageWrapper -->
@@ -124,14 +143,8 @@
 			</header>
 		</div>
 		<main> 
-            <div id="app">
-            <h1>Woohoo! Your order is complete 🎉</h1>
-            <img
-               class="item small"
-               src="src/img/celebrate.jpeg"
-               alt="order complete"
-               />
-            <span class="caption">Photo by <a href="https://unsplash.com/@jdent?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Jason Dent</a> on <a href="https://unsplash.com/s/photos/celebrate?utm_source=unsplash&amp;utm_medium=referral&amp;utm_content=creditCopyText">Unsplash</a></span>
+            <div id="app" style="height:500px">
+            <h1 id="successMessage"></h1>
          </div>
 		</main>
 		<!-- ftAreaWrap -->
