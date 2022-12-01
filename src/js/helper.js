@@ -352,6 +352,9 @@ async function donateAmount(){
     if (phone == "" || phone == null || phone == undefined){
         alert("Contact No cannot be empty");
         return;
+    }else if (phone.length != 10){
+        alert("Please enter a valid phone number");
+        return;
     }
     if (total_amount == "" || total_amount == null || total_amount == undefined){
         alert("Amount cannot be empty");
@@ -413,16 +416,10 @@ async function donateAmount(){
           },
           createOrder: async function () {
             document.getElementById('credit-card-payment-buttom').value = "Processing...";
-            const user = await addUserToDatabase();
-            if(user){
-              userId = user.id;
-              const res = await fetch(`/create-order?pay=${paymentPrice}`, { method: 'POST' });
-              const { id } = await res.json();
-              orderId = id;
-              return id;
+            try{
+                addDonation(first_name, last_name, email, phone, total_amount);
             }
-            else{
-              userId = undefined;
+            catch{
               alert("Error with the user details");
               document.getElementById('credit-card-payment-buttom').value = "Pay";
             }
@@ -430,17 +427,8 @@ async function donateAmount(){
         }).then(function (hostedFields) {
           document.querySelector("#card-form").addEventListener('submit', (event) => {
              event.preventDefault();
-    
              hostedFields.submit().then( async () => {
-               const res = await fetch(`/capture-order/${orderId}`, { method: 'POST' });
-               const { status } = await res.json();
-                if (status === 'COMPLETED') {
-                    console.log("credit card donation success");
-                    return addDonation(first_name, last_name, email, phone, total_amount);
-                } else {
-                 alert('Payment unsuccessful. Please try again!');
-               }
-             }).catch((err) => {
+            }).catch((err) => {
                console.error(JSON.stringify(err));
              });
            });
@@ -604,7 +592,6 @@ async function purchaseTickets(){
         }).then(function (hostedFields) {
           document.querySelector("#card-form").addEventListener('submit', (event) => {
              event.preventDefault();
-    
              hostedFields.submit().then( async () => {
              }).catch((err) => {
                console.error(JSON.stringify(err));
