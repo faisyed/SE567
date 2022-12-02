@@ -1,10 +1,14 @@
 const getArts = (filter, filter_value) => {
-  console.log(filter_value);
-  console.log(filter);
-  const DOMStrings = {
+    const DOMStrings = {
     collection_list: document.getElementById("collection_list"),
     parentDivBtn: document.getElementById("pagination_btn")
-  };
+    };
+
+    //remove the link, buttons and list enteries
+     const clearResults = () => {
+       DOMStrings.collection_list.innerHTML = '';
+       DOMStrings.parentDivBtn.innerHTML = '';
+     };
 
   //array
   var collections = [];
@@ -52,23 +56,18 @@ const getArts = (filter, filter_value) => {
      }
   }
 
-  //remove the link, buttons and list enteries
-  const clearResults = () => {
-    DOMStrings.collection_list.innerHTML = '';
-    DOMStrings.parentDivBtn.innerHTML = '';
-  };
 
   //add the collections to the UI
-  const renderCollections = (fruit) =>{
+  const renderCollections = (art) =>{
     const list = `<div class="col-12 col-sm-6 col-md-4 mimItem px-xl-4">
                   		<article class="collectionColumn mb-6 mb-xl-8 position-relative">
                   			<div class="imgHolder mb-4" >
-                  				<a href="single-works.html?id=${fruit.id}">
-                  					<img src=${fruit.url} class="img-fluid d-block" alt="image description">
+                  				<a href="single-works.html?id=${art.id}">
+                  					<img src=${art.url} class="img-fluid d-block" alt="image description">
                   				</a>
                   			</div>
-                  			<h2 class="mb-1"><a href="single-works.html?id=${fruit.id}">${fruit.title}</a></h2>
-                  			<h3 class="fontAlter text-gray777 mb-0">${fruit.author}</h3>
+                  			<h2 class="mb-1"><a href="single-works.html?id=${art.id}">${art.title}</a></h2>
+                  			<h3 class="fontAlter text-gray777 mb-0">${art.author}</h3>
                   		</article>
                   	</div>`
     DOMStrings.collection_list.insertAdjacentHTML('beforeend', list);
@@ -84,53 +83,55 @@ const getArts = (filter, filter_value) => {
     let final;
     if(page === 1 && totalPages > 1){
        final = renderButton(page, 'next');
-       }
+      }
     else if(page < totalPages){
        final = `${renderButton(page, 'prev')} ${renderButton(page, 'next')}`;
       }
     else if(page === totalPages && totalPages > 1){
       final = renderButton(page, 'prev');
+     } else if(totalPages === 1) {
+       final = "";
      }
 
     DOMStrings.parentDivBtn.insertAdjacentHTML('afterbegin', final);
   };
 
-  //set the page, result per page, loop and pass each fruit
+  //set the page, result per page, loop and pass each art
   //page and resPerPage are default parameters
   const getPage = (collections, page = 1, resPerPage = 12) => {
-    let data = loadCollection();
-    data.then(arts => {
-         collections =  arts
-    }).then(() => {
-        if(collections.length == 0){
-            var list = '<h4>No art collection match with your search criteria</h4>'
-            DOMStrings.collection_list.insertAdjacentHTML('beforeend', list);
-        } else {
-            const first = (page - 1) * resPerPage;
-            const end = page * resPerPage;
-            collections.slice(first, end).forEach(renderCollections);
-            calcPage(page, collections.length, resPerPage);
-        }
-    });
+    clearResults();
+    const first = (page - 1) * resPerPage;
+    const end = page * resPerPage;
+    collections.slice(first, end).forEach(renderCollections);
+    calcPage(page, collections.length, resPerPage);
+
   };
 
   //Event delegation using the Div to add listener to the button inside
   DOMStrings.parentDivBtn.addEventListener('click', (e) =>{
       const button = e.target.closest('.pageBtn');
       if(button){
-        const goto = parseInt(button.dataset.goto, 10);
         clearResults();
+        const goto = parseInt(button.dataset.goto, 10);
         getPage(collections, goto);
       }
   });
 
-  clearResults();
-  getPage(collections);
-//  //click the link
-//  DOMStrings.link.addEventListener('click', () => {
-//    clearResults();
-//    getPage(fruits);
-//  });
+   clearResults();
+   collections = []
+   let data = loadCollection();
+   console.log(collections)
+   data.then(arts => {
+            collections =  arts
+       }).then(() => {
+           if(collections.length == 0){
+               var list = '<h4>No art collection match with your search criteria</h4>'
+               DOMStrings.collection_list.insertAdjacentHTML('beforeend', list);
+           } else {
+               getPage(collections);
+           }
+       })
+
 }
 
 const getArt = () => {
