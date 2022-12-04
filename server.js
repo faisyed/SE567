@@ -683,7 +683,7 @@ getUpComingMemberEvents = (mem_id, type) => {
 
 getLastPurchasedTickets = (user_id,user_type) => {
   return new Promise((resolve, reject) => {
-    pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from ticket_transactions t join events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit 5",[user_id,user_type], (err, data) => {
+    pool.query("select 'Entry Ticket' as ticket_for,t.total_amount as amount, t.purchase_date as purchase_date from ticket_transactions t where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit 5",[user_id,user_type], (err, data) => {
       if (err){
         reject(err);
       }
@@ -694,7 +694,7 @@ getLastPurchasedTickets = (user_id,user_type) => {
 
 getLastPurchasedArts = (user_id, user_type) => {
   return new Promise((resolve, reject) => {
-    pool.query("SELECT o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from shop_transactions s join sold_objects o on s.shop_id=o.shop_id and s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit 5",[user_id,user_type], (err, data) => {
+    pool.query("SELECT o.obj_title as title, s.total_amount as amount, s.purchase_date as purchase_date from shop_transactions s join objects o on s.obj_oid=o.obj_id where s.user_id = ? and s.user_type= ? order by s.purchase_date desc limit 5",[user_id,user_type], (err, data) => {
       if (err){
         reject(err);
       }
