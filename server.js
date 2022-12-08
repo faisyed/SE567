@@ -1872,13 +1872,14 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if(email_type == "donation"){
     var subject = "Donation Confirmation";
-    var body = "Dear Member, \n\nThank you for your donation. Your donation is successfully processed. \n\nThank you.";
+    let amount = req.body[0].amount;
+    var body = "Dear User, <br><br>Thank you for your donation of $<b>"+ amount +"</b>. Your donation is successfully processed. <br><br>Thank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
       to: email_list,
       subject: subject,
-      text: body
+      html: body
     };
     mailTransporter.sendMail(mailDetails, function(err, data) {
       if(err) {

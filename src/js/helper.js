@@ -353,6 +353,11 @@ async function donateAmount(){
         alert("Contact No cannot be empty");
         return;
     }
+    // validate the phone number to be 10 digits
+    if (phone.length != 10 || !onlyNumbers(phone)){
+        alert("Contact No should be 10 digits");
+        return;
+    }
     if (total_amount == "" || total_amount == null || total_amount == undefined){
         alert("Amount cannot be empty");
         return;
@@ -462,7 +467,7 @@ const addDonation = async (first_name, last_name, email, phone, total_amount) =>
         var res1 = await fetch(url1, config1);
         if (res1.status == 200){
             var url2 = "http://localhost:3000/sendEmails/";
-            var data2 = [{"email_type":"donation","email_list":email}];
+            var data2 = [{"email_type":"donation","email_list":email,"amount":total_amount}];
             const config2 = {
                 headers: {
                     'Content-Type': 'application/json',
