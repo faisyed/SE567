@@ -632,6 +632,11 @@ async function registerNewMember(){
         alert("Please enter phone");
         return;
     }
+    // check if phone number is 10 digits
+    if (phone.length != 10 || !onlyNumbers(phone)){
+        alert("Please enter a valid phone number of 10 digits");
+        return;
+    }
     if (address1 == "" || address1 == null || address1 == undefined){
         alert("Please enter address1");
         return;
@@ -646,6 +651,11 @@ async function registerNewMember(){
     }
     if (zip == "" || zip == null || zip == undefined){
         alert("Please enter zip");
+        return;
+    }
+    // check if zip code is 5 digits
+    if (zip.length != 5 || !onlyNumbers(zip)){
+        alert("Please enter a valid zip code of 5 digits");
         return;
     }
 
@@ -1454,6 +1464,10 @@ async function getEmployeePortalDetails(role) {
     }
 }
 
+function onlyNumbers(str) {
+    return /^[0-9.,]+$/.test(str);
+}
+
 async function updatePersonalDetails(user_type) {
     let user_id = 0;
     if (user_type == 'member') {
@@ -1478,6 +1492,11 @@ async function updatePersonalDetails(user_type) {
         alert("Please enter phone");
         return;
     }
+    // check if phone length is 10
+    if (phone.length != 10 || !onlyNumbers(phone)){
+        alert("Please enter a valid phone number of 10 digits");
+        return;
+    }
     if (address1 == "" || address1 == null || address1 == undefined){
         alert("Please enter address1");
         return;
@@ -1492,6 +1511,11 @@ async function updatePersonalDetails(user_type) {
     }
     if (zip == "" || zip == null || zip == undefined){
         alert("Please enter zip");
+        return;
+    }
+    // check if zip length is 5
+    if (zip.length != 5 || !onlyNumbers(zip)){
+        alert("Please enter a valid zip code of 5 digits");
         return;
     }
     

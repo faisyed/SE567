@@ -383,9 +383,12 @@ app.post("/buyArt/", async (req,res) => {
         res.status(200).send(data);
       });
 
-
-      //delete objects from object table
-
+      // delete from objects based on obj_id
+      pool.query("delete from `objects` where `obj_id` = ?", [data[0].obj_id], (err, data) => { 
+        if (err){
+            console.error(err);
+        }
+      });
     }
     else{
       missed.push("id does not exist in the database");
@@ -683,7 +686,7 @@ getUpComingMemberEvents = (mem_id, type) => {
 
 getLastPurchasedTickets = (user_id,user_type) => {
   return new Promise((resolve, reject) => {
-    pool.query("select case e.ev_name when null then 'Entry Ticket' else e.ev_name end as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from ticket_transactions t join events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit 5",[user_id,user_type], (err, data) => {
+    pool.query("select 'Entry Ticket' as ticket_for, total_amount as amount, purchase_date from ticket_transactions where ticket_class='entry' union select e.ev_name as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from ticket_transactions t join events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by purchase_date desc limit 5",[user_id,user_type], (err, data) => {
       if (err){
         reject(err);
       }
@@ -1852,13 +1855,13 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if (email_type == "credentials"){
     var subject = "Art Gallery Login Credentials";
-    var body = "Dear Member, \n\nYour username is '" + req.body[0].username + "' and password is '" + req.body[0].password + "'. \n\nThank you.";
+    var body = "Dear Member, <br><br>Your <strong>username</strong> is <b>'" + req.body[0].username + "'</b> and <strong>password</strong> is <b>'" + req.body[0].password + "'</b>. <br><br>Thank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
       to: email_list,
       subject: subject,
-      text: body
+      html: body
     };
     mailTransporter.sendMail(mailDetails, function(err, data) {
       if(err) {
