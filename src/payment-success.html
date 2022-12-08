@@ -24,9 +24,11 @@
     <link href="src/styles.css" rel="stylesheet"/>
 	
 	<script>
-		document.addEventListener('DOMContentLoaded', function() {
+		document.addEventListener('DOMContentLoaded', async function() {
 			const urlSearchParams = new URLSearchParams(window.location.search);
 			const entires = Object.fromEntries(urlSearchParams.entries());
+			let session_info = await getSessionInfo();
+			handle_tabs(session_info);
 
 			const type = entires.type;
 			if (type === "1"){
@@ -106,7 +108,7 @@
 														<li>
 															<a href="exhibition-list.html">Exhibition</a>
 														</li>
-														<li>
+														<li id="drop_auction" style="display: none;">
 															<a href="auction-list.html">Auction</a>
 														</li>
 														<li>
@@ -130,8 +132,14 @@
 													</ul>
 												</div>
 											</li>
-											<li class="nav-item">
+											<li class="nav-item" id="drop_account" style="display: block;">
 												<a class="nav-link" href="my-account.html" aria-haspopup="true" aria-expanded="false">My Account</a>
+											</li>
+											<li class="nav-item" id="drop_portal" style="display: none;">
+												<a class="nav-link" id="portal_page" href="" aria-haspopup="true" aria-expanded="false">My Portal</a>
+											</li>
+											<li class="nav-item" id="drop_logout" style="display: none;">
+												<a class="nav-link" href="javascript:logout()" aria-haspopup="true" aria-expanded="false">Logout</a>
 											</li>
 										</ul>
 									</div>
@@ -188,5 +196,6 @@
 	<script src="js/bootstrap.min.js"></script>
 	<script src="https://kit.fontawesome.com/391f644c42.js"></script>
 	<script src="js/payment.js"></script>
+	<script src="js/collection.js"></script>
 </body>
 </html>

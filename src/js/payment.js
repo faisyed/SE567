@@ -1,5 +1,9 @@
 // @TODO Login to developer.paypal.com, create (or select an existing)
 const buyArt = async () => {
+  let session_info = await getSessionInfo();
+  handle_tabs(session_info);
+
+  console.log("session",session_info);
   
   const urlSearchParams = new URLSearchParams(window.location.search);
   const entires = Object.fromEntries(urlSearchParams.entries());
