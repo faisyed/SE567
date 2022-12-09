@@ -33,20 +33,22 @@
 			const type = entires.type;
 			if (type === "1"){
 				const payment = !!entires.payment ? ' for $'+entires.payment : '';
-				document.getElementById('successMessage').innerHTML  = "Your purchase is complete 🎉 "+ payment;
+				document.getElementById('successMessage').innerHTML  = "Your purchase is complete 🎉 "+ payment + '.';
 			}
 			else if(type === "2"){
 				const payment = !!entires.payment ? ' for '+entires.payment : '';
-				document.getElementById('successMessage').innerHTML  = "Your donation of "+ payment +"$ is complete 🎉";
+				document.getElementById('successMessage').innerHTML  = "Your donation of "+ payment +"$ is complete 🎉 .";
 			}
 			else if(type === "4"){
 				const payment = !!entires.payment ? ' for '+entires.payment : '';
-				document.getElementById('successMessage').innerHTML  = "Successfully bought tickets 🎉" + payment;
+				document.getElementById('successMessage').innerHTML  = "Successfully bought tickets 🎉" + payment + '.';
 			}
 			else{
 				const payment = !!entires.payment ? ' for '+entires.payment : '';
-				document.getElementById('successMessage').innerHTML  = "Successfully registered for a membership 🎉";
+				document.getElementById('successMessage').innerHTML  = "Successfully registered for a membership 🎉 .";
 			}
+
+			document.getElementById('emailConfirmation').innerHTML = 'Please check your email for further instructions.';
 			
 	})     
 	</script>
@@ -128,7 +130,7 @@
 													<!-- mnDropList -->
 													<ul class="list-unstyled mnDropList mb-0 pt-1 pb-1 pt-md-4 pb-md-6">
 														<li><a  href="contact-us.html">Contact Us</a></li>
-														<li id="drop_member"><a  href="membership.html">Membership</a></li>
+														<li><a  href="membership.html">Membership</a></li>
 														<li><a  href="donate.html">Donate</a></li>
 													</ul>
 												</div>
@@ -152,8 +154,9 @@
 			</header>
 		</div>
 		<main> 
-            <div id="app" style="height:500px">
-            <h1 id="successMessage"></h1>
+            <div id="app" style="height:500px; margin: 8px;">
+            <h2 id="successMessage"></h2>
+			<h3 id="emailConfirmation"></h3>
          </div>
 		</main>
 		<!-- ftAreaWrap -->
