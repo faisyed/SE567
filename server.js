@@ -1793,13 +1793,16 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if (email_type == "purchase_art"){
     var subject = "Artwork Purchase Confirmation";
-    var body = "Dear User, \n\nThank you for purchasing the art work. Your purchase is successfully processed. \n\nThank you.";
+    var body = "Dear User, <br><br>Thank you for purchasing the art work. Your purchase is successfully processed. <br><br>";
+    body += "Please visit the Art Gallery to pick up your purchased art within the next 10 days. <br><br>"
+    body += "Your transaction id is: <b>" + req.body[0].trans_id + "</b><br><br>";
+    body += "Thank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
       to: email_list,
       subject: subject,
-      text: body
+      html: body
     };
     mailTransporter.sendMail(mailDetails, function(err, data) {
       if(err) {
