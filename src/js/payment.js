@@ -125,8 +125,9 @@ const buyArt = async () => {
       onApprove: function(data, actions) {
         return actions.order.capture().then(async function(details) {
           const utype = document.getElementById("user_type").value;
-          console.log("user details after approval",userId,utype,objId);
-          return onShopTransactionSuccess(objId,userId,utype,paymentPrice);
+          const emailId = document.getElementById("user_email").value;
+          console.log("user details after approval",userId,utype,objId,emailId);
+          return onShopTransactionSuccess(objId, userId, utype, paymentPrice, emailId);
         });
       }
   }).render("#paypal-button-container");
@@ -194,8 +195,10 @@ const buyArt = async () => {
            if (status === 'COMPLETED') {
               document.getElementById('credit-card-payment-buttom').style.display = "none";
               const utype = document.getElementById("user_type").value;
+              const emailId = document.getElementById("user_email").value;
+              console.log("user details after approval",userId,utype,objId,emailId);
               
-              return onShopTransactionSuccess(objId, userId, utype,paymentPrice);
+              return onShopTransactionSuccess(objId, userId, utype, paymentPrice, emailId);
            } else {
              document.getElementById('credit-card-payment-buttom').value = "Pay";
              alert('Payment unsuccessful. Please try again!');
@@ -212,11 +215,34 @@ const buyArt = async () => {
     
 }
 
-const onShopTransactionSuccess = async (objId, userId, userType, paymentPrice) => {
+function generateString(length) {
+  const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = ' ';
+  const charactersLength = characters.length;
+  for ( let i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+
+  return result;
+}
+
+const onShopTransactionSuccess = async (objId, userId, userType, paymentPrice, email) => {
   if (!!userId){        
     const completed = await addArtToDatabase(objId, userId, userType);
-    console.log("transaction status",completed,paymentPrice);
     if (completed){
+      console.log("transaction status",completed,paymentPrice,email);
+      var url2 = "http://localhost:3000/sendEmails/";
+      var data2 = [{"email_type":"purchase_art","email_list":email, "trans_id":generateString(15)}];
+      const config2 = {
+          headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json'
+          },
+          method: 'POST',
+          body: JSON.stringify(data2)
+      };
+      console.log("Just before fetching urls",data2,config2);
+      var res2 = await fetch(url2, config2);
       window.location.href = '/payment-success.html?type=1&payment='+paymentPrice;
     }
     else{
