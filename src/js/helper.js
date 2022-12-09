@@ -85,6 +85,19 @@ async function fillTicketDetails() {
     let session_info = await getSessionInfo();
     handle_tabs(session_info);
     let entries = window.location.search;
+    let today = new Date();
+    let dd = today.getDate();
+    let mm = today.getMonth()+1; //January is 0!
+    let yyyy = today.getFullYear();
+    if(dd<10){
+            dd='0'+dd
+        } 
+        if(mm<10){
+            mm='0'+mm
+        } 
+
+    today = yyyy+'-'+mm+'-'+dd;
+    document.getElementById("ev_date").setAttribute("min", today);
     if (entries != "") {
         entries = entries.substring(1).split("&");
         let event_id = entries[0].split("=")[1];
@@ -485,7 +498,18 @@ const addDonation = async (first_name, last_name, email, phone, total_amount) =>
         alert("Donation Transaction failed");
     }
 }
- 
+
+function generateString(length) {
+    const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = ' ';
+    const charactersLength = characters.length;
+    for ( let i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
+}
+
 async function purchaseTickets(){
     var first_name = document.getElementById("first_name").value;
     var last_name = document.getElementById("last_name").value;
@@ -508,6 +532,11 @@ async function purchaseTickets(){
     }
     if (phone == "" || phone == null || phone == undefined){
         alert("Please enter phone");
+        return;
+    }
+    // validate if phone has 10 digits
+    if (phone.length != 10 || !onlyNumbers(phone)){
+        alert("Please enter valid phone number of 10 digits");
         return;
     }
     if (ev_date == "" || ev_date == null || ev_date == undefined){
@@ -550,7 +579,7 @@ async function purchaseTickets(){
         if (res1.status == 200){
             alert("Tickets purchased successfully");
             var url2 = "http://localhost:3000/sendEmails/";
-            var data2 = [{"email_type":"purchase_ticket","email_list":email}];
+            var data2 = [{"email_type":"purchase_ticket","email_list":email,"adult_count":adult_count,"child_count":child_count,"senior_count":senior_count,"student_count":student_count,"other_count":other_count,"adult_price":adult_price,"child_price":child_price,"senior_price":senior_price,"student_price":student_price,"other_price":other_price,"ticket_total":ticket_total,"trans_id":generateString(15)}];
             const config2 = {
                 headers: {
                     'Content-Type': 'application/json',

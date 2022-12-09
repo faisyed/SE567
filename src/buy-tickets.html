@@ -188,7 +188,7 @@
                                                 <td>
                                                     <div class="quantity">
                                                         <div class="quantity quantityII position-relative d-inline-block mt-1">
-                                                            <input type="number" id="adult_count" min="0" value="1">
+                                                            <input type="number" id="adult_count" min="0" max="10" value="1">
                                                         </div>
                                                     </div>
                                                 </td>
@@ -200,7 +200,7 @@
                                                 <td>
                                                     <div class="quantity">
                                                         <div class="quantity quantityII position-relative d-inline-block mt-1">
-                                                            <input type="number" id="senior_count" min="0" value="0">
+                                                            <input type="number" id="senior_count" min="0" max="10" value="0">
                                                         </div>
                                                     </div>
                                                 </td>
@@ -212,7 +212,7 @@
                                                 <td>
                                                     <div class="quantity">
                                                         <div class="quantity quantityII position-relative d-inline-block mt-1">
-                                                            <input type="number" id="student_count" min="0" value="0">
+                                                            <input type="number" id="student_count" min="0" max="10" value="0">
                                                         </div>
                                                     </div>
                                                 </td>
@@ -224,7 +224,7 @@
                                                 <td>
                                                     <div class="quantity">
                                                         <div class="quantity quantityII position-relative d-inline-block mt-1">
-                                                            <input type="number" id="other_count" min="0" value="0">
+                                                            <input type="number" id="other_count" min="0" max="10" value="0">
                                                         </div>
                                                     </div>
                                                 </td>
@@ -236,7 +236,7 @@
                                                 <td>
                                                     <div class="quantity">
                                                         <div class="quantity quantityII position-relative d-inline-block mt-1">
-                                                            <input type="number" id="child_count" min="0" value="0">
+                                                            <input type="number" id="child_count" min="0" max="10" value="0">
                                                         </div>
                                                     </div>
                                                 </td>
@@ -308,7 +308,11 @@
             if (e.target.id == "adult_count") {
 				adult_price = parseFloat(document.getElementById("adult_price").innerHTML);
                 adult_count = parseInt(e.target.value);
-                adult_subtotal.innerHTML = adult_count * adult_price;
+				if (adult_count <0) {
+					alert("Please enter a valid adult count");
+				}else{
+                	adult_subtotal.innerHTML = adult_count * adult_price;
+				}
             }
             updateTotal();
         });
@@ -321,7 +325,11 @@
             if (e.target.id == "senior_count") {
 				senior_price = parseFloat(document.getElementById("senior_price").innerHTML);
                 senior_count = parseInt(e.target.value);
-                senior_subtotal.innerHTML = senior_count * senior_price;
+				if (senior_count <0) {
+					alert("Please enter a valid senior count");
+				} else {
+                	senior_subtotal.innerHTML = senior_count * senior_price;
+				}
             }
             updateTotal();
         });
@@ -334,7 +342,11 @@
             if (e.target.id == "student_count") {
 				student_price = parseFloat(document.getElementById("student_price").innerHTML);
                 student_count = parseInt(e.target.value);
-                student_subtotal.innerHTML = student_count * student_price;
+				if (student_count <0) {
+					alert("Please enter a valid student count");
+				} else {
+                	student_subtotal.innerHTML = student_count * student_price;
+				}
             }
             updateTotal();
         });
@@ -347,7 +359,11 @@
             if (e.target.id == "other_count") {
 				other_price = parseFloat(document.getElementById("other_price").innerHTML);
                 other_count = parseInt(e.target.value);
-                other_subtotal.innerHTML = other_count * other_price;
+				if (other_count <0) {
+					alert("Please enter a valid count");
+				} else {
+                	other_subtotal.innerHTML = other_count * other_price;
+				}
             }
             updateTotal();
         });

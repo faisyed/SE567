@@ -1770,7 +1770,7 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if (email_type == "register"){
     var subject = "Membership Registration Confirmation";
-    var body = "Dear Member, \n\nThank you for registering for the Art Gallery. Your membership is now active. \n\nThank you.";
+    var body = "Dear User, \n\nThank you for registering for the Art Gallery. Your membership is now active. \n\nThank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
@@ -1787,7 +1787,7 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if (email_type == "purchase_art"){
     var subject = "Artwork Purchase Confirmation";
-    var body = "Dear Member, \n\nThank you for purchasing the art work. Your purchase is successfully processed. \n\nThank you.";
+    var body = "Dear User, \n\nThank you for purchasing the art work. Your purchase is successfully processed. \n\nThank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
@@ -1804,13 +1804,27 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if (email_type == "purchase_ticket"){
     var subject = "Ticket Purchase Confirmation";
-    var body = "Dear Member, \n\nThank you for purchasing the ticket. Your purchase is successfully processed. \n\nThank you.";
+    //create html table with ticket count and price
+    var body = "Dear User, <br><br>";
+    body += "Thank you for purchasing the ticket. Your purchase is successfully processed. <br><br>";
+    body += "Your transaction id is: <b>" + req.body[0].trans_id + "</b><br><br>";
+    body += "Please find the ticket details below: <br><br>";
+    body += "<table border='1' style='border-collapse: collapse;'>";
+    body += "<tr><th>Ticket Type</th><th>Count</th><th>Price</th></tr>";
+    body += "<tr><td>Adult</td><td>" + req.body[0].adult_count + "</td><td>" + req.body[0].adult_price + "</td></tr>";
+    body += "<tr><td>Child</td><td>" + req.body[0].child_count + "</td><td>" + "Free" + "</td></tr>";
+    body += "<tr><td>Senior</td><td>" + req.body[0].senior_count + "</td><td>" + req.body[0].senior_price + "</td></tr>";
+    body += "<tr><td>Student</td><td>" + req.body[0].student_count + "</td><td>" + req.body[0].student_price + "</td></tr>";
+    body += "<tr><td>Veteran/ First Responder/ With Disabilities</td><td>" + req.body[0].other_count + "</td><td>" + req.body[0].other_price + "</td></tr>";
+    body += "<tr><td>Total</td><td>" + "" + "</td><td>" + req.body[0].ticket_total + "</td></tr>";
+    body += "</table><br><br>";
+    body += "Thank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
       to: email_list,
       subject: subject,
-      text: body
+      html: body
     };
     mailTransporter.sendMail(mailDetails, function(err, data) {
       if(err) {
@@ -1821,7 +1835,7 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if (email_type == "cancel_event"){
     var subject = "Event Cancellation";
-    var body = "Dear Member, \n\nThe event you have registered for has been cancelled. Please visit your portal to get more information. \n\nThank you.";
+    var body = "Dear User, \n\nThe event you have registered for has been cancelled. Please visit your portal to get more information. \n\nThank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
@@ -1838,7 +1852,7 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if (email_type == "contact_us_reply"){
     var subject = "Contact Us Reply";
-    var body = "Dear Member, \n\nThank you for contacting us. We have received your message and will get back to you shortly. \n\nThank you.";
+    var body = "Dear User, \n\nThank you for contacting us. We have received your message and will get back to you shortly. \n\nThank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
@@ -1890,7 +1904,7 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if(email_type == "update_details"){
     var subject = "Update Details Confirmation";
-    var body = "Dear Member, \n\nYour details have been successfully updated. \n\nThank you.";
+    var body = "Dear User, \n\nYour details have been successfully updated. \n\nThank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
@@ -1907,7 +1921,7 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if(email_type == "enrolled"){
     var subject = "Enrolled as employee";
-    var body = "Dear Member, \n\nYou have been enrolled as an employee at the Art Gallery. We are looking forward to meeting you upcoming Monday. \n\nYou can login to your portal using the following credentials:\nUsername:"+req.body[0].username+"\nPassword:"+req.body[0].password+" \n\nThank you.";
+    var body = "Dear User, \n\nYou have been enrolled as an employee at the Art Gallery. We are looking forward to meeting you upcoming Monday. \n\nYou can login to your portal using the following credentials:\nUsername:"+req.body[0].username+"\nPassword:"+req.body[0].password+" \n\nThank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
