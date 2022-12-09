@@ -1930,13 +1930,13 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if(email_type == "enrolled"){
     var subject = "Enrolled as employee";
-    var body = "Dear User, \n\nYou have been enrolled as an employee at the Art Gallery. We are looking forward to meeting you upcoming Monday. \n\nYou can login to your portal using the following credentials:\nUsername:"+req.body[0].username+"\nPassword:"+req.body[0].password+" \n\nThank you.";
+    var body = "Dear User, <br><br>You have been enrolled as an employee at the Art Gallery. We are looking forward to meeting you upcoming Monday. <br><br>You can login to your portal using the following credentials:<br><b>Username</b>: <b>"+req.body[0].username+"</b><br><b>Password</b>: <b>"+req.body[0].password+"</b> <br><br>Thank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
       to: email_list,
       subject: subject,
-      text: body
+      html: body
     };
     mailTransporter.sendMail(mailDetails, function(err, data) {
       if(err) {
