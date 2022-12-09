@@ -82,6 +82,7 @@ async function eventDetails(){
 }
 
 async function fillTicketDetails() {
+    await activatePayPal();
     let session_info = await getSessionInfo();
     handle_tabs(session_info);
     let entries = window.location.search;
@@ -564,6 +565,91 @@ async function purchaseTickets(){
     var event_id = document.getElementById("event_id").innerHTML;
     var event_type = document.getElementById("event_type").innerHTML;
 
+    document.getElementById('payment-tickets-id').style.display = "initial";
+    paypal.Buttons({
+        style: {
+          layout: 'horizontal'
+        },
+         createOrder: async function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                  amount: {
+                    value: ticket_total
+                  }
+                }]
+            });
+          },
+          onApprove: function(data, actions) {
+            return actions.order.capture().then(async function(details) {
+                return buyTicket(first_name, last_name, email, phone, ev_date, adult_count, child_count, senior_count, student_count, other_count, adult_price, child_price, senior_price, student_price, other_price, ticket_total, event_id, event_type);
+            });
+          }
+      }).render("#paypal-button-container");
+    
+      // Eligibility check for advanced credit and debit card payments
+      if (paypal.HostedFields.isEligible()) {
+        let orderId;
+    
+        paypal.HostedFields.render({
+          styles: {
+           // Styling element state
+           '.valid': {
+             'color': 'green'
+           },
+           '.invalid': {
+             'color': 'red'
+           }
+          },
+          fields: {
+            number: {
+              selector: "#card-number",
+              placeholder: "4111 1111 1111 1111"
+            },
+            cvv: {
+              selector: "#cvv",
+              placeholder: "123"
+            },
+            expirationDate: {
+              selector: "#expiration-date",
+              placeholder: "MM/YY"
+            }
+          },
+          createOrder: async function () {
+            document.getElementById('credit-card-payment-button').value = "Processing...";
+            const res = await fetch(`/create-order?pay=${ticket_total}`, { method: 'POST' });
+            const { id } = await res.json();
+            orderId = id;
+            return id;
+          }
+        }).then(function (hostedFields) {
+            document.querySelector("#card-ticket-form").addEventListener('submit', (event) => {
+               event.preventDefault();
+      
+               hostedFields.submit().then( async () => {
+                 const res = await fetch(`/capture-order/${orderId}`, { method: 'POST' });
+                 const { status } = await res.json();
+                  document.getElementById('credit-card-payment-button').style.display = "None";
+                  if (status === 'COMPLETED') {
+                      console.log("credit card success");
+                      return buyTicket(first_name, last_name, email, phone, ev_date, adult_count, child_count, senior_count, student_count, other_count, adult_price, child_price, senior_price, student_price, other_price, ticket_total, event_id, event_type);
+                  } else {
+                      document.getElementById('credit-card-payment-button').value = "Pay";
+                   alert('Payment unsuccessful. Please try again!');
+                 }
+               }).catch((err) => {
+                 console.error(JSON.stringify(err));
+                 alert('Payment unsuccessful. Click OK to reload');
+                 location.reload();
+               });
+             });
+           });
+         } else {
+           // hides the advanced credit and debit card payments fields, if merchant isn't eligible
+           document.querySelector("#card-ticket-form").style = 'display: none';
+        }   
+}
+
+const buyTicket = async (first_name, last_name, email, phone, ev_date, adult_count, child_count, senior_count, student_count, other_count, adult_price, child_price, senior_price, student_price, other_price, ticket_total, event_id, event_type) => {
     try {
         var url1 = "http://localhost:3000/buyTickets/";
         var data1 = [{"first_name":first_name,"last_name":last_name,"email":email,"phone":phone,"ev_date":ev_date,"adult_count":adult_count,"child_count":child_count,"senior_count":senior_count,"student_count":student_count,"other_count":other_count,"adult_price":adult_price,"child_price":child_price,"senior_price":senior_price,"student_price":student_price,"other_price":other_price,"ticket_total":ticket_total,"event_id":event_id,"event_type":event_type}];
@@ -589,7 +675,7 @@ async function purchaseTickets(){
                 body: JSON.stringify(data2)
             };
             var res2 = await fetch(url2, config2);
-            window.location.assign('./buy-tickets.html');
+            window.location.href = '/payment-success.html?type=4&payment='+ticket_total;
         } else{
             alert("Ticket purchase failed");
         }
