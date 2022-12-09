@@ -975,6 +975,17 @@ cancelEvent = (ev_id) => {
   });
 }
 
+cancelEventEmployees = (ev_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("delete from `event_employee_map` where ev_id=?",[ev_id],(err, data) => {
+      if (err){
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
 //====================================================================================================
 
 /*
@@ -1991,10 +2002,45 @@ app.post("/add_art",  async (req, res) => {
 app.post("/cancelevent",  async (req, res) => {
   let ev_id = req.body[0].ev_id;
   try {
-    let resp = await cancelEvent(parseInt(ev_id));
+    let resp1 = await cancelEventEmployees(parseInt(ev_id));
+    let resp2 = await cancelEvent(parseInt(ev_id));
     res.status(200).json({"message":"Event cancelled successfully"});
   } catch (err) {
     res.status(400).json({"message":"Event cancellation failed"});
+  }
+});
+
+inactivateEmployee = async (emp_list) => {
+  return new Promise((resolve, reject) => {
+    pool.query("update employees set is_active = 'N' where emp_id in (?)", [emp_list], (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+app.post("/inactivate_employee", async (req, res) => {
+  let emp_list = req.body[0].emp_list;
+  let cnt = 0
+  // convert emp_list from array to string seperated by comma
+  try {
+    for(let i=0; i<emp_list.length; i++){
+      let resp = await inactivateEmployee(emp_list[i]);
+      if (resp.affectedRows != 0) {
+        cnt+=1;
+      }
+    }
+    if (cnt == emp_list.length) {
+      res.status(200).json({"message":"Employee inactivated successfully"});
+    } else {
+      res.status(400).json({"message":"Employee inactivation failed"});
+    }
+  }
+  catch (err) {
+    res.status(400).json({"message":"Employee inactivation failed"});
   }
 });
 //==================================================================================================

@@ -370,19 +370,24 @@
                                         <input type="submit" onclick="addEmployeeBlock()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Enroll Employee">
                                     </label>
                                 </div>
+								<div class="form-group position-relative mb-2">
+                                    <label class="d-block">
+                                        <input type="submit" onclick="inactiveEmployeeBlock()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Inactive Employee">
+                                    </label>
+                                </div>
                                 <div class="form-group position-relative mb-2">
                                     <label class="d-block">
                                         <input type="submit" onclick="addEventBlock()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Add Event">
                                     </label>
                                 </div>
-                                <div class="form-group position-relative mb-2">
-                                    <label class="d-block">
-                                        <input type="submit" onclick="addArtBlock()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Add Art">
-                                    </label>
-                                </div>
 								<div class="form-group position-relative mb-2">
                                     <label class="d-block">
                                         <input type="submit" onclick="cancelEventBlock()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Cancel Event">
+                                    </label>
+                                </div>
+                                <div class="form-group position-relative mb-2">
+                                    <label class="d-block">
+                                        <input type="submit" onclick="addArtBlock()" class="btn btn-secondary text-uppercase d-block btnMidMinWidth mt-6" value="Add Art">
                                     </label>
                                 </div>
                             </div>
@@ -706,6 +711,30 @@
 						</div>
                     </div>
                 </section>
+				<section id="inactivateEmployeeSection" class="vistiTwoColumn">
+                    <div class="row" id="inactiveEmployeeEventDiv">
+                        <div class="col-18 offset-lg-2 col-md-8" id="inactivateEmployeeDiv" style="display: none;">
+							<!-- donationBoxWrap -->
+                            <div class="bg-brown py-3 px-lg-5">
+                                <h3 class="text-white mb-0 ml-50">Inactivate Employees</h3>
+                            </div>
+							<div class="donationBoxWrap border px-3 pb-4 px-md-6 pb-md-9 mt-2 pt-4">
+								<div class="form-row mx-n2">
+									<div class="col-12 px-2 col-sm-6 col-md-12 col-lg-6">
+										<div class="form-group position-relative mb-2">
+											<label class="d-block">
+												<strong class="d-block font-weight-normal mb-1 mt-1">Employee <span class="text-brown">*</span></strong>
+												<select id="inactivate_emp" class="select form-control formControlMedium" multiple size="10">
+												</select>
+											</label>
+										</div>
+									</div>
+								</div>
+								<input type="submit" onclick="inactiveEmployee()" class="btn btn-secondary text-uppercase d-block w-100 mt-6" value="Inactivate">
+							</div>
+						</div>
+                    </div>
+                </section>
 			</div>
 		</main>
 		<!-- ftAreaWrap -->
@@ -751,7 +780,7 @@
     <script src="js/helper.js"></script>
 	<script>
 		let event_element = document.getElementById("ev_type_del");
-		event_element.addEventListener('click', function(){
+		event_element.addEventListener('change', function(){
 			let options = event_element.querySelectorAll('option');
 			let selected = event_element.value;
 			populateEventNames(selected);

@@ -695,6 +695,10 @@ async function addEmployeeBlock(){
     } else{
         document.getElementById("newEmployeeDiv").style.display = "none";
     }
+    document.getElementById("newEventDiv").style.display = "none";
+    document.getElementById("newArtDiv").style.display = "none";
+    document.getElementById("oldCancelEventDiv").style.display = "none";
+    document.getElementById("inactivateEmployeeDiv").style.display = "none";
 }
 
 async function addEventBlock(){
@@ -704,15 +708,23 @@ async function addEventBlock(){
     } else{
         document.getElementById("newEventDiv").style.display = "none";
     }
+    document.getElementById("newEmployeeDiv").style.display = "none";
+    document.getElementById("newArtDiv").style.display = "none";
+    document.getElementById("oldCancelEventDiv").style.display = "none";
+    document.getElementById("inactivateEmployeeDiv").style.display = "none";
 }
 
 async function cancelEventBlock(){
-    let eventBlockStyle = document.getElementById("oldCancelEventDiv").style.display;
-    if (eventBlockStyle == "none"){
+    let cancelEventBlockStyle = document.getElementById("oldCancelEventDiv").style.display;
+    if (cancelEventBlockStyle == "none"){
         document.getElementById("oldCancelEventDiv").style.display = "block";
     } else{
         document.getElementById("oldCancelEventDiv").style.display = "none";
     }
+    document.getElementById("newEmployeeDiv").style.display = "none";
+    document.getElementById("newEventDiv").style.display = "none";
+    document.getElementById("newArtDiv").style.display = "none";
+    document.getElementById("inactivateEmployeeDiv").style.display = "none";
 }
 
 async function addArtBlock(){
@@ -722,6 +734,23 @@ async function addArtBlock(){
     } else{
         document.getElementById("newArtDiv").style.display = "none";
     }
+    document.getElementById("newEmployeeDiv").style.display = "none";
+    document.getElementById("newEventDiv").style.display = "none";
+    document.getElementById("oldCancelEventDiv").style.display = "none";
+    document.getElementById("inactivateEmployeeDiv").style.display = "none";
+}
+
+async function inactiveEmployeeBlock(){
+    let inactiveEmployee = document.getElementById("inactivateEmployeeDiv").style.display;
+    if (inactiveEmployee == "none"){
+        document.getElementById("inactivateEmployeeDiv").style.display = "block";
+    } else{
+        document.getElementById("inactivateEmployeeDiv").style.display = "none";
+    }
+    document.getElementById("newEmployeeDiv").style.display = "none";
+    document.getElementById("newEventDiv").style.display = "none";
+    document.getElementById("oldCancelEventDiv").style.display = "none";
+    document.getElementById("newArtDiv").style.display = "none";
 }
 
 async function registerNewMember(){
@@ -1057,9 +1086,9 @@ async function addEmployee(){
 }
 
 // get selected employees from multiselect dropdown ev_employees
-function getSelectedEmployees(){
+function getSelectedEmployees(element_id){
     var selectedEmployees = [];
-    var employees = document.getElementById("ev_employees");
+    var employees = document.getElementById(element_id);
     for (var i = 0; i < employees.options.length; i++) {
         if (employees.options[i].selected) {
             selectedEmployees.push(parseInt(employees.options[i].value));
@@ -1076,7 +1105,7 @@ async function addEvent() {
     let ev_site = document.getElementById("ev_site").value;
     let ev_room = document.getElementById("ev_room").value;
     let ev_price = document.getElementById("ev_price").value;
-    let ev_employees = getSelectedEmployees();
+    let ev_employees = getSelectedEmployees("ev_employees");
 
     // validate the fields to be non-empty, null or undefined and send alert if empty
     if (ev_name == "" || ev_name == null || ev_name == undefined){
@@ -1165,27 +1194,6 @@ async function cancelEvent(){
             // clear the fields
             document.getElementById("cancelEventDiv").style.display = "none";
             window.location.assign('./manager-portal.html');
-            let url3 = "http://localhost:3000/getCancelEmails/" + ev_id;
-            let res3 = await fetch(url3);
-            let data4 = await res3.json();
-            let email = "";
-            for (let i = 0; i < data4.length; i++) {
-                email = email + data4[i].email + ",";
-            }
-            email = email.substring(0, email.length - 1);
-            // send update details mail
-            let url2 = "http://localhost:3000/sendEmails/";
-            var data3 = [{"email_type":"cancel_event","email_list":email}];
-            const config2 = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json'
-                },
-                method: 'POST',
-                body: JSON.stringify(data3)
-            };
-            var res2 = await fetch(url2, config2);
-            // hide the div
         } else{
             alert("Event cancellation failed");
         }
@@ -1324,6 +1332,35 @@ async function addArt() {
         }
     } catch (err) {
         alert("Artwork addition failed");
+    }
+}
+
+async function inactiveEmployee() {
+    let emp_list = getSelectedEmployees("inactivate_emp");
+    if (emp_list.length == 0){
+        alert("Please select employees to inactivate");
+        return;
+    }
+    try {
+        let url1 = "http://localhost:3000/inactivate_employee/";
+        let data1 = [{"emp_list":emp_list}];
+        const config1 = {
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify(data1)
+        };
+        var res1 = await fetch(url1, config1);
+        if (res1.status == 200){
+            alert("Employee inactivated successfully");
+            window.location.assign('./manager-portal.html');
+        } else{
+            alert("Employee inactivation failed");
+        }
+    } catch(err) {
+        alert("Employee inactivation failed");
     }
 }
 
@@ -1571,6 +1608,15 @@ async function getEmployeePortalDetails(role) {
                 el.textContent = opt;
                 el.value = data8[i].emp_id;
                 select2.appendChild(el);
+            }
+
+            let select3 = document.getElementById("inactivate_emp");
+            for (let i = 0; i < data8.length; i++) {
+                let opt = data8[i].first_name + " " + data8[i].last_name;
+                let el = document.createElement("option");
+                el.textContent = opt;
+                el.value = data8[i].emp_id;
+                select3.appendChild(el);
             }
 
             let url9 = "http://localhost:3000/getObjClass/";
@@ -1860,6 +1906,10 @@ async function populateEventNames(type){
         let res1 = await fetch(url1);
         let data1 = await res1.json();
         let select = document.getElementById("ev_name_del");
+        let len = select.length;
+        for (let i=0; i<len; i++){
+            select.remove(0);
+        }
         for (let i = 0; i < data1.length; i++) {
             let opt = data1[i].ev_name;
             let el = document.createElement("option");
