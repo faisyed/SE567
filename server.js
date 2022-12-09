@@ -395,7 +395,7 @@ app.post("/buyArt/", async (req,res) => {
     if (err){
         return res.status(400).send("Deleting art failed");
     }
-    res.status(200).send(data);
+    res.status(200).send("Art deleted successfully");
   });
 
 });
@@ -688,7 +688,7 @@ getUpComingMemberEvents = (mem_id, type) => {
 
 getLastPurchasedTickets = (user_id,user_type) => {
   return new Promise((resolve, reject) => {
-    pool.query("select 'Entry Ticket' as ticket_for, total_amount as amount, purchase_date from ticket_transactions where ticket_class='entry' union select e.ev_name as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from ticket_transactions t join events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by purchase_date desc limit 5",[user_id,user_type], (err, data) => {
+    pool.query("(select e.ev_name as ticket_for, t.total_amount as amount, t.purchase_date as purchase_date from ticket_transactions t join events e on t.ev_id = e.ev_id where t.user_id = ? and t.user_type = ? order by t.purchase_date desc limit 5) union (select 'Entry Ticket' as ticket_for, total_amount as amount, purchase_date from ticket_transactions where ticket_class='entry' and user_id=? and user_type=? order by purchase_date desc limit 5) order by purchase_date desc limit 5",[user_id,user_type,user_id,user_type], (err, data) => {
       if (err){
         reject(err);
       }
