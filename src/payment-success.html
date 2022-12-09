@@ -39,6 +39,10 @@
 				const payment = !!entires.payment ? ' for '+entires.payment : '';
 				document.getElementById('successMessage').innerHTML  = "Your donation of "+ payment +"$ is complete 🎉";
 			}
+			else if(type === "4"){
+				const payment = !!entires.payment ? ' for '+entires.payment : '';
+				document.getElementById('successMessage').innerHTML  = "Successfully bought tickets 🎉" + payment;
+			}
 			else{
 				const payment = !!entires.payment ? ' for '+entires.payment : '';
 				document.getElementById('successMessage').innerHTML  = "Successfully registered for a membership 🎉";
