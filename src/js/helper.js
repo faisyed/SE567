@@ -868,6 +868,11 @@ async function addEmployee(){
         alert("Please enter phone");
         return;
     }
+    // check if phone number is 10 digits and is a number
+    if (phone_no.length != 10 || !onlyNumbers(phone_no)){
+        alert("Please enter a valid phone number of 10 digits");
+        return;
+    }
     if (address1 == "" || address1 == null || address1 == undefined){
         alert("Please enter address1");
         return;
@@ -882,6 +887,11 @@ async function addEmployee(){
     }
     if (zipcode == "" || zipcode == null || zipcode == undefined){
         alert("Please enter zip");
+        return;
+    }
+    // check if zipcode is 5 digits and is a number
+    if (zipcode.length != 5 || !onlyNumbers(zipcode)){
+        alert("Please enter a valid zipcode of 5 digits");
         return;
     }
 

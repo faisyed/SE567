@@ -88,7 +88,7 @@ const buyArt = async () => {
   
   const objId =  entires.id;
   const paymentPrice = entires.pay;
-  let userId = !!session_info.user_id;
+  let userId = !!session_info.user_id ? session_info.user_id : undefined;
 
   paypal.Buttons({
     style: {

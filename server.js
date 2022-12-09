@@ -342,6 +342,27 @@ app.get("/searchPrice/",(req,res) => {
 
 });
 
+insertShopTransaction = (obj_id, price, user_id, user_type) => {
+  return new Promise((resolve, reject) => {
+    pool.query("insert into `shop_transactions` (`obj_oid`, `total_amount`, `user_id`, `user_type`, `purchase_date`) values (?,?,?,?,?)", [obj_id, price, user_id, user_type, new Date()], (err, data) => {
+      if (err){
+          reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+objectDetailsFunc = (obj_id) => {
+  return new Promise((resolve, reject) => {
+    pool.query("select * from `objects` where `obj_id` = ?", [obj_id], (err, data) => {
+      if (err){
+          reject(err);
+      }
+      resolve(data);
+    });
+  });
+}
 
 //Buy Art
 app.post("/buyArt/", async (req,res) => {
@@ -365,35 +386,16 @@ app.post("/buyArt/", async (req,res) => {
       return;
   }
 
-  pool.query("SELECT obj_id, price FROM `objects` where `obj_id` = ?", [parseInt(req.query.id)], (err,data) => {
-    if(err){
-      console.error(err);
-      missed.push("id does not exist in the database");
-      res.status(400).send(missed);
+  let objectDetails = await objectDetailsFunc(parseInt(req.query.id));
 
+  let shopTransaction = await insertShopTransaction(objectDetails[0].obj_id, objectDetails[0].price, req.body[0].user_id, req.body[0].user_type);
+
+  // delete from objects based on obj_id
+  pool.query("delete from `objects` where `obj_id` = ?", [objectDetails[0].obj_id], (err, data) => { 
+    if (err){
+        return res.status(400).send("Deleting art failed");
     }
-
-
-    if(data.length > 0 && data[0].obj_id > 0){
-      pool.query("insert into `shop_transactions` (`obj_oid`, `total_amount`, `user_id`, `user_type`, `purchase_date`) values (?,?,?,?,?)", [data[0].obj_id, data[0].price, req.body[0].user_id, req.body[0].user_type, new Date()], (err, data) => {
-        if (err){
-            console.error(err);
-            res.status(400).send(missed);
-        }
-        res.status(200).send(data);
-      });
-
-      // delete from objects based on obj_id
-      pool.query("delete from `objects` where `obj_id` = ?", [data[0].obj_id], (err, data) => { 
-        if (err){
-            console.error(err);
-        }
-      });
-    }
-    else{
-      missed.push("id does not exist in the database");
-      res.status(400).send(missed);
-    }
+    res.status(200).send(data);
   });
 
 });
