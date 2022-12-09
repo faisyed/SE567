@@ -1019,7 +1019,6 @@ async function addEmployee(){
         var res1 = await fetch(url1, config1);
         if (res1.status == 200){
             alert("Employee enrolled successfully");
-            window.location.assign('./manager-portal.html');
             var url2 = "http://localhost:3000/sendEmails/";
             var data2 = [{"email_type":"enrolled","email_list":email,'username':username,'password':pass}];
             const config2 = {
@@ -1032,6 +1031,7 @@ async function addEmployee(){
             };
             var res2 = await fetch(url2, config2);
             // clear the fields
+            window.location.assign('./manager-portal.html');
             document.getElementById("emp_first_name").value = "";
             document.getElementById("emp_last_name").value = "";
             document.getElementById("emp_email").value = "";
