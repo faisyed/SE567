@@ -1107,7 +1107,7 @@ async function addEvent() {
         alert("Please enter event employees");
         return;
     }
-    if (ev_price == 0 || ev_price == null || ev_price == undefined){
+    if ((ev_price == 0 || ev_price == null || ev_price == undefined) && ev_type != "auction"){
         alert("Please enter event price");
         return;
     }
