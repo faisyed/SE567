@@ -1771,11 +1771,13 @@ function handle_tabs(session){
         document.getElementById("drop_account").style.display = "block";
         document.getElementById("drop_portal").style.display = "none";
         document.getElementById("drop_logout").style.display = "none";
+        document.getElementById("drop_member").style.display = "block";
     } else {
         document.getElementById("drop_account").style.display = "none";
         document.getElementById("drop_portal").style.display = "block";
         document.getElementById("drop_logout").style.display = "block";
         document.getElementById("drop_auction").style.display = "block";
+        document.getElementById("drop_member").style.display = "none";
         if (session.user_type == "M"){
             document.getElementById("portal_page").href = "member-portal.html";
         } else if(session.user_type == "E") {
