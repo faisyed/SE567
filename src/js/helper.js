@@ -905,7 +905,7 @@ async function addMemberToDatabase(first_name, last_name, email, phone, address1
         if (res1.status == 200){
             alert("Member registered successfully");
             var url2 = "http://localhost:3000/sendEmails/";
-            var data2 = [{"email_type":"register","email_list":email}];
+            var data2 = [{"email_type":"register","email_list":email,"username":username,"password":pass,"trans_id":generateString(15)}];
             const config2 = {
                 headers: {
                     'Content-Type': 'application/json',

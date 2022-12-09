@@ -1585,7 +1585,7 @@ app.post('/registermember', async (req, res) => {
     const newMember = await insertMember(req.body[0]);
     const newLogin = await pool.query("INSERT INTO `login` (username, password, user_id, user_type) VALUES (?, ?, ?, ?)", [req.body[0].username, req.body[0].password, newMember.insertId, "M"]);
     const master_transaction = await pool.query("INSERT INTO `master_transactions` (tran_type, user_id, user_type, purchase_date, amount) VALUES (?, ?, ?, ?, ?)",["registration", newMember.insertId, "M", new Date(), 100]);
-    return res.status(200);
+    return res.status(200).json({message: "Member registered successfully"});
   }catch(err){
     console.log(err);
       return res.status(400).json({"message":"Member registration failed"});
@@ -1772,13 +1772,17 @@ app.post("/sendEmails" , async (req, res) => {
     });
   } else if (email_type == "register"){
     var subject = "Membership Registration Confirmation";
-    var body = "Dear User, \n\nThank you for registering for the Art Gallery. Your membership is now active. \n\nThank you.";
+    var body = "Dear User, <br><br>Thank you for registering for the Art Gallery. Your membership is now active. <br><br>";
+    body += "Your <b>username</b> is: <b>" + req.body[0].username + "</b><br>";
+    body += "Your <b>password</b> is: <b>" + req.body[0].password + "</b><br><br>";
+    body += "Your transaction id is: <b>" + req.body[0].trans_id + "</b><br><br>";
+    body += "Thank you.";
     var email_list = req.body[0].email_list;
     let mailDetails = {
       from: 'art.gallery.notifications@gmail.com',
       to: email_list,
       subject: subject,
-      text: body
+      html: body
     };
     mailTransporter.sendMail(mailDetails, function(err, data) {
       if(err) {
