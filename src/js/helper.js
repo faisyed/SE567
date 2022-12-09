@@ -75,7 +75,8 @@ async function eventDetails(){
         var location = "Room No. " + data.ev_room_no + ", in " + data.ev_site;
         document.getElementById("ev_loc").innerText = location;
         document.getElementById("event_id").innerHTML = event_id;
-        document.getElementById("event_price").innerHTML = data.ev_price;
+        const price = (!!session_info & session_info.user_type === 'M') ? 0.7*data.ev_price : data.ev_price;
+        document.getElementById("event_price").innerHTML = price;
     } catch (err) {
         alert("Error in fetching event details");
     }

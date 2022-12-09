@@ -343,7 +343,7 @@
                                         <tfoot>
                                             <tr>
                                                 <td colspan="3">Total Price($)</td>
-                                                <td><p id="ticket_total">20</p></td>
+                                                <td><p id="ticket_total"></p></td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -493,6 +493,14 @@
         });
 
         function updateTotal() {
+        let adult_price = parseFloat(document.getElementById("adult_price").innerHTML);
+        let adult_count = parseInt(document.getElementById("adult_count").value);
+        let other_price = parseFloat(document.getElementById("other_price").innerHTML);
+        let other_count = parseInt(document.getElementById("other_count").value);
+        let student_price = parseFloat(document.getElementById("student_price").innerHTML);
+        let student_count = parseInt(document.getElementById("student_count").value);
+        let senior_price = parseFloat(document.getElementById("senior_price").innerHTML);
+        let senior_count = parseInt(document.getElementById("senior_count").value);
             let ticket_total = document.getElementById("ticket_total");
             ticket_total.innerHTML = adult_count * adult_price + senior_count * senior_price + student_count * student_price + other_count * other_price;
         }
