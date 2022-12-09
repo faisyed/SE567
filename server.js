@@ -719,7 +719,7 @@ getEventDetails = (ev_id) => {
 
 getCurrentAuctions = () => {
   return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["auction"],(err, data) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=? order by ev_date",["auction"],(err, data) => {
       if (err){
         reject(err);
       }
@@ -730,7 +730,7 @@ getCurrentAuctions = () => {
 
 getCurrentExhibitions = () => {
   return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["exhibition"],(err, data) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=? order by ev_date",["exhibition"],(err, data) => {
       if (err){
         reject(err);
       }
@@ -741,7 +741,7 @@ getCurrentExhibitions = () => {
 
 getCurrentShows = () => {
   return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date >= curdate() and ev_type=?",["show"],(err, data) => {
+    pool.query("select * from `events` where ev_date >= curdate() and ev_type=? order by ev_date",["show"],(err, data) => {
       if (err){
         reject(err);
       }
@@ -752,7 +752,7 @@ getCurrentShows = () => {
 
 getPastShows = () => {
   return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["show"],(err, data) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=? order by ev_date desc",["show"],(err, data) => {
       if (err){
         reject(err);
       }
@@ -763,7 +763,7 @@ getPastShows = () => {
 
 getPastExhibitions = () => {
   return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["exhibition"],(err, data) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=? order by ev_date desc",["exhibition"],(err, data) => {
       if (err){
         reject(err);
       }
@@ -774,7 +774,7 @@ getPastExhibitions = () => {
 
 getPastAuctions = () => {
   return new Promise((resolve, reject) => {
-    pool.query("select * from `events` where ev_date < curdate() and ev_type=?",["auction"],(err, data) => {
+    pool.query("select * from `events` where ev_date < curdate() and ev_type=? order by ev_date desc",["auction"],(err, data) => {
       if (err){
         reject(err);
       }
